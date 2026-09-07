@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "customer": "Sarah Tan",
+    "phoneNo": "+60 12-3456789",
+    "email": "1@eaxmple.com",
+    "membership": "Gold Member",
+    "booking": "2"
+  },
+  {
+    "id": "2",
+    "customer": "Nurul Hana",
+    "phoneNo": "+60 12-3456789",
+    "email": "2@eaxmple.com",
+    "membership": "Gold Member",
+    "booking": "1"
+  },
+  {
+    "id": "3",
+    "customer": "Sarah Tan",
+    "phoneNo": "+60 12-3456789",
+    "email": "3@eaxmple.com",
+    "membership": "",
+    "booking": "0"
+  }
+]

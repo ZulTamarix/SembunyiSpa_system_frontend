@@ -1,0 +1,38 @@
+[
+  {
+    "id": "BK-2026-001",
+    "customer": "Sarah Tan",
+    "phoneNo": "+60 12-3456789",
+    "treatment": "The Mahabrata Experience",
+    "date": "19 August 2026",
+    "time": "2:00 PM",
+    "therapist": "Callie Jong",
+    "room": "Embun",
+    "status": "Confirmed",
+    "payment": "Pending-Pay at Counter"
+  },
+  {
+    "id": "BK-2026-002",
+    "customer": "Nurul Hana",
+    "phoneNo": "+60 12-3456789",
+    "treatment": "Balinese Massage (60 min)",
+    "date": "20 August 2026",
+    "time": "11:00 AM",
+    "therapist": "Calista Mirih",
+    "room": "—",
+    "status": "Confirmed",
+    "payment": "Pending-Pay at Counter"
+  },
+  {
+    "id": "BK-2026-003",
+    "customer": "Sarah Tan",
+    "phoneNo": "+60 12-3456789",
+    "treatment": "Parameswara Experience",
+    "date": "20 July 2026",
+    "time": "3:00 PM",
+    "therapist": "Callie Jong",
+    "room": "Bayu",
+    "status": "Completed",
+    "payment": "Paid"
+  }
+]

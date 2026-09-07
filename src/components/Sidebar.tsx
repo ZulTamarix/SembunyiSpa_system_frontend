@@ -93,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
       </div>
 
       {/* Border */}
-      <div className="border-t-2 border-selected" />
+      <div className="border-t-2 border-highlighted" />
 
       {/* Nav */}
       <nav className="flex-1 py-5 space-y-6">
@@ -109,6 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             <ul className="space-y-1">
               {section.items.map((item) => {
                 const active = location.pathname === item.path;
+                
                 return (
                   <li key={item.label}>
                     <button
@@ -119,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                         isOpen ? "justify-start pl-4 pr-3" : "justify-center px-1"
                       } ${
                         active
-                          ? "bg-selected text-white font-semibold"
+                          ? "bg-highlighted text-white font-semibold"
                           : "text-white/60 hover:text-white/90 hover:bg-white/5"
                       }`}
                     >
@@ -127,7 +128,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
                         <span className="absolute left-0 top-0 h-full w-[3px] bg-amber-400 rounded-r" />
                       )}
                       <span className="shrink-0 text-white/70">{item.icon}</span>
-                      {isOpen && <span className="font-bold">{item.label}</span>}
+                      {isOpen && <span className="font-semibold">{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -138,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
       </nav>
 
       {/* Border */}
-      <div className="border-t-2 border-selected" />
+      <div className="border-t-2 border-highlighted" />
       
       {/* Logout */}  {/* Logout - pinned to bottom via mt-auto on the flex-col aside */}
       <div className="mt-auto py-3">
@@ -150,7 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
             isOpen ? "justify-start pl-4 pr-3" : "justify-center px-1"
           } ${
             logoutActive
-              ? "bg-selected text-white font-semibold"
+              ? "bg-highlightedd text-white font-semibold"
               : "text-white/60 hover:text-white/90 hover:bg-white/5"
           }`}
         >
