@@ -8,7 +8,7 @@ interface GridProps {
 
 export default function Grid({ children, className = "" }: GridProps) {
   return (
-    <div className={`grid grid-cols-1 gap-10 pl-5 pr-5 mb-10 ${className}`}>
+    <div className={`grid grid-cols-1 gap-10 pl-5 pr-5 mb-5 ${className}`}>
       {children}
     </div>
   );

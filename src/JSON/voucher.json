@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "code": "WELCOME2026",
+    "description": "Welcome gift — 10% off any treatment",
+    "type": "gift",
+    "customer": "Sarah Tan",
+    "validTill": "2026-12-31",
+    "status": "Active"
+  },
+  {
+    "id": "2",
+    "code": "SPA-PROMO-50",
+    "description": "Promotional — RM50 off The Mahabrata Experience",
+    "type": "promotional",
+    "customer": "Sarah Tan",
+    "validTill": "2026-09-30",
+    "status": "Active"
+  },
+  {
+    "id": "3",
+    "code": "BDAY-GIFT",
+    "description": "Birthday special — complimentary foot soak",
+    "type": "gift",
+    "customer": "Sarah Tan",
+    "validTill": "2026-08-31",
+    "status": "Active"
+  }
+]

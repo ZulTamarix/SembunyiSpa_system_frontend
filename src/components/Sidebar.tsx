@@ -29,6 +29,12 @@ const sections: NavSection[] = [
       { label: "Therapists & Roster",   path: "/therapist",   icon: <Astroid size={18} className="text-white"/> },
       { label: "Packages",              path: "/packages",    icon: <Diamond size={18} /> },
       { label: "Membership",            path: "/memberships", icon: <Disc size={18} /> },
+      
+      // { label: "Bookings",              path: "/bookings",    icon: "📅" },
+      // { label: "Customers",             path: "/customers",   icon: "👤" },
+      // { label: "Therapists & Roster",   path: "/therapist",   icon: "✦" },
+      // { label: "Packages",              path: "/packages",    icon: "◈" },
+      // { label: "Membership",            path: "/memberships", icon: "◈" },
     ],
   },
   {
@@ -50,7 +56,7 @@ const sections: NavSection[] = [
     title: "ADMIN",
     items: [
       { label: "User Management", path: "/user", icon: <Settings size={18} /> },
-      { label: "System Settings", path: "/setting", icon: <Wrench size={18} /> },
+      { label: "System Settings", path: "/settings", icon: <Wrench size={18} /> },
     ],
   },
 ];

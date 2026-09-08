@@ -1,14 +1,17 @@
+
 interface ButtonProps {
+  icon?: React.ElementType;
   label: string
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string
 }
 
-export default function Button({ label, onClick, className }: ButtonProps) {
+export default function Button({ icon: Icon, label, onClick, className }: ButtonProps) {
   return (
-    <div className={`pt-3 ${className}`}>
-        <button onClick={onClick} className="py-3 w-full rounded-2xl bg-secondary text-white text-sm font-medium transition-all cursor-pointer">
-          {label}
+    <div className={`${className}`}>
+        <button onClick={onClick} className="py-2 w-full rounded-xl bg-secondary text-black text-md font-bold transition-all cursor-pointer flex items-center justify-center gap-2">
+          {Icon && <Icon size={18} />}
+          <span>{label}</span>
         </button>
     </div>
   );

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "name": "Spa Services Menu 2026",
+    "type": "PDF",
+    "date": "2026-08-01",
+    "access": "Public"
+  },
+  {
+    "id": "2",
+    "name": "Therapist Handbook",
+    "type": "PDF",
+    "date": "2026-07-15",
+    "access": "Staff"
+  },
+  {
+    "id": "3",
+    "name": "Membership Terms & Conditions",
+    "type": "FOCX",
+    "date": "2026-01-10",
+    "access": "Public"
+  },
+  {
+    "id": "4",
+    "name": "Q3 Operations Report",
+    "type": "XLSX",
+    "date": "2026-08-01",
+    "access": "Admin"
+  }
+]

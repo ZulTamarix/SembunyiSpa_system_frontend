@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "member": "Sarah Tan",
+    "phoneNo": "SPA-2026-001",
+    "tier": "Gold Member",
+    "joined": "1 January 2026",
+    "privileges": "4"
+  },
+  {
+    "id": "2",
+    "member": "Nurul Hana",
+    "phoneNo": "SPA-2026-002",
+    "tier": "Silver Member",
+    "joined": "15 March 2026",
+    "privileges": "3"
+  }
+]
