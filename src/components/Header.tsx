@@ -41,6 +41,16 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       </button>
 
       <h1 className="text-lg text-neutral-950 font-medium font-serif">{title}</h1>
+
+
+      <div className="ml-auto flex items-center gap-3 whitespace-nowrap">
+          <span className="font-semibold w-32 h-6 bg-tertiary rounded-xl flex items-center justify-center text-sm">
+            Administrator
+          </span>
+          <span className="font-bold w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+            A
+          </span>
+      </div>
     </header>
   );
 };

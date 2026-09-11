@@ -17,11 +17,11 @@ export function Table<T extends { id?: string | number }>({
   data,
 }: TableProps<T>) {
   return (
-    <div className="bg-body border border-border rounded-2xl overflow-hidden overflow-x-auto  scrollbar-hide shadow-sm">
+    <div className="bg-body border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
       <table className="w-full border-collapse">
         {/* title */}
         <thead>
-          <tr className="border-b border-[#d9cdb8]">
+          <tr className="border-b border-border">
             {fieldName.map((col) => (
               <th key={col.key} className="text-left px-6 py-3 text-xs font-bold uppercase tracking-wider text-title whitespace-nowrap">
                 {col.header}

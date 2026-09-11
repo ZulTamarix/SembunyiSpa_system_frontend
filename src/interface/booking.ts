@@ -1,6 +1,6 @@
 export interface Booking_type {
     id: string;
-    customer: string;
+    name: string;
     phoneNo: string;
     treatment: string;
     date: string;

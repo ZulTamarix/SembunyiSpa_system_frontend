@@ -1,7 +1,10 @@
+import { Plus } from "lucide-react";
+import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import Table, { type Column } from "../../components/ui/Table";
 import type { Customer_type } from "../../interface/customer";
 import customers from "../../JSON/customer.json"
+import Input from "../../components/ui/input";
 
 const Customers: React.FC = () => {
 
@@ -31,11 +34,9 @@ const Customers: React.FC = () => {
     return (
         <>
             {/* filter */}
-            <Grid className="md:grid-cols-4">
-                <button>hai</button>
-                <div/>
-                <div/>
-                <button>hai</button>
+            <Grid className="md:grid-cols-7 items-center">
+                <Input placeholder="Search customers..." className="md:col-span-2 bg-white "/>
+                <Button icon={Plus} label='Add Customer' className="md:col-start-7 md:col-span-3"/>
             </Grid>
             {/* table */}
             <Grid>

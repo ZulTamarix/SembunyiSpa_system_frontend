@@ -2,6 +2,9 @@ import { Table, type Column } from "../../components/ui/Table";
 import type { Booking_type } from "../../interface/booking";
 import bookings from "../../JSON/booking.json"
 import Grid from "../../components/ui/Grid";
+import Button from "../../components/ui/Button";
+import { Plus } from "lucide-react";
+import Input from "../../components/ui/input";
 
 const Bookings: React.FC = () => {
 
@@ -15,11 +18,11 @@ const Bookings: React.FC = () => {
             ),
         },
         {
-            key: "customer",
+            key: "name",
             header: "Customer",
             render: (row) => (
                 <div>
-                    <div className="font-semibold text-black">{row.customer}</div>
+                    <div className="font-semibold text-black">{row.name}</div>
                     <span>{row.phoneNo}</span>
                 </div>
             )
@@ -45,9 +48,24 @@ const Bookings: React.FC = () => {
 
     return (
         <>
-            {/* <Grid>
-                
-            </Grid> */}
+            {/* filter */}
+            <Grid className="md:grid-cols-5 items-center">
+                <div className="md:col-span-5 bg-white p-3 rounded-xl grid md:grid-cols-5 items-center gap-4 border border-border overflow-hidden">
+                    <Input placeholder="Search by name,phone or booking ID..." className="md:col-span-3 bg-tertiary "/>
+                    <select className="bg-tertiary px-3 h-10 rounded-xl border border-border focus:outline-none focus:ring-0 focus:border-border">
+                        <option selected>All</option>
+                        <option value=''>Confirmed</option>
+                        <option value=''>Arrived</option>
+                        <option value=''>Room Assigned</option>
+                        <option value=''>In Treatment</option>
+                        <option value=''>Completed</option>
+                        <option value=''>Cancelled</option>
+                    </select>
+                    <Button icon={Plus} label='Create Booking' className="md:col-start-5"/>
+                </div>
+            </Grid>
+            
+            {/* Table */}
             <Grid>
                 <Table fieldName={tableTitle} data={bookings} />
             </Grid>
