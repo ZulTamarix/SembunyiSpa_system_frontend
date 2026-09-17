@@ -1,8 +1,8 @@
 // sidebar.tsx
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutGrid, CalendarDays, User, Disc, Ticket, Image as ImageIcon, Bell, BarChart3, Astroid, Diamond, FileText, Settings, Wrench, CornerDownLeft } from "lucide-react";
-import logo from '../assets/logo.png'; 
+import { LayoutGrid, CalendarDays, User, Disc, Ticket, Image as ImageIcon, Bell, BarChart3, Astroid, Diamond, FileText, Settings, Wrench, CornerDownLeft, CalendarCheck2, UserStar } from "lucide-react";
+import logo from '../assets/logo_rectangle.png'; 
 
 interface NavItem {
   label: string;
@@ -70,6 +70,7 @@ const sections: NavSection[] = [
       { label: "Bookings",            path: "/bookings",    icon: <CalendarDays size={18} />, icon_selected: <CalendarDays size={18} className="text-sky-400" /> },
       { label: "Customers",           path: "/customers",   icon: <User size={18} />, icon_selected: <User size={18} className="text-purple-400" /> },
       { label: "Therapists & Roster", path: "/therapist",   icon: <Astroid size={18} className="text-white" />, icon_selected: <Astroid size={18} className="text-yellow-200" /> },
+      { label: "Schedule",            path: "/schedule",    icon: <CalendarCheck2 size={18} className="text-white" />, icon_selected: <CalendarCheck2 size={18} className="text-blue-300" /> },
       { label: "Packages",            path: "/packages",    icon: <Diamond size={18} />, icon_selected: <Diamond size={18} className="text-pink-400" /> },
       { label: "Membership",          path: "/memberships", icon: <Disc size={18} />, icon_selected: <Disc size={18} className="text-amber-400" /> },
     ],
@@ -79,6 +80,7 @@ const sections: NavSection[] = [
     items: [
       { label: "Vouchers",      path: "/vouchers",      icon: <Ticket size={18} />, icon_selected: <Ticket size={18} className="text-orange-500" /> },
       { label: "Banners",       path: "/banners",       icon: <ImageIcon size={18} />, icon_selected: <ImageIcon size={18} className="text-blue-400" /> },
+      { label: "Reviews",       path: "/reviews", icon: <UserStar size={18} />, icon_selected: <UserStar size={18} className="text-green-400" /> },
       { label: "Notifications", path: "/notifications", icon: <Bell size={18} />, icon_selected: <Bell size={18} className="text-amber-400" /> },
     ],
   },
@@ -120,11 +122,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
       <div className="h-14 px-3 flex items-center">
         <div
           className={`${
-            isOpen ? "w-14 h-10 bg-tertiary rounded-xl" : "w-8 h-8 bg-secondary rounded-full"
+            isOpen ? "w-full h-10 bg-tertiary rounded-xl" : "w-8 h-8 bg-secondary rounded-full"
           } flex items-center justify-center overflow-hidden transition-all duration-200`}
         >
           {isOpen ? (
-            <img src={logo} alt="MyApp Logo" className="h-8 w-auto" />
+            <img src={logo} alt="MyApp Logo" className="h-full w-auto" />
           ) : (
             <span className="text-[14px] text-center leading-tight text-black font-bold">
               S

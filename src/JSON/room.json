@@ -1,0 +1,47 @@
+[
+    {
+        "id": "1",
+        "name": "Bayu",
+        "description": "Single Room"
+    },
+    {
+        "id": "2",
+        "name": "Embun",
+        "description": "Single Room"
+    },
+    {
+        "id": "3",
+        "name": "Mentari",
+        "description": "Single Room"
+    },
+    {
+        "id": "4",
+        "name": "Ombak",
+        "description": "Single Room"
+    },
+    {
+        "id": "5",
+        "name": "Purnama",
+        "description": "Single Room"
+    },
+    {
+        "id": "6",
+        "name": "Renyai",
+        "description": "Couple Room"
+    },
+    {
+        "id": "7",
+        "name": "Senja",
+        "description": "Hair Spa"
+    },
+    {
+        "id": "8",
+        "name": "Tasek",
+        "description": "Sound Therapy Room"
+    },
+    {
+        "id": "9",
+        "name": "Mayang Sari",
+        "description": "Couple Room"
+    }
+]

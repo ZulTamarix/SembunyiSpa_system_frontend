@@ -1,0 +1,52 @@
+[
+    {
+        "id": "1",
+        "poster": "",
+        "title": "Parameswara Experience",
+        "type": "Spa Experience",
+        "description": "A regal 2.5-hour spa journey for men inspired by the founder of the Malacca Sultanate. Combines a full-body Malay massage, warm herbal compress,",
+        "duration": "150",
+        "price": "408",
+        "gender": "male"
+    },
+    {
+        "id": "2",
+        "poster": "",
+        "title": "Dara Pethak Experience",
+        "type": "Body Message",
+        "description": "A feminine 2.5-hour ritual for women drawing on ancient court beauty traditions. Features a gentle full-body massage, jasmine-infused floral bath,",
+        "duration": "150",
+        "price": "500",
+        "gender": "female"
+    },
+    {
+        "id": "3",
+        "poster": "",
+        "title": "Hang Li Po Experience",
+        "type": "Spa Experience",
+        "description": "A 2.5-hour East-meets-West spa journey inspired by the Ming dynasty princess. Combines Chinese meridian techniques, aromatherapy massage",
+        "duration": "90",
+        "price": "316",
+        "gender": "female"
+    },
+    {
+        "id": "4",
+        "poster": "",
+        "title": "Ratu Tribhuwana Experience",
+        "type": "Sembunyi Sggnature",
+        "description": "A 2.5-hour Majapahit-inspired queen ritual. Begins with a Javanese Lulur scrub, continues with a deep Balinese massage, and concludes with a floral",
+        "duration": "60",
+        "price": "200",
+        "gender": "couple"
+    },
+    {
+        "id": "5",
+        "poster": "",
+        "title": "Sample",
+        "type": "Body Message",
+        "description": "A feminine 2.5-hour ritual for women drawing on ancient court beauty traditions. Features a gentle full-body massage, jasmine-infused floral bath,",
+        "duration": "200",
+        "price": "200",
+        "gender": "unisex"
+    }
+]

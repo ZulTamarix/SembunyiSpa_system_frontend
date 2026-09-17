@@ -18,6 +18,8 @@ import Banners from "./pages/marketings/Banners";
 import Notifications from "./pages/marketings/Notifications";
 import User from "./pages/admin/User";
 import Settings from "./pages/admin/Settings";
+import Schedule from "./pages/operations/Schedule";
+import Reviews from "./pages/marketings/Review";
 
 const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -26,11 +28,12 @@ const App: React.FC = () => {
     <div className="flex min-h-screen w-screen">
       <Sidebar isOpen={sidebarOpen} />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* <div className="flex-1 flex flex-col min-w-0"> */}
+      <div className="flex-1 flex flex-col">
         <Header onMenuClick={() => setSidebarOpen((prev) => !prev)} />
 
         <main className="flex-1 overflow-y-auto pt-6 bg-body">
-        {/* <main className="pt-24 pb-20"> */}
+        {/* <main className="pt-24 pb-20 bg-body"> */}
           <Routes>
             {/* 1) Home */}
             <Route path="/" element={<Dashboard />} />
@@ -40,12 +43,14 @@ const App: React.FC = () => {
             <Route path="/customers" element={<Customers />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/therapist" element={<Therapist />} />
+            <Route path="/schedule" element={<Schedule />} />
             <Route path="/packages" element={<Packages />} />
             <Route path="/memberships" element={<Membership />} />
 
             {/* 3) Marketing */}
             <Route path="/vouchers" element={<Vouchers />} />
             <Route path="/banners" element={<Banners />} />
+            <Route path="/reviews" element={<Reviews />} />
             <Route path="/notifications" element={<Notifications />} />
 
             {/* 4) Analytics */}

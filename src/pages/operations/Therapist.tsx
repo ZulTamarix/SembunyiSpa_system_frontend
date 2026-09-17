@@ -1,72 +1,166 @@
-import { Plus } from "lucide-react";
+import { Plus,  Warehouse } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import therapists from "../../JSON/therapist.json"
+import { useEffect, useState } from "react";
+import { Sparkles, ClipboardList } from "lucide-react";
+import { Table, type Column } from "../../components/ui/Table";
+import type { Room_type } from "../../interface/room";
+import rooms from "../../JSON/room.json"
 
 const Therapist: React.FC = () => {
 
+    //#region 0 --> main
+        const [active, setActive] = useState("staff");
+        const tabs = [
+            { id: "staff", label: "Staff Directory", icon: Sparkles },
+            { id: "duty", label: "Duty Roster", icon: ClipboardList },
+            { id: "room", label: "Room", icon: Warehouse },
+        ];
+        useEffect(() => {
+            switch(active) {
+                case 'staff': ''; break;
+                case 'duty': ''; break;
+                case 'room': ''; break;
+            }
+        },[active])
+    //#endregion
+
+    
+    //#region 3 --> room
+    // 1) tableTitle
+        const tableTitle: Column<Room_type>[] = [
+            { key: "name", header: "Room" },
+            { key: "description", header: "Description" },
+            {
+                key: "",
+                header: "",
+                render: () => (
+                    <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
+                        Edit
+                    </button>
+                )
+            },
+        ];
+    //#endregion
+    
     return (
         <>
-            {/* Create */}
-            <Grid className="md:grid-cols-5 items-center">
-                <span className="text-title">{therapists.length} staff members</span>
-                <Button icon={Plus} label='Add Therapist' className="md:col-start-5"/>
-            </Grid>
-            
-            {/* table */}
-            <Grid className="md:grid-cols-3">
-                {therapists.map((data) => (
-                    <div key={data.code} className="w-full rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
-                        {/* Header */}
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-tertiary">
-                                    <span className="text-2xl font-bold text-secondary">
-                                        {data.name.charAt(0)}
+            {/* #region 0 --> main */}
+            <>
+                <Grid className="md:grid-cols-2">
+                    <nav className="grid grid-cols-3 rounded-xl border border-border bg-white p-1.5 shadow-sm">
+                        {tabs.map(({ id, label, icon: Icon }) => {
+                            const isActive = active === id;
+                            return (
+                                    <button
+                                        key={id}
+                                        onClick={() => setActive(id)}
+                                        className={`flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors 
+                                            ${isActive
+                                            ? "bg-secondary text-black"
+                                            : "text-title hover:bg-secondary hover:text-black"
+                                        }`}
+                                    >
+                                    <Icon size={16} strokeWidth={2.4} />
+                                    {label}
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </Grid>
+            </>
+
+            {/* #region 1 --> therapist */}
+            {active == 'staff' && (
+                <>
+                    {/* Create */}
+                    <Grid className="md:grid-cols-5 items-center">
+                        <span className="text-title">{therapists.length} staff members</span>
+                        <Button icon={Plus} label='Add Therapist' className="md:col-start-5"/>
+                    </Grid>
+                    
+                    {/* table */}
+                    <Grid className="md:grid-cols-3">
+                        {therapists.map((data) => (
+                            <div key={data.id} className="w-full rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+                                {/* Header */}
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-tertiary">
+                                            <span className="text-2xl font-bold text-secondary">
+                                                {data.name.charAt(0)}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-base font-bold text-stone-900">{data.name}</h2>
+                                            <p className="text-sm text-title mt-1 ">{data.code}</p>
+                                            {/* <p className="text-sm text-title">{data.designation}</p> */}
+                                        </div>
+                                    </div>
+
+                                    <span className="whitespace-nowrap rounded-full bg-tertiary px-3 py-1.5 text-xs text-title font-semibold tracking-wide">
+                                        {data.title}
                                     </span>
                                 </div>
-                                <div>
-                                    <h2 className="text-base font-bold text-stone-900">{data.name}</h2>
-                                    <p className="text-sm text-title mt-1 ">{data.code}</p>
-                                    <p className="text-sm text-title">{data.designation}</p>
+
+                                {/* Details */}
+                                <div className="mt-6 space-y-1 text-[15px]">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-title">Phone</span>
+                                        <span className="font-medium text-title">{data.phoneNo}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-title">Email</span>
+                                        <span className="font-medium text-title">{data.email}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-title">Bookable</span>
+                                        <span className="font-medium text-title">
+                                            {data.bookable ? "Yes" : "No"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="mt-6 flex gap-3">
+                                    <button className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50">
+                                        Edit
+                                    </button>
+                                    <button className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50">
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
+                        ))}
+                    </Grid>
+                </>
+            )}
 
-                            <span className="whitespace-nowrap rounded-full bg-tertiary px-3 py-1.5 text-xs text-title font-semibold tracking-wide">
-                                {data.title}
-                            </span>
-                        </div>
+            {/* #region 2 --> roster */}
+            {active == 'duty' && (
+                <>
+                </>
+            )}
 
-                        {/* Details */}
-                        <div className="mt-6 space-y-1 text-[15px]">
-                            <div className="flex items-center justify-between">
-                                <span className="text-title">Phone</span>
-                                <span className="font-medium text-title">{data.phoneNo}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-title">Email</span>
-                                <span className="font-medium text-title">{data.email}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-title">Bookable</span>
-                                <span className="font-medium text-title">
-                                    {data.bookable ? "Yes" : "No"}
-                                </span>
-                            </div>
-                        </div>
+            {/* #region 3 --> room */}
+            {active == 'room' && (
+                <>
+                    {/* Create */}
+                    <Grid className="md:grid-cols-5 items-center">
+                        <span className="md:col-start-2 text-title">{therapists.length} rooms</span>
+                        <Button icon={Plus} label='Add Room' className="md:col-start-4"/>
+                    </Grid>
 
-                        {/* Actions */}
-                        <div className="mt-6 flex gap-3">
-                            <button className="flex-1 rounded-full border border-stone-200 py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50">
-                                Edit
-                            </button>
-                            <button className="flex-1 rounded-full border border-rose-200 py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50">
-                                Remove
-                            </button>
+                    {/* table */}
+                    <Grid className="md:grid-cols-5">
+                        <div className="md:col-start-2 col-span-3">
+                        <Table fieldName={tableTitle} data={rooms}  />
                         </div>
-                    </div>
-                ))}
-            </Grid>
+                    </Grid>
+                </>
+            )}
+
         </>
     )
 }
