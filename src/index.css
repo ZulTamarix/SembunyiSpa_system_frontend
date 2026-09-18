@@ -1,17 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --color-body: #f7f3ec;
  
+  /* theme */
   --color-primary: #1c1108; 
   --color-secondary: #c9a84c; 
   --color-tertiary: #f7f3ec; 
 
+  /* signal */
+  --color-danger: #F87171;
+  --color-warning: #FBBF24;
+  --color-success: #4ADE80;
+
+  /* text */
+  --color-title: #7a6455;
+
+  /* others */
   --color-highlighted: #312411;
   --color-border: #d4c5a9;
-
-  --color-title: #7a6455;
+  --color-hover: #FDFBF8;
 }
+
+
+
 
 /* 1) Hide scrollbar but keep scrolling */
 .scrollbar-hide {

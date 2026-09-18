@@ -32,8 +32,8 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col">
         <Header onMenuClick={() => setSidebarOpen((prev) => !prev)} />
 
-        <main className="flex-1 overflow-y-auto pt-6 bg-body">
-        {/* <main className="pt-24 pb-20 bg-body"> */}
+        <main className="flex-1 overflow-y-auto pt-6 bg-tertiary">
+        {/* <main className="pt-24 pb-20 bg-tertiary"> */}
           <Routes>
             {/* 1) Home */}
             <Route path="/" element={<Dashboard />} />

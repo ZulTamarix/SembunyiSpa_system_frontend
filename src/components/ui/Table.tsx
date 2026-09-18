@@ -17,7 +17,7 @@ export function Table<T extends { id?: string | number }>({
   data,
 }: TableProps<T>) {
   return (
-    <div className="bg-body border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
+    <div className="border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
       <table className="w-full border-collapse">
         {/* title */}
         <thead>
@@ -34,7 +34,7 @@ export function Table<T extends { id?: string | number }>({
           {data.map((row, i) => (
             <tr
               key={row.id ?? i}
-              className="border-b border-border last:border-0 hover:bg-tertiary transition-colors"
+              className="border-b border-border last:border-0 hover:bg-hover transition-colors"
             >
               {fieldName.map((col) => (
                 <td key={col.key} className="px-6 py-3 align-middle text-title text-sm whitespace-nowrap">
