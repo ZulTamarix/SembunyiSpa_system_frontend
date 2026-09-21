@@ -54,7 +54,7 @@ const User: React.FC = () => {
 
 
     // #region 2) --> useEffect
-        // rreset fieldname everytime form closed
+        // reset fieldname everytime form closed
         useEffect(() => {
             if(!form) {
                 setError({})  
@@ -305,14 +305,14 @@ const User: React.FC = () => {
                         <>
                             <Field
                                 label="Position"
-                                placeholder="Enter your position"
+                                placeholder="Spa Manager"
                                 value={user_therapist.position}
                                 error={error_therapist.position}
                                 onChange={(e) => setUser_therapist({ ...user_therapist, position: e.target.value })}
                             />
                             <Field
                                 label="Code"
-                                placeholder="Enter a code"
+                                placeholder="C1763"
                                 value={user_therapist.code}
                                 error={error_therapist.code}
                                 onChange={(e) => setUser_therapist({ ...user_therapist, code: e.target.value })}

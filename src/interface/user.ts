@@ -21,3 +21,13 @@ export interface User_customer_type {
   total_booking?: number;
   date_joined: string;
 }
+
+// JSON
+export interface User_therapist_json {
+  MAIN: User_therapist_type
+  user: User_type
+}
+export interface User_customer_json {
+  MAIN: User_customer_type
+  user: User_type
+}

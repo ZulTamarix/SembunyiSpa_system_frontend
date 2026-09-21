@@ -20,10 +20,10 @@ export default function Form({ isOpen, onClose, title, children, footer, width =
             <div onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
             {/* Form */}
-            <div className={` relative w-full ${width} max-h-[85vh] flex flex-col rounded-xl bg-white shadow-2xl border border-gray-200 overflow-hidden  `}>
+            <div className={` relative w-full ${width} max-h-[85vh] flex flex-col rounded-xl shadow-2xl border border-gray-200 overflow-hidden  `}>
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-2 border-b border-border">
+                <div className="flex items-center justify-between px-5 py-2 bg-white border-b border-border">
                     <h2 className="text-lg font-semibold text-title">
                         {title}
                     </h2>
@@ -34,7 +34,7 @@ export default function Form({ isOpen, onClose, title, children, footer, width =
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto px-5 py-5">
+                <div className="flex-1 overflow-y-auto px-5 py-5 bg-tertiary">
                     {children}
                 </div>
 

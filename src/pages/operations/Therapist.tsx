@@ -296,7 +296,7 @@ const Therapist: React.FC = () => {
 
                             <Field
                                 label="Description"
-                                placeholder="Enter description"
+                                placeholder="Single room / Couple room / ...."
                                 value={description}
                                 error={errorRoom.description}
                                 onChange={(e) => setDescription(e.target.value)}
