@@ -13,7 +13,7 @@ const User: React.FC = () => {
     // #region 1) --> useState
         // a) fieldname-> common
         const [user, setUser] = useState<User_type>({
-            id: '',
+            id: 0,
             role: '',
             name: '',
             email: '',
@@ -23,15 +23,16 @@ const User: React.FC = () => {
         })
         // b) fieldname-> therapist
         const [user_therapist, setUser_therapist] = useState<User_therapist_type>({
-            id: '',
+            id: 0,
             user: user,
             position: '',
             code: ''
         })
         // c) fieldname-> customer
         const [user_customer, setUser_customer] = useState<User_customer_type>({
-            id: '',
+            id: 0,
             user: user,
+            total_booking: 0,
             date_joined: ''
         })
         // a) detect error -> common
@@ -59,7 +60,7 @@ const User: React.FC = () => {
             if(!form) {
                 setError({})  
                 setUser ({
-                    id: '',
+                    id: 0,
                     role: '',
                     name: '',
                     email: '',
@@ -68,14 +69,15 @@ const User: React.FC = () => {
                     password: ''
                 })
                 setUser_therapist ({
-                    id: '',
+                    id: 0,
                     user: user,
                     position: '',
                     code: ''
                 })
                 setUser_customer ({
-                    id: '',
+                    id: 0,
                     user: user,
+                    total_booking: 0,
                     date_joined: ''
                 })
             }
@@ -222,6 +224,7 @@ const User: React.FC = () => {
                         code: user_therapist.code
                     }),
                     ...(user.role === 'customer' && {
+                        total_booking: user_customer.total_booking,
                         date_joined: user_customer.date_joined
                     })
                 });

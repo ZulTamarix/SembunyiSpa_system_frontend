@@ -8,11 +8,12 @@ import Field from "../../components/ui/Field";
 import type { Package_json, Package_type } from "../../interface/package";
 import type { User_therapist_json } from "../../interface/user";
 import type { Room_type } from "../../interface/room";
+import Bullet_point from "../../components/ui/Bullet_point";
 
 // #region 0) --> Multi select
 
     interface MultiSelectOption {
-        id: string;
+        id: number;
         name: string;
         description?: string;
     }
@@ -97,7 +98,7 @@ const Packages: React.FC = () => {
     // #region 1) --> useState
         // fieldname
         const [packages, setPackages] = useState<Package_type> ({
-            id: '',
+            id: 0,
             poster: null,
             title: '',
             type: '',
@@ -108,6 +109,8 @@ const Packages: React.FC = () => {
         })
         // preview poster
         const [posterPreview, setPosterPreview] = useState<string | null>(null);
+        // details
+        const [details, setDetails] = useState<string[]>([""]);
         // set CRUD's State
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
@@ -122,7 +125,7 @@ const Packages: React.FC = () => {
         useEffect(() => {
             if(!form) { 
                 setPackages ({
-                    id: '',
+                    id: 0,
                     poster: null,
                     title: '',
                     type: '',
@@ -148,27 +151,33 @@ const Packages: React.FC = () => {
             // clean any blank or ""
             const details_cleaned = details.filter(detail => detail !== "");
 
+            // format data to allow image uploading
+            const formData = new FormData();
+
+            if(packages.poster)
+                formData.append('poster', packages.poster);
+
+            formData.append('title', packages.title);
+            formData.append('type', packages.type);
+            formData.append('description', packages.description);
+            formData.append('duration', packages.duration.toString());
+            formData.append('price', packages.price.toString());
+            formData.append('gender', packages.gender);
+
+            formData.append('detail_list', JSON.stringify(details_cleaned));
+            formData.append('therapist_list', JSON.stringify(selectedTherapist));
+            formData.append('room_list', JSON.stringify(selectedRoom));
+
             // CREATE data
             try {
-                await api.post(`/package`, {
-                    poster: 'testing',
-                    title: packages.title,
-                    type: packages.type,
-                    description: packages.description,
-                    duration: packages.duration,
-                    price: packages.price,
-                    gender: packages.gender,
-                    detail_list: details_cleaned,
-                    therapist_list: selectedTherapist,
-                    room_list: selectedRoom
-                });
+                await api.post('/package', formData);
 
-                fetch_package()
+                fetchData_package()
                 setForm(false)
             }
             catch(error) {
                 console.error('Error:', error); // use only to remove warning on vscode
-                // console.error('Response status:', error.response?.status);
+                // console.error('Response:', error.response?.data);
             }
             finally {
                 setIsLoading(false)
@@ -189,7 +198,7 @@ const Packages: React.FC = () => {
         const [databasePackage, setDatabase_package] = useState<Package_json[]>([])
 
         // a) therapist
-        const fetch_therapist = useCallback(() => {
+        const fetchData_therapist = useCallback(() => {
 
             api.get('/user', {
                 params: {
@@ -204,7 +213,7 @@ const Packages: React.FC = () => {
             });
         }, [])
         // b) room
-        const fetch_room = useCallback(() => {
+        const fetchData_room = useCallback(() => {
             api.get('/room')
             .then((response) => {
                 setDatabase_room(response.data)
@@ -215,12 +224,12 @@ const Packages: React.FC = () => {
             });
         }, [])
         // c) package
-        const fetch_package = useCallback(() => {
+        const fetchData_package = useCallback(() => {
             api.get('/package')
             .then((response) => {
 
                 setDatabase_package(response.data)
-                console.log('data = ',response.data)
+                // console.log('data = ',response.data)
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
@@ -229,54 +238,10 @@ const Packages: React.FC = () => {
 
         // fetch database
         useEffect(() => {
-            fetch_therapist()
-            fetch_room()
-            fetch_package()
+            fetchData_therapist()
+            fetchData_room()
+            fetchData_package()
         }, [])
-    //#endregion
-
-
-    // #region 5) logic for bullet point
-        const [details, setDetails] = useState<string[]>([""]);
-
-        const handleDetailChange = (index: number, value: string) => {
-            const updatedDetails = [...details];
-            updatedDetails[index] = value;
-            setDetails(updatedDetails);
-        };
-
-        const handleDetailKeyDown = (
-            index: number,
-            e: React.KeyboardEvent<HTMLInputElement>
-        ) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-
-                const updatedDetails = [...details];
-                updatedDetails.splice(index + 1, 0, "");
-
-                setDetails(updatedDetails);
-
-                // Focus the newly created input
-                setTimeout(() => {
-                    document.getElementById(`detail-${index + 1}`)?.focus();
-                }, 0);
-            }
-
-            if (e.key === "Backspace" && details[index] === "" && details.length > 1) {
-                e.preventDefault();
-
-                const updatedDetails = [...details];
-                updatedDetails.splice(index, 1);
-
-                setDetails(updatedDetails);
-
-                // Focus previous input
-                setTimeout(() => {
-                    document.getElementById(`detail-${index - 1}`)?.focus();
-                }, 0);
-            }
-        };
     //#endregion
 
 
@@ -291,29 +256,38 @@ const Packages: React.FC = () => {
             {/* Table */}
             <Grid className="md:grid-cols-2">
                 {databasePackage.map((data) => (
-                  <div key={data.MAIN.id} className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+                  <div key={data.MAIN_DATA.id} className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+                        {/* Poster */}
+                        
+                       
                         {/* Header */}
                         <div className="flex h-8 items-center justify-between">
                             <span className="whitespace-nowrap rounded-full bg-tertiary px-3 py-1.5 text-xs font-bold tracking-wide text-title uppercase">
-                                {data.MAIN.type}
+                                {data.MAIN_DATA.type}
                             </span>
 
                             <span className="text-lg font-bold">
-                                RM {data.MAIN.price}
+                                RM {data.MAIN_DATA.price}
                             </span>
                         </div>
 
                         {/* Title */}
                         <div className="mt-3 h-6">
                             <h2 className="text-base font-serif font-bold text-stone-900 uppercase">
-                                {data.MAIN.title}
+                                {data.MAIN_DATA.title}
                             </h2>
                         </div>
 
                         {/* Description */}
                         <div className="mt-3 flex-1">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs text-title font-semibold">{data.MAIN.description}</span>
+                                <span className="text-xs text-title font-semibold">
+                                    {data.MAIN_DATA.description.length > 150 ? (
+                                        `${data.MAIN_DATA.description.slice(0, 150)}...`
+                                    ) : ( 
+                                        data.MAIN_DATA.description
+                                    )}
+                                </span>
                             </div>
                         </div>
                         
@@ -321,7 +295,7 @@ const Packages: React.FC = () => {
                         {/* Duration */}
                         <div className="mt-3">
                             <span className="text-xs font-semibold text-title">
-                                {data.MAIN.duration} min
+                                {data.MAIN_DATA.duration} min
                             </span>
                         </div>
 
@@ -464,40 +438,19 @@ const Packages: React.FC = () => {
                         />
                         {/* 8) Detail */}
                         <div className="col-span-2">
-                            <label className="block mb-1.5 text-sm font-medium text-title">
-                                Package's details
-                            </label>
-
-                            <div className="space-y-2">
-                                {details.map((detail, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                        <span className="text-title text-lg">•</span>
-
-                                        <input
-                                            id={`detail-${index}`}
-                                            type="text"
-                                            value={detail}
-                                            onChange={(e) =>
-                                                handleDetailChange(index, e.target.value)
-                                            }
-                                            onKeyDown={(e) =>
-                                                handleDetailKeyDown(index, e)
-                                            }
-                                            placeholder="Press ENTER to add more"
-                                            className="bg-white w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title focus:border-border focus:ring-2 focus:ring-border"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            <Bullet_point
+                                value={details}
+                                onChange={setDetails}
+                                label="Package's details"
+                            />
                         </div>
                         {/* 9) Therapist */}
                         <MultiSelect
                             label="Therapist"
-                            required
                             options={databaseTherapist.map((therapist) => ({
-                                id: therapist.MAIN.id,
+                                id: therapist.MAIN_DATA.id,
                                 name: therapist.user.name,
-                                description: therapist.MAIN.position
+                                description: therapist.MAIN_DATA.position
                             }))}
                             selected={selectedTherapist}
                             onChange={setSelectedTherapist}
@@ -505,7 +458,6 @@ const Packages: React.FC = () => {
                         {/* 10) Room */}
                         <MultiSelect
                             label="Room"
-                            required
                             options={databaseRoom.map((room) => ({
                                 id: room.id,
                                 name: room.name,

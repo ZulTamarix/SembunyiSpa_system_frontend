@@ -1,5 +1,5 @@
 export interface Therapist_type {
-    id: string;
+    id: number;
     name: string;
     code: string;
     designation: string;

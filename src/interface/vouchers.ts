@@ -1,5 +1,5 @@
 export interface Voucher_type {
-    id: string;
+    id: number;
     code: string;
     description: string;
     type: string;

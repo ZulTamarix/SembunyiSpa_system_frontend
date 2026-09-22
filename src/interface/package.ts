@@ -1,5 +1,5 @@
 export interface Package_type {
-    id: string;
+    id: number;
     poster: File | null;
     title: string;
     type: string;
@@ -10,17 +10,17 @@ export interface Package_type {
 }
 
 export interface Package_json {
-    MAIN: Package_type
+    MAIN_DATA: Package_type
     detail: {
-        id: string;
+        id: number;
         detail: string
     }
     therapist: {
-        id: string;
+        id: number;
         user_therapist_id: string
     }
     room: {
-        id: string;
+        id: number;
         room_id: string
     }
 }

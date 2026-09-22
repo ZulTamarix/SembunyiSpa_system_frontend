@@ -1,5 +1,5 @@
 export interface Booking_type {
-    id: string;
+    id: number;
     name: string;
     phoneNo: string;
     treatment: string;

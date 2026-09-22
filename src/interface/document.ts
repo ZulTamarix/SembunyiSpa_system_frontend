@@ -1,5 +1,5 @@
 export interface Document_type {
-    id: string;
+    id: number;
     name: string
     type: string;
     date: string;
