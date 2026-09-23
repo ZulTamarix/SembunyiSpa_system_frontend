@@ -5,6 +5,8 @@ import Table, { type Column } from "../../components/ui/Table";
 import type { Customer_type } from "../../interface/customer";
 import customers from "../../JSON/customer.json"
 import Input from "../../components/ui/input";
+import roster from "../../JSON/roster.json";
+
 
 const Customers: React.FC = () => {
 
@@ -31,12 +33,13 @@ const Customers: React.FC = () => {
         { key: "booking", header: "Booking" },
     ];
     
+    
     return (
         <>
             {/* filter */}
             <Grid className="md:grid-cols-7 items-center">
                 <Input placeholder="Search customers..." className="md:col-span-2 bg-white "/>
-                <Button icon={Plus} label='Add Customer' className="md:col-start-7 md:col-span-3"/>
+                <Button onClick={()=> console.log('data = ',roster)} icon={Plus} label='Add Customer' className="md:col-start-7 md:col-span-3"/>
             </Grid>
             {/* table */}
             <Grid>

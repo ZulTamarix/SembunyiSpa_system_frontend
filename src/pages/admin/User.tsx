@@ -258,7 +258,7 @@ const User: React.FC = () => {
             </Grid>
 
             {/* create user */}
-            <Form title={crud=='create'? 'Add User':'Edit User'} isOpen={form} onClose={() => setForm(false)}
+            <Form title={crud=='create'? 'Add User':'Edit User'} isOpen={form} onClose={() => setForm(false)} width="max-w-lg"
                 
                 footer={
                     <>

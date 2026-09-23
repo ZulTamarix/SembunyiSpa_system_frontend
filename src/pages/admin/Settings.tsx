@@ -164,7 +164,7 @@ const Settings: React.FC = () => {
                     </Grid>
 
                     {/* create room */}
-                    <Form title={crud=='create'? 'Add Room':'Edit Room'} isOpen={form_room} onClose={() => setForm_room(false)}
+                    <Form title={crud=='create'? 'Add Room':'Edit Room'} isOpen={form_room} onClose={() => setForm_room(false)} width="max-w-lg"
                         
                         footer={
                             <>

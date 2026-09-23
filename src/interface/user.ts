@@ -22,10 +22,10 @@ export interface User_customer_type {
 
 // JSON
 export interface User_therapist_json {
-  MAIN_DATA: User_therapist_type
+  user_therapist: User_therapist_type
   user: User_type
 }
 export interface User_customer_json {
-  MAIN_DATA: User_customer_type
+  user_customer: User_customer_type
   user: User_type
 }

@@ -10,16 +10,16 @@ export interface Package_type {
 }
 
 export interface Package_json {
-    MAIN_DATA: Package_type
-    detail: {
+    package: Package_type
+    package_detail: {
         id: number;
         detail: string
     }
-    therapist: {
+    package_therapist: {
         id: number;
         user_therapist_id: string
     }
-    room: {
+    package_room: {
         id: number;
         room_id: string
     }

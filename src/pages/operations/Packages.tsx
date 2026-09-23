@@ -256,25 +256,25 @@ const Packages: React.FC = () => {
             {/* Table */}
             <Grid className="md:grid-cols-2">
                 {databasePackage.map((data) => (
-                  <div key={data.MAIN_DATA.id} className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+                  <div key={data.package.id} className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
                         {/* Poster */}
                         
                        
                         {/* Header */}
                         <div className="flex h-8 items-center justify-between">
                             <span className="whitespace-nowrap rounded-full bg-tertiary px-3 py-1.5 text-xs font-bold tracking-wide text-title uppercase">
-                                {data.MAIN_DATA.type}
+                                {data.package.type}
                             </span>
 
                             <span className="text-lg font-bold">
-                                RM {data.MAIN_DATA.price}
+                                RM {data.package.price}
                             </span>
                         </div>
 
                         {/* Title */}
                         <div className="mt-3 h-6">
                             <h2 className="text-base font-serif font-bold text-stone-900 uppercase">
-                                {data.MAIN_DATA.title}
+                                {data.package.title}
                             </h2>
                         </div>
 
@@ -282,10 +282,10 @@ const Packages: React.FC = () => {
                         <div className="mt-3 flex-1">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs text-title font-semibold">
-                                    {data.MAIN_DATA.description.length > 150 ? (
-                                        `${data.MAIN_DATA.description.slice(0, 150)}...`
+                                    {data.package.description.length > 150 ? (
+                                        `${data.package.description.slice(0, 150)}...`
                                     ) : ( 
-                                        data.MAIN_DATA.description
+                                        data.package.description
                                     )}
                                 </span>
                             </div>
@@ -295,7 +295,7 @@ const Packages: React.FC = () => {
                         {/* Duration */}
                         <div className="mt-3">
                             <span className="text-xs font-semibold text-title">
-                                {data.MAIN_DATA.duration} min
+                                {data.package.duration} min
                             </span>
                         </div>
 
@@ -448,9 +448,9 @@ const Packages: React.FC = () => {
                         <MultiSelect
                             label="Therapist"
                             options={databaseTherapist.map((therapist) => ({
-                                id: therapist.MAIN_DATA.id,
+                                id: therapist.user_therapist.id,
                                 name: therapist.user.name,
-                                description: therapist.MAIN_DATA.position
+                                description: therapist.user_therapist.position
                             }))}
                             selected={selectedTherapist}
                             onChange={setSelectedTherapist}

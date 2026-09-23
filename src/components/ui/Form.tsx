@@ -7,10 +7,10 @@ interface FormProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
-  width?: string;
+  width: string;
 }
 
-export default function Form({ isOpen, onClose, title, children, footer, width = "max-w-lg" }: FormProps) {
+export default function Form({ isOpen, onClose, title, children, footer, width, }: FormProps) {
 
     if (!isOpen) return null;
 
@@ -34,7 +34,7 @@ export default function Form({ isOpen, onClose, title, children, footer, width =
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto px-5 py-5 bg-tertiary">
+                <div className="flex-1 scrollbar-none overflow-y-auto px-5 py-5 bg-tertiary">
                     {children}
                 </div>
 

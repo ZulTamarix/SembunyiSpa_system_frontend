@@ -80,7 +80,7 @@ const sections: NavSection[] = [
     items: [
       { label: "Vouchers",      path: "/vouchers",      icon: <Ticket size={18} />, icon_selected: <Ticket size={18} className="text-orange-500" /> },
       { label: "Banners",       path: "/banners",       icon: <ImageIcon size={18} />, icon_selected: <ImageIcon size={18} className="text-blue-400" /> },
-      { label: "Reviews",       path: "/reviews", icon: <UserStar size={18} />, icon_selected: <UserStar size={18} className="text-green-400" /> },
+      // { label: "Reviews",       path: "/reviews", icon: <UserStar size={18} />, icon_selected: <UserStar size={18} className="text-green-400" /> },
       { label: "Notifications", path: "/notifications", icon: <Bell size={18} />, icon_selected: <Bell size={18} className="text-amber-400" /> },
     ],
   },
@@ -88,7 +88,7 @@ const sections: NavSection[] = [
     title: "ANALYTICS",
     items: [
       { label: "Reports",   path: "/reports",   icon: <BarChart3 size={18} />, icon_selected: <BarChart3 size={18} className="text-emerald-500" /> },
-      { label: "Documents", path: "/documents", icon: <FileText size={18} />, icon_selected: <FileText size={18} className="text-blue-400" /> },
+      // { label: "Documents", path: "/documents", icon: <FileText size={18} />, icon_selected: <FileText size={18} className="text-blue-400" /> },
     ],
   },
   {

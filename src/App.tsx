@@ -12,14 +12,13 @@ import Membership from "./pages/operations/Membership";
 import Packages from "./pages/operations/Packages";
 import Therapist from "./pages/operations/Therapist";
 import Vouchers from "./pages/marketings/Vouchers";
-import Documents from "./pages/analytics/Documents";
 import Reports from "./pages/analytics/Reports";
 import Banners from "./pages/marketings/Banners";
 import Notifications from "./pages/marketings/Notifications";
 import User from "./pages/admin/User";
 import Settings from "./pages/admin/Settings";
 import Schedule from "./pages/operations/Schedule";
-import Reviews from "./pages/marketings/Review";
+import DutyRosterCalendar from "./pages/operations/Dutyrostercalendar";
 
 const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -47,15 +46,18 @@ const App: React.FC = () => {
             <Route path="/packages" element={<Packages />} />
             <Route path="/memberships" element={<Membership />} />
 
+
+            <Route path="/test" element={<DutyRosterCalendar />} />
+
             {/* 3) Marketing */}
             <Route path="/vouchers" element={<Vouchers />} />
             <Route path="/banners" element={<Banners />} />
-            <Route path="/reviews" element={<Reviews />} />
+            {/* <Route path="/reviews" element={<Reviews />} /> */}
             <Route path="/notifications" element={<Notifications />} />
 
             {/* 4) Analytics */}
             <Route path="/reports" element={<Reports />} />
-            <Route path="/documents" element={<Documents />} />
+            {/* <Route path="/documents" element={<Documents />} /> */}
             
             {/* 5) Admin */}
             <Route path="/user" element={<User />} />

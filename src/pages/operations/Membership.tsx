@@ -2,7 +2,7 @@ import { Plus, IdCard, Award } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import { Table, type Column } from "../../components/ui/Table";
-import type { Membership_customer_type, Membership_json, Membership_type } from "../../interface/membership";
+import type { Membership_customer_json, Membership_customer_type, Membership_json, Membership_type } from "../../interface/membership";
 import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
@@ -104,8 +104,8 @@ const Membership: React.FC = () => {
                 if(!form_customer) {
                     setCustomer({
                         id: 0,
-                        user_customer_id: databaseUser_customer[0]?.MAIN_DATA.id ?? 1,
-                        membership_id: databaseMembership[0]?.MAIN_DATA.id ?? 1,
+                        user_customer_id: databaseUser_customer[0]?.user_customer.id ?? 1,
+                        membership_id: databaseMembership[0]?.membership.id ?? 1,
                         code: '',
                         date_joined: ''
                     })
@@ -117,7 +117,7 @@ const Membership: React.FC = () => {
             // const [databaseCustomer, setDatabase_customer] = useState<Customer_json[]>([])
 
             const [databaseUser_customer, setDatabase_user_customer] = useState<User_customer_json[]>([])
-            const [databaseCustomer, setDatabase_customer] = useState<Membership_customer_type[]>([])
+            const [databaseCustomer, setDatabase_customer] = useState<Membership_customer_json[]>([])
 
             // a) fetch 'user_customer'
             const fetchData_user_customer = useCallback(() => {
@@ -132,7 +132,7 @@ const Membership: React.FC = () => {
                     setDatabase_user_customer(response.data)
 
                     // set data
-                    customer.user_customer_id = response.data[0].MAIN_DATA.id
+                    customer.user_customer_id = response.data[0].user_customer.id
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
@@ -147,38 +147,46 @@ const Membership: React.FC = () => {
                     }
                 })
                 .then((response) => {
-
+                    console.log('data = ',response.data)
                     setDatabase_customer(response.data)
-                    console.log('datsa = ',response.data)
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
                 });
             }, [])
 
-
             
-            // const tableTitle_customer: Column<Customer_json>[] = [
-            //     {
-            //         key: "tier",
-            //         header: "Tier",
-            //         render: (row) => row.MAIN_DATA.tier
-            //     },
-            //     {
-            //         key: "privilege",
-            //         header: "Privilege",
-            //         render: (row) => row.privilege.length
-            //     },
-            //     {
-            //         key: "",
-            //         header: "",
-            //         render: () => (
-            //             <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
-            //                 Edit
-            //             </button>
-            //         )
-            //     },
-            // ];
+            const tableTitle_customer: Column<Membership_customer_json>[] = [
+                {
+                    key: "member",
+                    header: "Member",
+                    render: (row) => row.user.name
+                },
+                {
+                    key: "code",
+                    header: "Number",
+                    render: (row) => row.membership_customer.code
+                },
+                {
+                    key: "tier",
+                    header: "Tier",
+                    render: (row) => row.membership.tier
+                },
+                {
+                    key: "joined",
+                    header: "Joined",
+                    render: (row) => row.membership_customer.date_joined
+                },
+                {
+                    key: "",
+                    header: "",
+                    render: () => (
+                        <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
+                            Edit
+                        </button>
+                    )
+                },
+            ];
         //#endregion
     
     //#endregion
@@ -256,8 +264,8 @@ const Membership: React.FC = () => {
                 .then((response) => {
 
                     setDatabase_membership(response.data)
-                    console.log('data = ',response.data)
-                    customer.membership_id = response.data[0].MAIN_DATA.id
+                    // console.log('data = ',response.data)
+                    customer.membership_id = response.data[0].membership.id
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
@@ -269,12 +277,12 @@ const Membership: React.FC = () => {
                 {
                     key: "tier",
                     header: "Tier",
-                    render: (row) => row.MAIN_DATA.tier
+                    render: (row) => row.membership.tier
                 },
                 {
                     key: "privilege",
                     header: "Privilege",
-                    render: (row) => row.privilege.length
+                    render: (row) => row.membership_privilege.length
                 },
                 {
                     key: "",
@@ -310,12 +318,12 @@ const Membership: React.FC = () => {
                     </Grid>
 
                     {/* Table */}
-                    {/* <Grid>
-                        <Table fieldName={tableTitle_customer} data={databaseMembership} />
-                    </Grid> */}
+                    <Grid>
+                        <Table fieldName={tableTitle_customer} data={databaseCustomer} />
+                    </Grid>
 
                     {/* Form */}
-                    <Form title={crud=='create'? 'Add Membership':'Edit Membership'} isOpen={form_customer} onClose={() => setForm_customer(false)}
+                    <Form title={crud=='create'? 'Add Membership':'Edit Membership'} isOpen={form_customer} onClose={() => setForm_customer(false)} width="max-w-lg"
                         
                         footer={
                             <>
@@ -354,8 +362,8 @@ const Membership: React.FC = () => {
                                 onChange={(e) => setCustomer({...customer, membership_id: Number(e.target.value)})}
                                 type="select"
                                 options={databaseMembership.map((membership) => ({
-                                    label: membership.MAIN_DATA.tier,
-                                    value: membership.MAIN_DATA.id,
+                                    label: membership.membership.tier,
+                                    value: membership.membership.id,
                                 }))}
                             />
                             {/* 2) */}
@@ -368,7 +376,7 @@ const Membership: React.FC = () => {
                                 options={
                                 databaseUser_customer.map((user) => ({
                                     label: user.user.name,
-                                    value: user.MAIN_DATA.id
+                                    value: user.user_customer.id
                                 }))}
                             />
                             {/* 3) */}
@@ -406,7 +414,7 @@ const Membership: React.FC = () => {
                     </Grid>
 
                     {/* Form */}
-                    <Form title={crud=='create'? 'Add Tier List':'Edit Tier List'} isOpen={form_membership} onClose={() => setForm_membership(false)}
+                    <Form title={crud=='create'? 'Add Tier List':'Edit Tier List'} isOpen={form_membership} onClose={() => setForm_membership(false)} width="max-w-lg"
                         
                         footer={
                             <>
