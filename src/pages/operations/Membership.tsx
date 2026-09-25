@@ -2,14 +2,15 @@ import { Plus, IdCard, Award } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import { Table, type Column } from "../../components/ui/Table";
-import type { Membership_customer_json, Membership_customer_type, Membership_json, Membership_type } from "../../interface/membership";
+import type { Membership_json, Membership_type } from "../../interface/membership";
 import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
 import Bullet_point from "../../components/ui/Bullet_point";
 import api from "../../api/axios";
 import Tabs from "../../components/ui/Tab";
-import type { User_customer_json } from "../../interface/user";
+import type { User_type } from "../../interface/user";
+import Label from "../../components/ui/Label";
 
 const Membership: React.FC = () => {
 
@@ -31,7 +32,7 @@ const Membership: React.FC = () => {
         useEffect(() => {
             switch(active) {
                 case 'customer': 
-                    fetchData_user_customer()
+                    fetchData_user()
                     fetchData_customer()
                 break;
                 case 'membership': 
@@ -49,13 +50,20 @@ const Membership: React.FC = () => {
             // form
             const [form_customer, setForm_customer] = useState(false);
             // fieldname
-            const [customer, setCustomer] = useState<Membership_customer_type> ({
+            const [customer, setCustomer] = useState<User_type> ({
                 id: 0,
-                user_customer_id: 0,
+                role: '',
+                name: '',
+                email: '',
+                phoneNo: '',
+                status: '',
+                password: '',
+                date_joined: '',
                 membership_id: 0,
-                code: '',
-                date_joined: ''
+                specialty: '',
+                code: ''
             })
+            
 
         //#endregion
 
@@ -64,24 +72,21 @@ const Membership: React.FC = () => {
             // CREATE
             const handleCreate_customer = async() => {
                 // loading
-                setIsLoading(true)
+                // setIsLoading(true)
                 const test = {
-                    
-                        membership_id: customer.membership_id,
-                        user_customer_id: customer.user_customer_id,
-                        code: customer.code,
-                        date_joined: customer.date_joined
+                    id: customer.id,
+                    membership_id: customer.membership_id,
+                    code: customer.code,
                 }
                 console.log(test)
 
                 try {
-                    await api.post(`/membership`, {
-                        type: 'customer',
-
+                    
+                    await api.put(`/user/${customer.id}`, {
                         membership_id: customer.membership_id,
-                        user_customer_id: customer.user_customer_id,
                         code: customer.code,
-                        date_joined: customer.date_joined
+
+                        switch: 'membership'
                     });
 
                     fetchData_customer()
@@ -103,60 +108,69 @@ const Membership: React.FC = () => {
             useEffect(() => {
                 if(!form_customer) {
                     setCustomer({
-                        id: 0,
-                        user_customer_id: databaseUser_customer[0]?.user_customer.id ?? 1,
+                        id: databaseUser[0]?.id ?? 1,
+                        role: '',
+                        name: '',
+                        email: '',
+                        phoneNo: '',
+                        status: '',
+                        password: '',
+                        date_joined: '',
                         membership_id: databaseMembership[0]?.membership.id ?? 1,
-                        code: '',
-                        date_joined: ''
+                        specialty: '',
+                        code: ''
                     })
                 }
             }, [form_customer])
         //#endregion
         
         //#region 4) --> database
-            // const [databaseCustomer, setDatabase_customer] = useState<Customer_json[]>([])
+            const [databaseUser, setDatabase_user] = useState<User_type[]>([])
+            const [databaseCustomer, setDatabase_customer] = useState<Membership_json[]>([])
 
-            const [databaseUser_customer, setDatabase_user_customer] = useState<User_customer_json[]>([])
-            const [databaseCustomer, setDatabase_customer] = useState<Membership_customer_json[]>([])
-
-            // a) fetch 'user_customer'
-            const fetchData_user_customer = useCallback(() => {
+            // a) fetch 'user'
+            const fetchData_user = useCallback(() => {
 
                 api.get('/user', {
                     params: {
-                        role: 'customer'
+                        role: 'customer',
+                        extra: 'no_membership' // call all user that dont have membership yet
                     }
                 })
                 .then((response) => {
-                    // console.log('data = ',response.data)
-                    setDatabase_user_customer(response.data)
+                    // console.log('user = ',response.data)
+                    setDatabase_user(response.data)
 
                     // set data
-                    customer.user_customer_id = response.data[0].user_customer.id
+                    setCustomer(prev => ({
+                        ...prev,
+                        id: response.data[0].id
+                    }))
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
                 });
             }, [])
 
-            // b) fetch 'membership_customer'
+            // b) fetch 'customer'
             const fetchData_customer = useCallback(() => {
-                api.get('/membership', {
+
+                api.get('/user', {
                     params: {
-                        type: 'customer'
+                        role: 'customer',
+                        extra: 'membership'
                     }
                 })
                 .then((response) => {
-                    console.log('data = ',response.data)
+                    // console.log('customer = ',response.data)
                     setDatabase_customer(response.data)
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
                 });
             }, [])
-
             
-            const tableTitle_customer: Column<Membership_customer_json>[] = [
+            const tableTitle_customer: Column<Membership_json>[] = [
                 {
                     key: "member",
                     header: "Member",
@@ -165,21 +179,25 @@ const Membership: React.FC = () => {
                 {
                     key: "code",
                     header: "Number",
-                    render: (row) => row.membership_customer.code
+                    render: (row) => row.user.code
                 },
                 {
                     key: "tier",
                     header: "Tier",
-                    render: (row) => row.membership.tier
+                    render: (row) => (
+                        <span className="py-1 px-2 rounded-full bg-tertiary border border-border text-title font-semibold">
+                           {row.membership.tier} member
+                        </span>
+                    )
                 },
                 {
-                    key: "joined",
-                    header: "Joined",
-                    render: (row) => row.membership_customer.date_joined
+                    key: "privilege",
+                    header: "Privilege",
+                    render: (row) => `${row.membership_privilege.length} privileges`
                 },
                 {
                     key: "",
-                    header: "",
+                    header: "Action",
                     render: () => (
                         <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
                             Edit
@@ -229,8 +247,7 @@ const Membership: React.FC = () => {
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.message);
-                    console.error('Response status:', error.response?.data);
+                    // console.error('Response status:', error.response?.data);
                 }
                 finally {
                     setIsLoading(false)
@@ -264,8 +281,12 @@ const Membership: React.FC = () => {
                 .then((response) => {
 
                     setDatabase_membership(response.data)
-                    // console.log('data = ',response.data)
-                    customer.membership_id = response.data[0].membership.id
+                    
+                    // set data
+                    setCustomer(prev => ({
+                        ...prev,
+                        membership_id: response.data[0].membership.id
+                    }))
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
@@ -286,7 +307,7 @@ const Membership: React.FC = () => {
                 },
                 {
                     key: "",
-                    header: "",
+                    header: "Action",
                     render: () => (
                         <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
                             Edit
@@ -313,7 +334,7 @@ const Membership: React.FC = () => {
                 <>
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
-                        <span className=" text-title">{databaseMembership.length} membership</span>
+                        <Label>{databaseMembership.length} Membership</Label>
                         <Button onClick={() => { setForm_customer(true); setCrud('create')}} icon={Plus} label='Add Membership' className="md:col-start-5"/>
                     </Grid>
 
@@ -359,7 +380,10 @@ const Membership: React.FC = () => {
                                 label="Tier"
                                 // placeholder="Select role"
                                 value={customer.membership_id || ''}
-                                onChange={(e) => setCustomer({...customer, membership_id: Number(e.target.value)})}
+                                onChange={(e) => setCustomer({
+                                    ...customer,
+                                    membership_id: e.target.value === "" ? "" : Number(e.target.value)
+                                })}
                                 type="select"
                                 options={databaseMembership.map((membership) => ({
                                     label: membership.membership.tier,
@@ -370,13 +394,16 @@ const Membership: React.FC = () => {
                             <Field
                                 label="Customer"
                                 // placeholder="Select role"
-                                value={customer.user_customer_id || ''}
-                                onChange={(e) => setCustomer({...customer, user_customer_id: Number(e.target.value)})}
+                                value={customer.id || ''}
+                                onChange={(e) => setCustomer({
+                                    ...customer,
+                                    id: e.target.value === "" ? "" : Number(e.target.value)
+                                })}
                                 type="select"
                                 options={
-                                databaseUser_customer.map((user) => ({
-                                    label: user.user.name,
-                                    value: user.user_customer.id
+                                databaseUser.map((user) => ({
+                                    label: user.name,
+                                    value: user.id
                                 }))}
                             />
                             {/* 3) */}
@@ -385,13 +412,6 @@ const Membership: React.FC = () => {
                                 placeholder="SPA-2026-000"
                                 value={customer.code || ''}
                                 onChange={(e) => setCustomer({...customer, code: e.target.value})}
-                            />
-                            {/* 4) */}
-                            <Field
-                                label="Date joined"
-                                value={customer.date_joined || ''}
-                                onChange={(e) => setCustomer({...customer, date_joined: e.target.value})}
-                                type="date"
                             />
                         </div>
                     </Form>
@@ -402,15 +422,13 @@ const Membership: React.FC = () => {
                 <>
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
-                        <span className="md:col-start-2  text-title">{databaseMembership.length} tier list</span>
-                        <Button onClick={() => { setForm_membership(true); setCrud('create')}} icon={Plus} label='Create Tier List' className="md:col-start-4"/>
+                        <Label>{databaseMembership.length} Tier</Label>
+                        <Button onClick={() => { setForm_membership(true); setCrud('create')}} icon={Plus} label='Create Tier List' className="md:col-start-5"/>
                     </Grid>
 
                     {/* Table */}
-                    <Grid className="md:grid-cols-5">
-                        <div className="md:col-start-2 col-span-3">
-                            <Table fieldName={tableTitle_membership} data={databaseMembership} />
-                        </div>
+                    <Grid>
+                        <Table fieldName={tableTitle_membership} data={databaseMembership} />
                     </Grid>
 
                     {/* Form */}

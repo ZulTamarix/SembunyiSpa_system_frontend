@@ -1,8 +1,6 @@
 [
     {"id": 1, "code": "OFF", "description": "Off Day"},
-    {"id": 2, "code": "ROD", "description": "Replacement Off Day"},
     {"id": 3, "code": "PH", "description": "Public Holiday"},
-    {"id": 4, "code": "RPH", "description": "Replacement Public Holiday"},
     {"id": 5, "code": "MC", "description": "Medical Leave"},
     {"id": 6, "code": "EL", "description": "Emergency Leave"},
     {"id": 7, "code": "AL", "description": "Annual Leave"},

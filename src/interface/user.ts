@@ -1,31 +1,19 @@
 export interface User_type {
-  id: number;
-  role: 'admin'|'therapist'|'customer'|'';
+  id: number | "";
+  role: 'admin' | 'therapist' | 'customer' | 'walkin' | '';
   name: string;
   email: string;
   phoneNo: string;
   status: string;
   password: string;
-}
-export interface User_therapist_type {
-  id: number;
-  user: User_type;
-  position: string;
-  code: string;
-}
-export interface User_customer_type {
-  id: number;
-  user: User_type;
-  total_booking: number;
   date_joined: string;
+  membership_id?: number | "";
+  specialty: string;
+  code: string;
 }
 
 // JSON
-export interface User_therapist_json {
-  user_therapist: User_therapist_type
-  user: User_type
-}
-export interface User_customer_json {
-  user_customer: User_customer_type
-  user: User_type
-}
+// export interface User_therapist_json {
+//   user_therapist: User_therapist_type
+//   user: User_type
+// }

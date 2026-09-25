@@ -4,8 +4,8 @@ export interface Package_type {
     title: string;
     type: string;
     description: string;
-    duration: number;
-    price: number;
+    duration: number | "";
+    price: number | "";
     gender: string;
 }
 

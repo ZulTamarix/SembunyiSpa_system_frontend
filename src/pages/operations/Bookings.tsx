@@ -4,7 +4,7 @@ import bookings from "../../JSON/booking.json"
 import Grid from "../../components/ui/Grid";
 import Button from "../../components/ui/Button";
 import { Plus } from "lucide-react";
-import Input from "../../components/ui/input";
+import Searchbar from "../../components/ui/Searchbar";
 
 const Bookings: React.FC = () => {
 
@@ -44,14 +44,14 @@ const Bookings: React.FC = () => {
         { key: "payment", header: "Payment" },
     ];
 
-    // 2) searchbar
+    // 2) searchbars
 
     return (
         <>
             {/* filter */}
             <Grid className="md:grid-cols-5 items-center">
                 <div className="md:col-span-5 bg-white p-3 rounded-xl grid md:grid-cols-5 items-center gap-4 border border-border overflow-hidden">
-                    <Input placeholder="Search by name,phone or booking ID..." className="md:col-span-3 bg-tertiary "/>
+                    <Searchbar placeholder="Search by name,phone or booking ID..." className="md:col-span-3 bg-tertiary "/>
                     <select className="bg-tertiary px-3 h-10 rounded-xl border border-border focus:outline-none focus:ring-0 focus:border-border">
                         <option selected>All</option>
                         <option value=''>Confirmed</option>

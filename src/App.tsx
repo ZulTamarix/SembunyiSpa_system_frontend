@@ -18,7 +18,6 @@ import Notifications from "./pages/marketings/Notifications";
 import User from "./pages/admin/User";
 import Settings from "./pages/admin/Settings";
 import Schedule from "./pages/operations/Schedule";
-import DutyRosterCalendar from "./pages/operations/Dutyrostercalendar";
 
 const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -45,9 +44,6 @@ const App: React.FC = () => {
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/packages" element={<Packages />} />
             <Route path="/memberships" element={<Membership />} />
-
-
-            <Route path="/test" element={<DutyRosterCalendar />} />
 
             {/* 3) Marketing */}
             <Route path="/vouchers" element={<Vouchers />} />

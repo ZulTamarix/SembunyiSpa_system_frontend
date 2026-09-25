@@ -8,6 +8,7 @@ import { ClipboardList, Component, Plus, Sparkles, Warehouse } from "lucide-reac
 import Form from "../../components/ui/Form";
 import api from "../../api/axios";
 import Tabs from "../../components/ui/Tab";
+import Label from "../../components/ui/Label";
 
 const Settings: React.FC = () => {
     
@@ -58,7 +59,7 @@ const Settings: React.FC = () => {
             { key: "description", header: "Description" },
             {
                 key: "",
-                header: "",
+                header: "Action",
                 render: (item) => (
                     <div className="flex gap-3">
                         <button onClick={() => editRoom(item)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
@@ -152,15 +153,13 @@ const Settings: React.FC = () => {
                 <>
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
-                        <span className="md:col-start-2 text-title">{databaseRoom.length} rooms</span>
-                        <Button onClick={() => { setForm_room(true); setCrud('create')}} icon={Plus} label='Add Room' className="md:col-start-4"/>
+                        <Label>{databaseRoom.length} Room</Label>
+                        <Button onClick={() => { setForm_room(true); setCrud('create')}} icon={Plus} label='Add Room' className="md:col-start-5"/>
                     </Grid>
 
                     {/* table */}
-                    <Grid className="md:grid-cols-5">
-                        <div className="md:col-start-2 col-span-3">
-                            <Table fieldName={tableTitle} data={databaseRoom}  />
-                        </div>
+                    <Grid>
+                        <Table fieldName={tableTitle} data={databaseRoom}  />
                     </Grid>
 
                     {/* create room */}

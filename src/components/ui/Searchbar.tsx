@@ -1,6 +1,6 @@
 import React from "react";
 
-interface InputProps {
+interface SearchbarProps {
     placeholder?: string;
     className?: string;
     value?: string;
@@ -8,7 +8,7 @@ interface InputProps {
     type?: string;
 }
 
-export function Input({placeholder, className = "", value, onChange, type = "text"}: InputProps) {
+export function Searchbar({placeholder, className = "", value, onChange, type = "text"}: SearchbarProps) {
   return (
     <input
       type={type}
@@ -21,4 +21,4 @@ export function Input({placeholder, className = "", value, onChange, type = "tex
   );
 }
 
-export default Input;
+export default Searchbar;

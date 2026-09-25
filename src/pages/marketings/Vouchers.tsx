@@ -4,6 +4,7 @@ import Grid from "../../components/ui/Grid";
 import { Table, type Column } from "../../components/ui/Table";
 import vouchers from "../../JSON/voucher.json"
 import type { Voucher_type } from "../../interface/vouchers";
+import Label from "../../components/ui/Label";
 
 const Membership: React.FC = () => {
 
@@ -17,7 +18,7 @@ const Membership: React.FC = () => {
         { key: "status", header: "Status" },
         {
             key: "",
-            header: "",
+            header: "Action",
             render: () => (
                 <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
                     Edit
@@ -30,7 +31,7 @@ const Membership: React.FC = () => {
         <>
             {/* Create */}
             <Grid className="md:grid-cols-5 items-center">
-                <span className="text-title">{vouchers.length} vouchers</span>
+                <Label>{vouchers.length} voucher</Label>
                 <Button icon={Plus} label='Create Voucher' className="md:col-start-5"/>
             </Grid>
             {/* table */}

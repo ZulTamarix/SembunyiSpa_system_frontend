@@ -9,6 +9,7 @@ import type { Package_json, Package_type } from "../../interface/package";
 import type { User_therapist_json } from "../../interface/user";
 import type { Room_type } from "../../interface/room";
 import Bullet_point from "../../components/ui/Bullet_point";
+import Label from "../../components/ui/Label";
 
 // #region 0) --> Multi select
 
@@ -249,7 +250,7 @@ const Packages: React.FC = () => {
         <>
             {/* Create */}
             <Grid className="md:grid-cols-5 items-center">
-                <span className="text-title">{databasePackage.length} packages</span>
+                <Label>{databasePackage.length} Package</Label>
                 <Button onClick={()=> {setForm(true); setCrud('create')}} icon={Plus} label='Add Package' className="md:col-start-5"/>
             </Grid>
             
@@ -399,7 +400,10 @@ const Packages: React.FC = () => {
                             placeholder="Set duration in minute"
                             value={packages.duration}
                             // error={error}
-                            onChange={(e) => setPackages({ ...packages, duration: Number(e.target.value) })}
+                            onChange={(e) => setPackages({
+                                ...packages,
+                                duration: e.target.value === "" ? "" : Number(e.target.value)
+                            })}
                             type="number"
                         />
                         {/* 5) */}
@@ -408,7 +412,10 @@ const Packages: React.FC = () => {
                             placeholder="Enter price"
                             value={packages.price}
                             // error={error}
-                            onChange={(e) => setPackages({ ...packages, price: Number(e.target.value) })}
+                            onChange={(e) => setPackages({
+                                ...packages,
+                                price: e.target.value === "" ? "" : Number(e.target.value)
+                            })}
                             type="number"
                         />
                         {/* 6) */}

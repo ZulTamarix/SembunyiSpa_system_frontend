@@ -5,7 +5,7 @@ interface FieldOption {
 
 interface FieldProps {
     label: string;
-    type?: 'text' | 'number' | 'date' | 'select' | 'file' | 'textarea';
+    type?: 'text' | 'number' | 'date' | 'time' | 'select' | 'file' | 'textarea';
     placeholder?: string;
     value?: string | number;
     accept?: string;

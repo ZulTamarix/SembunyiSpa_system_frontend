@@ -2,11 +2,12 @@ import { Plus } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import { Table, type Column } from "../../components/ui/Table";
-import type { User_customer_type, User_therapist_type, User_type } from "../../interface/user";
+import type { User_type } from "../../interface/user";
 import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
 import api from "../../api/axios";
+import Label from "../../components/ui/Label";
 
 const User: React.FC = () => {
 
@@ -19,29 +20,13 @@ const User: React.FC = () => {
             email: '',
             phoneNo: '',
             status: '',
-            password: ''
-        })
-        // b) fieldname-> therapist
-        const [user_therapist, setUser_therapist] = useState<User_therapist_type>({
-            id: 0,
-            user: user,
-            position: '',
+            password: '',
+            date_joined: '',
+            specialty: '',
             code: ''
-        })
-        // c) fieldname-> customer
-        const [user_customer, setUser_customer] = useState<User_customer_type>({
-            id: 0,
-            user: user,
-            total_booking: 0,
-            date_joined: ''
         })
         // a) detect error -> common
         const [error, setError] = useState<Partial<Record<keyof User_type, string>>>({});
-        // b) detect error -> therapist
-        const [error_therapist, setError_therapist] = useState<Partial<Record<keyof User_therapist_type, string>>>({});
-        // c) detect error -> customer
-        const [error_customer, setError_customer] = useState<Partial<Record<keyof User_customer_type, string>>>({});
-
         // set CRUD's State
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
@@ -66,19 +51,10 @@ const User: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: '',
-                    password: ''
-                })
-                setUser_therapist ({
-                    id: 0,
-                    user: user,
-                    position: '',
+                    password: '',
+                    date_joined: '',
+                    specialty: '',
                     code: ''
-                })
-                setUser_customer ({
-                    id: 0,
-                    user: user,
-                    total_booking: 0,
-                    date_joined: ''
                 })
             }
         }, [form])
@@ -113,13 +89,16 @@ const User: React.FC = () => {
                 render: (row) => (
                     <>
                         {row.role == 'admin' ? (
-                            <span className="py-1 px-2 rounded-full bg-tertiary text-title">Administrator</span>
+                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-500">Administrator</span>
                         ) : 
                         row.role == 'therapist' ? (
                             <span className="py-1 px-2 rounded-full bg-purple-100 text-purple-600">Therapist</span>
                         ) : 
                         row.role == 'customer' ? (
-                            <span className="py-1 px-2 rounded-full bg-blue-100 text-blue-600">Customer</span>
+                            <span className="py-1 px-2 rounded-full bg-cyan-100 text-cyan-500">Customer</span>
+                        ) : 
+                        row.role == 'walkin' ? (
+                            <span className="py-1 px-2 rounded-full bg-red-100 text-rose-400">Walkin</span>
                         ) : (
                             <span>-</span>
                         )} 
@@ -142,7 +121,7 @@ const User: React.FC = () => {
             },
             {
                 key: "",
-                header: "",
+                header: "Action",
                 render: () => (
                     <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
                         Edit
@@ -166,8 +145,6 @@ const User: React.FC = () => {
 
             // check error
             const newError: Partial<Record<keyof User_type, string>> = {};
-            const newError_therapist: Partial<Record<keyof User_therapist_type, string>> = {};
-            const newError_customer: Partial<Record<keyof User_customer_type, string>> = {};
             if (!user.role.trim()) 
                 newError.role = "Role is required";
             if (!user.name.trim()) 
@@ -178,29 +155,17 @@ const User: React.FC = () => {
                 newError.phoneNo = "Phone number is required";
             if (!user.password.trim()) 
                 newError.password = "Password is required";
-
-            setError(newError);
+            if (!user.date_joined.trim()) 
+                newError.date_joined = "Date joined is required";
 
             if(user.role == 'therapist') {
-                if (!user_therapist.position.trim()) 
-                    newError_therapist.position = "Position is required";
-                if (!user_therapist.code.trim()) 
-                    newError_therapist.code = "Code is required";
-                setError_therapist(newError_therapist)
-
-                // Stop here if there are errorRoom
-                if (Object.keys(newError_therapist).length > 0) 
-                    return;
+                if (!user.specialty.trim()) 
+                    newError.specialty = "Position is required";
+                if (!user.code.trim()) 
+                    newError.code = "Code is required";
             }
-            else if(user.role == 'customer') {
-                if (!user_customer.date_joined.trim()) 
-                    newError_customer.date_joined = "Date joined is required";
-                setError_customer(newError_customer)
 
-                // Stop here if there are errorRoom
-                if (Object.keys(newError_customer).length > 0) 
-                    return;
-            }
+            setError(newError);
 
             // Stop here if there are errorRoom
             if (Object.keys(newError).length > 0) 
@@ -211,22 +176,18 @@ const User: React.FC = () => {
 
             // CREATE data
             try {
-                console.log('user = ',user_customer)
                 await api.post(`/user`, {
                     role: user.role,
                     name: user.name,
                     email: user.email,
                     phoneNo: user.phoneNo,
                     password: user.password,
+                    date_joined: user.date_joined,
 
                     ...(user.role === 'therapist' && {
-                        position: user_therapist.position,
-                        code: user_therapist.code
+                        specialty: user.specialty,
+                        code: user.code
                     }),
-                    ...(user.role === 'customer' && {
-                        total_booking: user_customer.total_booking,
-                        date_joined: user_customer.date_joined
-                    })
                 });
 
                 fetchData_user()
@@ -234,7 +195,7 @@ const User: React.FC = () => {
             }
             catch(error) {
                 console.error('Error:', error); // use only to remove warning on vscode
-                // console.error('Response status:', error.response?.message);
+                // console.error('Response status:', error.response?.data);
             }
             finally {
                 setIsLoading(false)
@@ -248,7 +209,7 @@ const User: React.FC = () => {
         <>
             {/* Create */}
             <Grid className="md:grid-cols-5 items-center">
-                <span className="text-title">{databaseUser.length} users</span>
+                <Label>{databaseUser.length} User</Label>
                 <Button onClick={()=> {setForm(true); setCrud('create')}} icon={Plus} label='Add User' className="md:col-start-5"/>
             </Grid>
 
@@ -295,46 +256,33 @@ const User: React.FC = () => {
                         placeholder="Select role"
                         value={user.role}
                         error={error.role}
-                        onChange={(e) => setUser({ ...user, role: e.target.value as 'admin' | 'therapist' | 'customer' })}
+                        onChange={(e) => setUser({ ...user, role: e.target.value as 'admin' | 'therapist' | 'customer' | 'walkin' })}
                         type="select"
                         options={[
                             { label: 'Administrator', value: 'admin' },
                             { label: 'Therapist', value: 'therapist' },
                             { label: 'Customer', value: 'customer' },
+                            { label: 'Walk in', value: 'walkin' },
                         ]}
                     />
                     {/* conditional role only */}
-                    {user.role == 'therapist' ? (
+                    {user.role == 'therapist' && (
                         <>
                             <Field
-                                label="Position"
+                                label="Specialty"
                                 placeholder="Spa Manager"
-                                value={user_therapist.position}
-                                error={error_therapist.position}
-                                onChange={(e) => setUser_therapist({ ...user_therapist, position: e.target.value })}
+                                value={user.specialty}
+                                error={error.specialty}
+                                onChange={(e) => setUser({ ...user, specialty: e.target.value })}
                             />
                             <Field
                                 label="Code"
                                 placeholder="C1763"
-                                value={user_therapist.code}
-                                error={error_therapist.code}
-                                onChange={(e) => setUser_therapist({ ...user_therapist, code: e.target.value })}
+                                value={user.code}
+                                error={error.code}
+                                onChange={(e) => setUser({ ...user, code: e.target.value })}
                             />
                         </>
-                    ) : 
-                    user.role == 'customer' ? (
-                        <>
-                            <Field
-                                label="Date joined"
-                                // placeholder="2026-03-12"
-                                value={user_customer.date_joined}
-                                error={error_customer.date_joined}
-                                onChange={(e) => setUser_customer({ ...user_customer, date_joined: e.target.value })}
-                                type="date"
-                            />
-                        </>
-                    ) : (
-                        <></>
                     )}
                     {/* for all role */}
                     <Field
@@ -364,6 +312,14 @@ const User: React.FC = () => {
                         value={user.password}
                         error={error.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
+                    />
+                    <Field
+                        label="Date joined"
+                        // placeholder="2026-03-12"
+                        value={user.date_joined}
+                        error={error.date_joined}
+                        onChange={(e) => setUser({ ...user, date_joined: e.target.value })}
+                        type="date"
                     />
                 </div>
             </Form>

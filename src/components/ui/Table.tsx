@@ -13,9 +13,10 @@ interface TableProps<T> {
 
 export function Table<T>({ fieldName, data }: TableProps<T>) {
   return (
-    <div className="border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
+    <div className="border border-border  rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
       <table className="w-full border-collapse">
         <thead>
+        {/* <thead className="bg-[#F0E8D8]"> */}
           <tr className="border-b border-border">
             {fieldName.map((col) => (
               <th key={col.key} className="text-left px-6 py-3 text-xs font-bold uppercase tracking-wider text-title whitespace-nowrap">
