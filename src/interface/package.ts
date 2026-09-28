@@ -17,7 +17,7 @@ export interface Package_json {
     }
     package_therapist: {
         id: number;
-        user_therapist_id: string
+        user_id: string
     }
     package_room: {
         id: number;

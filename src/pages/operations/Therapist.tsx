@@ -7,15 +7,12 @@ import { DAY_NAMES,  MONTH_NAMES, formatTime, getToday, toISODate, daysInMonth }
 import React from "react";
 import Card from "../../components/ui/Card";
 
-import rosterProp from "../../JSON/roster.json";
-import roster_shiftProp from "../../JSON/roster_shift.json";
-import roster_leaveProp from "../../JSON/roster_leave.json";
 import Form from "../../components/ui/Form";
 import Button from "../../components/ui/Button";
 import type { User_type } from "../../interface/user";
 import Table, { type Column } from "../../components/ui/Table";
 import Field from "../../components/ui/Field";
-import type { Roster_leave_type, Roster_shift_type } from "../../interface/roster";
+import type { Roster_json, Roster_leave_type, Roster_shift_type, Roster_type } from "../../interface/roster";
 import Label from "../../components/ui/Label";
 
 const Therapist: React.FC = () => {
@@ -39,9 +36,9 @@ const Therapist: React.FC = () => {
                 case 'therapist': 
                 break;
                 case 'roster': 
+                    fetchData_roster(year, (monthIndex+1))
                 break;
                 case 'legend': 
-                    // fetchData_shift()
                 break;
             }
         },[active])
@@ -49,25 +46,26 @@ const Therapist: React.FC = () => {
 
 
     //#region 1) --> therapist
-        const [databaseTherapist, setDatabase_therapist] = useState<User_type[]>([])
-        const fetchData_therapist = useCallback(() => {
+        const [databaseUser, setDatabase_user] = useState<User_type[]>([])
+
+        // a) fetch 'user'
+        const fetchData_user = useCallback(() => {
 
             api.get('/user', {
                 params: {
-                    role: 'therapist'
+                    role: 'therapist',
                 }
             })
             .then((response) => {
-                setDatabase_therapist(response.data)
+                // console.log('user = ',response.data)
+                setDatabase_user(response.data)
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
             });
         }, [])
-
-        // fetch database
-        useEffect(() => {
-            fetchData_therapist()
+        useEffect(() =>{
+            fetchData_user()
         }, [])
     //#endregion
 
@@ -76,54 +74,102 @@ const Therapist: React.FC = () => {
 
         // #region 1) --> useState
             // form
-            const [form, setForm] = useState(false);
+            const [form_roster, setForm_roster] = useState(false);
             // temporary
-            const [tempRoster, setTemp_roster] = useState([])
-            const [tempUser, setTemp_user] = useState([])
+            const [tempRoster, setTemp_roster] = useState<{ iso: string }>({ iso: '' })
+            const [tempUser, setTemp_user] = useState<User_type>()
+            // fieldame
+            const [roster, setRoster] = useState<Roster_type>({
+                id: 0,
+                date: '',
+                user_id: 0,
+                roster_leave_id: 0,
+                roster_shift_id: 0
+            })
         //#endregion
 
 
         //#region 2) --> method
-            const handle_plan = (roster: any, user: any) =>{
-                // console.log('test = ',roster)
-                console.log('roster = ',tempRoster)
-                console.log('user = ',tempUser)
+            const handleCreate_roster = (roster: any, user: any) =>{
+                // assign 'date' and 'user_id'
+                setRoster(prev => ({
+                    ...prev,
+                    date: roster.iso,
+                    user_id: user.id
+                }))
 
                 setTemp_roster(roster)
                 setTemp_user(user)
-                setForm(true)
+                setForm_roster(true)
             }
-            const handleEdit_roster = () => {
-                console.log('siap')
-                setForm(false)
+            const handleUpdate_roster = async () => {
+
+                // loading
+                setIsLoading(true)
+                try {
+                    await api.post(`/roster`, {
+                        date: roster.date,
+                        user_id: roster.user_id,
+                        roster_shift_id: roster.roster_shift_id,
+                        roster_leave_id: roster.roster_leave_id,
+
+                        switch: 'roster'
+                    });
+
+                    fetchData_roster(year, (monthIndex+1))
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+
+                setForm_roster(false)
             }
         //#endregion
 
 
         //#region 3) --> database
-            
-            const [databaseUser, setDatabase_user] = useState<User_type[]>([])
+            const [databaseRoster, setDatabase_roster] = useState<Roster_json[]>([])
 
             // a) fetch 'user'
-            const fetchData_user = useCallback(() => {
+            const fetchData_roster = useCallback((currentYear: number, currentMonth: number) => {
 
-                api.get('/user', {
+                api.get('/roster', {
                     params: {
-                        role: 'therapist',
+                        switch: 'roster',
+
+                        currentYear: currentYear, // 2026
+                        currentMonth: currentMonth // 9
                     }
                 })
                 .then((response) => {
-                    // console.log('user = ',response.data)
-                    setDatabase_user(response.data)
+                    // console.log('roster = ',response.data)
+                    setDatabase_roster(response.data)
                 })
                 .catch((error) => {
-                    console.error('Error fetching data:', error);
+                    console.error('Error fetching data:', error.data);
                 });
             }, [])
+        //#endregion
 
-            useEffect(() =>{
-                fetchData_user()
-            }, [])
+
+        //#region 4) --> useEffect
+        
+            // remove fieldname everytime form closed
+            useEffect(() => {
+                if(!form_roster) {
+                    setRoster({
+                        id: 0,
+                        date: '',
+                        user_id: 0,
+                        roster_leave_id: 0,
+                        roster_shift_id: 0
+                    })
+                }
+            }, [form_roster])
         //#endregion
 
 
@@ -137,51 +183,75 @@ const Therapist: React.FC = () => {
             const totalDays = daysInMonth(year, monthIndex);
 
             // b) method
+            // Previous month
             const goToPrevMonth = () => {
+                let newMonthIndex = monthIndex;
+                let newYear = year;
+
                 if (monthIndex === 0) {
-                setMonthIndex(11);
-                setYear((y) => y - 1);
+                    newMonthIndex = 11;
+                    newYear = year - 1;
                 } else {
-                setMonthIndex((m) => m - 1);
+                    newMonthIndex = monthIndex - 1;
                 }
-            };
-            const goToNextMonth = () => { 
-                if (monthIndex === 11) {
-                setMonthIndex(0);
-                setYear((y) => y + 1);
-                } else {
-                setMonthIndex((m) => m + 1);
-                }
+
+                setMonthIndex(newMonthIndex);
+                setYear(newYear);
+
+                // API month is 1-based
+                fetchData_roster(newYear, newMonthIndex + 1);
             };
 
-            // Build a lookup: { "YYYY-MM-DD": { [therapist_id]: rosterEntry } }
+
+            // Next month
+            const goToNextMonth = () => {
+                let newMonthIndex = monthIndex;
+                let newYear = year;
+
+                if (monthIndex === 11) {
+                    newMonthIndex = 0;
+                    newYear = year + 1;
+                } else {
+                    newMonthIndex = monthIndex + 1;
+                }
+
+                setMonthIndex(newMonthIndex);
+                setYear(newYear);
+
+                // API month is 1-based
+                fetchData_roster(newYear, newMonthIndex + 1);
+            };
+
+            // c) useMemo
             const rosterByDateAndTherapist = useMemo(() => {
-                const map = {};
-                for (const entry of rosterProp) {
-                if (!map[entry.date]) map[entry.date] = {};
-                    map[entry.date][entry.user_therapist_id] = entry;
+
+                const map: Record<string, Record<number, Roster_json>> = {};
+                // const map = {};
+                for (const entry of databaseRoster) {
+                    if (!map[entry.roster.date]) 
+                        map[entry.roster.date] = {};
+
+                    map[entry.roster.date][entry.roster.user_id] = entry;
                 }
                 return map;
-            }, [rosterProp]);
-
+            }, [databaseRoster]);
             const rows = useMemo(() => {
                 const list = [];
                 for (let day = 1; day <= totalDays; day++) {
-                const iso = toISODate(year, monthIndex, day);
-                const dow = new Date(year, monthIndex, day).getDay(); // 0=Sun..6=Sat
-                list.push({
-                    iso,
-                    day,
-                    dayName: DAY_NAMES[dow],
-                    isWeekend: dow === 0 || dow === 6,
-                });
+                    const iso = toISODate(year, monthIndex, day);
+                    const dow = new Date(year, monthIndex, day).getDay(); // 0=Sun..6=Sat
+                    list.push({
+                        iso,
+                        day,
+                        dayName: DAY_NAMES[dow],
+                        isWeekend: dow === 0 || dow === 6,
+                    });
                 }
                 return list;
             }, [year, monthIndex, totalDays]);
             const therapistsByRole = useMemo(() => {
                 return databaseUser.reduce((groups, therapist) => {
                     const role = therapist.specialty || "Other";
-
                     if (!groups[role]) {
                         groups[role] = [];
                     }
@@ -189,23 +259,24 @@ const Therapist: React.FC = () => {
                     groups[role].push(therapist);
 
                     return groups;
-                }, {});
+                }, {} as Record<string, typeof databaseUser>);
             }, [databaseUser]);
 
+            // d) design cell
             const getCell = (iso:any, therapistId: any) => {
-                const entry = rosterByDateAndTherapist[iso]?.[therapistId];
-                if (!entry) return null;
-
-                // If there is a leave, display roster_leave_id
-                if (entry.roster_leave_id !== null) {
+                const entry:Roster_json = rosterByDateAndTherapist[iso]?.[therapistId];
+                if (!entry) 
+                    return null;
+                // a) If there is a leave, display roster_leave_id
+                if (entry.roster_leave !== null) {
                     return {
-                    label: String(entry.roster_leave_id),
-                    isOff: true,
+                        label: String(entry.roster_leave.icon),
+                        isOff: true,
                     };
                 }
 
-                // Otherwise, display roster_shift_id
-                const label = shiftMap?.[entry.roster_shift_id] ?? String(entry.roster_shift_id);
+                // b) Otherwise, display roster_shift_id
+                const label = shiftMap?.[entry.roster_shift.id] ?? String(entry.roster_shift.icon);
 
                 return {
                     label,
@@ -419,7 +490,9 @@ const Therapist: React.FC = () => {
                 }
             }
         //#endregion
+    
     //#endregion
+
 
     return (
         <>
@@ -435,12 +508,12 @@ const Therapist: React.FC = () => {
                 <>
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
-                        <Label>{databaseTherapist.length} Therapist</Label>
+                        <Label>{databaseUser.length} Therapist</Label>
                     </Grid>
                     
                     {/* table */}
                     <Grid className="lg:grid-cols-3">
-                        {databaseTherapist.map((data) => (
+                        {databaseUser.map((data) => (
                             <div key={data.id} className="w-full rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
                                 {/* Header */}
                                 <div className="flex items-start justify-between">
@@ -507,7 +580,6 @@ const Therapist: React.FC = () => {
                                         className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center hover:opacity-90 transition cursor-pointer"
                                     >
                                         <span className="-translate-y-px">‹</span>
-            
                                     </button>
                                     {/* center */}
                                     <div className="px-4 py-2 rounded-xl border border-border bg-white/60 text-sm font-medium text-primary min-w-35 text-center">
@@ -576,7 +648,7 @@ const Therapist: React.FC = () => {
                                                                 <div key={row.iso} className="px-0.5 py-1 flex justify-center border-l border-border">
                                                                     {cell ? (
                                                                         <button
-                                                                            onClick={() => handle_plan(row, t)}
+                                                                            onClick={() => handleCreate_roster(row, t)}
                                                                             className={`w-full min-h-8 text-center text-xs font-bold px-1 py-1 rounded-md cursor-pointer hover:opacity-50 transition ${
                                                                                 cell.isOff
                                                                                     ? "bg-blue-200/70 text-blue-900"
@@ -587,7 +659,7 @@ const Therapist: React.FC = () => {
                                                                         </button>
                                                                     ) : (
                                                                         // <span className="text-xs text-title">—</span>
-                                                                        <button  onClick={() => handle_plan(row, t)} className={`w-full min-h-8 text-center text-sm font-bold px-1 py-1 rounded-md cursor-pointer bg-[#e7e0d2] text-[#6b6355]" hover:opacity-50 transition`}>
+                                                                        <button  onClick={() => handleCreate_roster(row, t)} className={`w-full min-h-8 text-center text-sm font-bold px-1 py-1 rounded-md cursor-pointer bg-[#e7e0d2] text-[#6b6355]" hover:opacity-50 transition`}>
                                                                             -
                                                                         </button>
                                                                     )}
@@ -616,10 +688,10 @@ const Therapist: React.FC = () => {
                             </h2>
                             {/* body */}
                             <ul className="space-y-1">
-                                {roster_shiftProp.map((shift) => (
+                                {databaseShift.map((shift) => (
                                 <li key={shift.id} className="flex items-center gap-2">
                                     <span className="flex items-center justify-center w-8 h-8 shrink-0 rounded-md bg-amber-200/70 text-amber-900 font-bold text-sm">
-                                        {shift.code}
+                                        {shift.icon}
                                     </span>
                                     <span className="text-slate-700 text-sm">
                                         {formatTime(shift.time_start)} — {formatTime(shift.time_end)}
@@ -637,10 +709,10 @@ const Therapist: React.FC = () => {
                             </h2>
                             {/* body */}
                             <ul className="space-y-1">
-                                {roster_leaveProp.map((leave) => (
+                                {databaseLeave.map((leave) => (
                                 <li key={leave.id} className="flex items-center gap-2">
                                     <span className={`flex items-center justify-center w-8 h-8 shrink-0 rounded-md font-bold text-xs bg-blue-200/70 text-blue-900`}>
-                                        {leave.code}
+                                        {leave.icon}
                                     </span>
                                     <span className="text-slate-700 text-sm">
                                         {leave.description}
@@ -653,20 +725,20 @@ const Therapist: React.FC = () => {
                     </Grid>
 
                     {/* Form */}
-                    <Form title="Edit Roster" isOpen={form} onClose={() => setForm(false)} width="max-w-sm"
+                    <Form title="Edit Roster" isOpen={form_roster} onClose={() => setForm_roster(false)} width="max-w-sm"
                         
                         footer={
                             <>
                                 <Button
                                     label="Cancel"
                                     className="w-24"
-                                    onClick={() => setForm(false)}
+                                    onClick={() => setForm_roster(false)}
                                     disabled={isLoading}
                                 />
                                 <Button
                                     label="Save"
                                     className="w-24"
-                                    onClick={handleEdit_roster}
+                                    onClick={handleUpdate_roster}
                                     disabled={isLoading}
                                 />
 
@@ -676,10 +748,11 @@ const Therapist: React.FC = () => {
                         <div className="flex flex-col gap-1">
                             {/* biodata */}
                             <div className="flex items-baseline gap-2">
-                                <span className="text-primary font-semibold">{tempUser.name}</span>
+                                <span className="text-primary font-semibold">{tempUser?.name}</span>
                                 {/* <span className="text-title font-bold">·</span> */}
                                 {/* <span className="text-title">{tempUser.code}</span> */}
                             </div>
+
                             {/* date iso */}
                             <span className="text-title">
                                 {new Date(tempRoster.iso + "T00:00:00").toLocaleDateString("en-GB", {
@@ -693,11 +766,26 @@ const Therapist: React.FC = () => {
                             {/* shift */}
                             <span className="text-title font-bold text-sm mt-3">SHIFT</span>
                             <div className="grid grid-cols-3 gap-1">
-                                {roster_shiftProp.map((shift) => (
-                                    <button key={shift.id} className="border border-border rounded-2xl bg-white py-2 cursor-pointer hover:bg-amber-200">
-                                        <span className="text-title text-xl font-bold">{shift.code}</span>
-                                            <br />
-                                        <span className="text-title text-[10px]">{formatTime(shift.time_start)} <b>-</b> {formatTime(shift.time_end)}</span>
+                                {databaseShift.map((shift) => (
+                                    <button
+                                        onClick={() =>
+                                            setRoster(prev => ({
+                                                ...prev,
+                                                roster_shift_id: shift.id,
+                                                roster_leave_id: 0
+                                            }))
+                                        }
+                                        className={`border border-border rounded-2xl py-2 cursor-pointer ${
+                                            roster.roster_shift_id === shift.id
+                                                ? "bg-amber-200"
+                                                : "bg-white hover:bg-amber-200"
+                                        }`}
+                                    >
+                                        <span className="text-title text-xl font-bold">{shift.icon}</span>
+                                        <br />
+                                        <span className="text-title text-[10px]">
+                                            {formatTime(shift.time_start)} <b>-</b> {formatTime(shift.time_end)}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
@@ -705,11 +793,26 @@ const Therapist: React.FC = () => {
                             {/* leave */}
                             <span className="text-title font-bold text-sm mt-3">LEAVE / STATUS</span>
                             <div className="grid grid-cols-3 gap-1">
-                                {roster_leaveProp.map((leave) => (
-                                    <button key={leave.id} className="border border-border rounded-2xl bg-white py-2 cursor-pointer hover:bg-amber-200">
-                                        <span className="text-title text-md font-bold">{leave.code}</span>
-                                            <br />
-                                        <span className="text-title text-[10px]">{leave.description}</span>
+                                {databaseLeave.map((leave) => (
+                                    <button
+                                        onClick={() =>
+                                            setRoster(prev => ({
+                                                ...prev,
+                                                roster_leave_id: leave.id,
+                                                roster_shift_id: 0
+                                            }))
+                                        }
+                                        className={`border border-border rounded-2xl py-2 cursor-pointer ${
+                                            roster.roster_leave_id === leave.id
+                                                ? "bg-amber-200"
+                                                : "bg-white hover:bg-amber-200"
+                                        }`}
+                                    >
+                                        <span className="text-title text-md font-bold">{leave.icon}</span>
+                                        <br />
+                                        <span className="text-title text-[10px]">
+                                            {leave.description}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
@@ -864,7 +967,6 @@ const Therapist: React.FC = () => {
                 </>
 
             )}
-
 
         </>
     )

@@ -1,9 +1,0 @@
-[
-    {"id": 1, "code": "OFF", "description": "Off Day"},
-    {"id": 3, "code": "PH", "description": "Public Holiday"},
-    {"id": 5, "code": "MC", "description": "Medical Leave"},
-    {"id": 6, "code": "EL", "description": "Emergency Leave"},
-    {"id": 7, "code": "AL", "description": "Annual Leave"},
-    {"id": 8, "code": "AB", "description": "Absent"},
-    {"id": 9, "code": "TR", "description": "Training"}
-]

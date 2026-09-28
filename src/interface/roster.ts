@@ -11,9 +11,16 @@ export interface Roster_leave_type {
     icon: string;
     description: string;
 }
+
 export interface Roster_shift_type {
     id: number;
     icon: number | "";
     time_start: string;
     time_end: string;
+}
+
+export interface Roster_json {
+    roster: Roster_type,
+    roster_leave: Roster_leave_type,
+    roster_shift: Roster_shift_type
 }

@@ -1,9 +1,6 @@
-import { Plus } from "lucide-react";
-import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import Table, { type Column } from "../../components/ui/Table";
 import Searchbar from "../../components/ui/Searchbar";
-import roster from "../../JSON/roster.json";
 import type { User_type } from "../../interface/user";
 import { useCallback, useEffect, useState } from "react";
 import api from "../../api/axios";
@@ -99,7 +96,7 @@ const Customers: React.FC = () => {
             {/* filter */}
             <Grid className="md:grid-cols-7 items-center">
                 <Searchbar placeholder="Search customers..." className="md:col-span-2 bg-white "/>
-                <Button onClick={()=> console.log('data = ',roster)} icon={Plus} label='Add Customer' className="md:col-start-7 md:col-span-3"/>
+                {/* <Button icon={Plus} label='Add Customer' className="md:col-start-7 md:col-span-3"/> */}
             </Grid>
 
             {/* Create */}
