@@ -8,6 +8,7 @@ import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
 import api from "../../api/axios";
 import Label from "../../components/ui/Label";
+import { getCurrentDate } from "../../utils/date";
 
 const User: React.FC = () => {
 
@@ -21,7 +22,7 @@ const User: React.FC = () => {
             phoneNo: '',
             status: '',
             password: '',
-            date_joined: '',
+            date_joined: getCurrentDate(),
             specialty: '',
             code: ''
         })
@@ -52,7 +53,7 @@ const User: React.FC = () => {
                     phoneNo: '',
                     status: '',
                     password: '',
-                    date_joined: '',
+                    date_joined: getCurrentDate(),
                     specialty: '',
                     code: ''
                 })

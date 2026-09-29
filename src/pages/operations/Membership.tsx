@@ -15,7 +15,7 @@ import Label from "../../components/ui/Label";
 const Membership: React.FC = () => {
 
     
-    //#region 0 --> main
+    //#region 0) --> main
     
         // set CRUD's State
         const [crud, setCrud] = useState<'create'|'edit'>('create')
@@ -64,7 +64,6 @@ const Membership: React.FC = () => {
                 code: ''
             })
             
-
         //#endregion
 
         //#region 2) --> method
@@ -90,6 +89,7 @@ const Membership: React.FC = () => {
                     });
 
                     fetchData_customer()
+                    fetchData_user()
                     setForm_customer(false)
                 }
                 catch(error) {
@@ -100,6 +100,7 @@ const Membership: React.FC = () => {
                     setIsLoading(false)
                 }
             }
+
         //#endregion
 
         //#region 3) --> useEffect
@@ -138,13 +139,13 @@ const Membership: React.FC = () => {
                     }
                 })
                 .then((response) => {
-                    // console.log('user = ',response.data)
+                    console.log('user = ',response.data)
                     setDatabase_user(response.data)
 
                     // set data
                     setCustomer(prev => ({
                         ...prev,
-                        id: response.data[0].id
+                        id: response.data[0]?.id || 0
                     }))
                 })
                 .catch((error) => {
@@ -236,8 +237,6 @@ const Membership: React.FC = () => {
                 const privilege_cleaned = privilege.filter(privilege => privilege !== "");
                 try {
                     await api.post(`/membership`, {
-                        type: 'membership',
-                        
                         tier: membership.tier,
                         privilege_list: privilege_cleaned
                     });
@@ -253,6 +252,7 @@ const Membership: React.FC = () => {
                     setIsLoading(false)
                 }
             }
+
         //#endregion
 
         //#region 3) --> useEffect
@@ -273,13 +273,10 @@ const Membership: React.FC = () => {
             const [databaseMembership, setDatabase_membership] = useState<Membership_json[]>([])
 
             const fetchData_membership = useCallback(() => {
-                api.get('/membership', {
-                    params: {
-                        type: 'membership'
-                    }
-                })
+                api.get('/membership')
                 .then((response) => {
 
+                    // console.log('data = ',response.data)
                     setDatabase_membership(response.data)
                     
                     // set data
@@ -335,7 +332,7 @@ const Membership: React.FC = () => {
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
                         <Label>{databaseMembership.length} Membership</Label>
-                        <Button onClick={() => { setForm_customer(true); setCrud('create')}} icon={Plus} label='Add Membership' className="md:col-start-5"/>
+                        <Button onClick={() => { setForm_customer(true); setCrud('create')}} icon={Plus} label='Add Membership' disabled={databaseUser.length==0} className="md:col-start-5"/>
                     </Grid>
 
                     {/* Table */}
@@ -401,10 +398,11 @@ const Membership: React.FC = () => {
                                 })}
                                 type="select"
                                 options={
-                                databaseUser.map((user) => ({
-                                    label: user.name,
-                                    value: user.id
-                                }))}
+                                    databaseUser.map((user) => ({
+                                        label: user.name,
+                                        value: user.id
+                                    }))
+                                }
                             />
                             {/* 3) */}
                             <Field

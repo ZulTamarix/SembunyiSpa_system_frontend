@@ -27,19 +27,24 @@ export function formatTime(time24) {
     if (hour === 0) hour = 12;
     return `${hour}:${minuteStr} ${period}`;
 }
+export const getCurrentDate = (): string => {
+    const date = new Date();
 
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
+    return `${year}-${month}-${day}`;
+};
 // Convert a number into a 2-digit string.
 export function pad2(n) {
     return String(n).padStart(2, "0");
 }
 
-
 // Create a date in YYYY-MM-DD format.
 export function toISODate(year, monthIndex, day) {
     return `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
 }
-
 
 // Get the number of days in a specific month.
 export function daysInMonth(year, monthIndex) {

@@ -5,9 +5,9 @@ interface FieldOption {
 
 interface FieldProps {
     label: string;
-    type?: 'text' | 'number' | 'date' | 'time' | 'select' | 'file' | 'textarea';
+    type?: 'text' | 'number' | 'date' | 'time' | 'select' | 'file' | 'textarea' | 'switch';
     placeholder?: string;
-    value?: string | number;
+    value?: string | number | boolean;
     accept?: string;
     onChange?: (
         e: React.ChangeEvent<
@@ -20,18 +20,7 @@ interface FieldProps {
     options?: FieldOption[];
 }
 
-export default function Field({
-    label,
-    type = "text",
-    placeholder,
-    value,
-    accept,
-    onChange,
-    error,
-    required = false,
-    disabled = false,
-    options = []
-}: FieldProps) {
+export default function Field({ label, type = "text", placeholder, value, accept, onChange, error, required = false, disabled = false, options = [] }: FieldProps) {
     return (
         <div>
             <label className="block mb-1.5 text-sm font-medium text-title">
@@ -42,7 +31,7 @@ export default function Field({
             {/* 1) select option */}
             {type === "select" ? (
                 <select
-                    value={value}
+                    value={value as string | number}
                     onChange={onChange}
                     disabled={disabled}
                     className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
@@ -65,7 +54,23 @@ export default function Field({
                 </select>
 
             ) :
-            // 2) file 
+            // 2) switch
+            type === "switch" ? (
+                <div className="flex items-center h-10.5">
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={Boolean(value)}
+                            onChange={onChange}
+                            disabled={disabled}
+                            className="sr-only peer"
+                        />
+
+                        <div className="relative w-16 h-8 bg-gray-300 rounded-md peer peer-checked:bg-secondary peer-disabled:opacity-50 peer-disabled:cursor-not-allowed after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-sm after:h-6 after:w-5 after:transition-all peer-checked:after:translate-x-9"/>
+                    </label>
+                </div>
+            ) :
+            // 3) file
             type === "file" ? (
                 <input
                     type="file"
@@ -79,12 +84,12 @@ export default function Field({
                     }`}
                 />
 
-            ) : 
-            // 3) textarea
+            ) :
+            // 4) textarea
             type === "textarea" ? (
                 <textarea
                     placeholder={placeholder}
-                    value={value}
+                    value={value as string}
                     onChange={onChange}
                     disabled={disabled}
                     rows={4}
@@ -95,13 +100,13 @@ export default function Field({
                     }`}
                 />
 
-            ) : 
-            // 4) others
+            ) :
+            // 5) others
             (
                 <input
                     type={type}
                     placeholder={placeholder}
-                    value={value}
+                    value={value as string | number}
                     onChange={onChange}
                     disabled={disabled}
                     className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
