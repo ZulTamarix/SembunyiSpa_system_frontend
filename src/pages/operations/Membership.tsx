@@ -6,11 +6,13 @@ import type { Membership_json, Membership_type } from "../../interface/membershi
 import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
-import Bullet_point from "../../components/ui/Bullet_point";
 import api from "../../api/axios";
 import Tabs from "../../components/ui/Tab";
 import type { User_type } from "../../interface/user";
 import Label from "../../components/ui/Label";
+import Bullet_point from "../../components/ui/Bullet_point";
+import type { Voucher_type } from "../../interface/vouchers";
+import { getCurrentDate } from "../../utils/date";
 
 const Membership: React.FC = () => {
 
@@ -39,10 +41,11 @@ const Membership: React.FC = () => {
                 break;
             }
         },[active])
-        useEffect(() => {
-            fetchData_membership()
-        }, [])
+        // useEffect(() => {
+        //     fetchData_membership()
+        // }, [])
     //#endregion
+
 
     //#region 1) --> customer
 
@@ -68,8 +71,8 @@ const Membership: React.FC = () => {
 
         //#region 2) --> method
         
-            // CREATE
-            const handleCreate_customer = async() => {
+            // UPDATE
+            const handleUpdate_customer = async() => {
                 // loading
                 // setIsLoading(true)
                 const test = {
@@ -132,14 +135,14 @@ const Membership: React.FC = () => {
             // a) fetch 'user'
             const fetchData_user = useCallback(() => {
 
-                api.get('/user', {
+                api.get(`/user`, {
                     params: {
                         role: 'customer',
-                        extra: 'no_membership' // call all user that dont have membership yet
+                        extra_1: 'no_membership' // call all user that dont have membership yet
                     }
                 })
                 .then((response) => {
-                    console.log('user = ',response.data)
+                    // console.log('user = ',response.data)
                     setDatabase_user(response.data)
 
                     // set data
@@ -156,10 +159,10 @@ const Membership: React.FC = () => {
             // b) fetch 'customer'
             const fetchData_customer = useCallback(() => {
 
-                api.get('/user', {
+                api.get(`/user`, {
                     params: {
                         role: 'customer',
-                        extra: 'membership'
+                        extra_1: 'membership'
                     }
                 })
                 .then((response) => {
@@ -216,7 +219,8 @@ const Membership: React.FC = () => {
         //#region 1) --> useState
             // form
             const [form_membership, setForm_membership] = useState(false);
-            // fieldname
+            const [form_privilege, setForm_privilege] = useState(false);
+            // fieldname (privilege)
             const [membership, setMembership] = useState<Membership_type> ({
                 id: 0,
                 tier: '',
@@ -224,29 +228,106 @@ const Membership: React.FC = () => {
             // privilege
             const [privilege, setPrivilege] = useState<string[]>([""]);
 
+            // fieldname (voucher)
+            const [voucher, setVoucher] = useState<Voucher_type[]> ([])
+            // set current index
+            const [index, setIndex] = useState(0)
+            // quantity
+            // const [unlimited, setUnlimited] = useState(false)
+            const [unlimited, setUnlimited] = useState<boolean[]>([])
+            // const [selectedCustomer, setSelected_customer] = useState('all')
+            const [selectedCustomer, setSelected_customer] = useState<string[]>([])
+
         //#endregion
 
         //#region 2) --> method
         
-            // CREATE
+            // open popup (privilege)
+            const handleOpen_privilege = (index: number) => {
+
+                // a) voucher
+                setVoucher((prev) => {
+                    if (prev[index]) {
+                        // return prev;
+
+                        return prev.map((item, i) =>
+                            i === index
+                                ? {
+                                    ...item,
+                                    description: privilege[index],
+                                }
+                                : item
+                        );
+                    }
+
+                    return [
+                        ...prev,
+                        {
+                            id: index,
+                            code: '',
+                            description: privilege[index],
+                            type: 'gift',
+                            date_expired: null,
+                            status: 'active',
+                            discount_type: 'discount_amount',
+                            discount_value: 0,
+                            quantity: 1
+                        }
+                    ];
+                });
+
+                // b) unlimited
+                setUnlimited((prev) => {
+                    if (prev[index] !== undefined) 
+                        return prev;
+
+                    const newUnlimited = [...prev];
+                    while (newUnlimited.length <= index) 
+                        newUnlimited.push(false);
+
+                    return newUnlimited;
+                });
+
+                // c) selected customer
+                setSelected_customer((prev) => {
+                    if (prev[index] !== undefined) 
+                        return prev;
+
+                    const newSelected_customer = [...prev];
+                    while (newSelected_customer.length <= index) 
+                        newSelected_customer.push('blank');
+
+                    return newSelected_customer;
+                });
+
+                setIndex(index)
+                setForm_privilege(true)
+            }
+
+            // CREATE (membership)
             const handleCreate_membership = async() => {
                 // loading
                 setIsLoading(true)
+
+                console.log('membership = ',membership)
+                console.log('privilege = ',privilege)
+                console.log('voucher = ',voucher)
 
                 // clean any blank or ""
                 const privilege_cleaned = privilege.filter(privilege => privilege !== "");
                 try {
                     await api.post(`/membership`, {
                         tier: membership.tier,
-                        privilege_list: privilege_cleaned
+                        privilege_list: privilege_cleaned,
+                        voucher_list: voucher
                     });
 
-                    fetchData_membership()
+                    // fetchData_membership()
                     setForm_membership(false)
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.data);
+                    console.error('Response status:', error.response?.data);
                 }
                 finally {
                     setIsLoading(false)
@@ -265,6 +346,7 @@ const Membership: React.FC = () => {
                         tier: ''
                     })
                     setPrivilege([''])
+                    setVoucher([])
                 }
             }, [form_membership])
         //#endregion
@@ -273,7 +355,7 @@ const Membership: React.FC = () => {
             const [databaseMembership, setDatabase_membership] = useState<Membership_json[]>([])
 
             const fetchData_membership = useCallback(() => {
-                api.get('/membership')
+                api.get(`/membership`)
                 .then((response) => {
 
                     // console.log('data = ',response.data)
@@ -316,8 +398,6 @@ const Membership: React.FC = () => {
     
     //#endregion
 
-    
-
     return (
         <>
             {/* #region 0 --> main */}
@@ -356,14 +436,14 @@ const Membership: React.FC = () => {
                                     <Button
                                         label="Save"
                                         className="w-24"
-                                        onClick={handleCreate_customer}
+                                        onClick={handleUpdate_customer}
                                         disabled={isLoading}
                                     />
                                 ) : (
                                     <Button
                                         label="Update"
                                         className="w-24"
-                                        onClick={handleCreate_customer}
+                                        onClick={handleUpdate_customer}
                                         disabled={isLoading}
                                     />
                                 )}
@@ -429,8 +509,8 @@ const Membership: React.FC = () => {
                         <Table fieldName={tableTitle_membership} data={databaseMembership} />
                     </Grid>
 
-                    {/* Form */}
-                    <Form title={crud=='create'? 'Add Tier List':'Edit Tier List'} isOpen={form_membership} onClose={() => setForm_membership(false)} width="max-w-lg"
+                    {/* Form (membership) */}
+                    <Form title={crud=='create'? 'Add Tier List':'Edit Tier List'} isOpen={form_membership} onClose={() => setForm_membership(false)} width="max-w-2xl"
                         
                         footer={
                             <>
@@ -446,7 +526,6 @@ const Membership: React.FC = () => {
                                         label="Save"
                                         className="w-24"
                                         onClick={handleCreate_membership}
-                                        disabled={isLoading}
                                     />
                                 ) : (
                                     <Button
@@ -469,13 +548,220 @@ const Membership: React.FC = () => {
                                 onChange={(e) => setMembership({ ...membership, tier : e.target.value })}
                             />
                             {/* 2) */}
-                            <div className="col-span-2">
-                                <Bullet_point
-                                    value={privilege}
-                                    onChange={setPrivilege}
-                                    label="Privilege"
-                                />
+                            <div className="grid grid-cols-4">
+                                <div className="col-span-3">
+                                    <Bullet_point
+                                        value={privilege}
+                                        onChange={setPrivilege}
+                                        label="Privilege"
+                                        placeholder="20% Discount on Food and Beverage"
+                                    />
+                                </div>
+                                <div className="col-span-1 space-y-2">
+                                    {privilege.map((_, index) => (
+                                        <Field
+                                            key={index}
+                                            label={index === 0 ? "Add voucher" : ""}
+                                            type="button"
+                                            value="+"
+                                            onClick={() => handleOpen_privilege(index)}
+                                        />
+                                    ))}
+                                </div>
                             </div>
+                        </div>
+                    </Form>
+
+                    {/* Form (privilege)(voucher) */}
+                    <Form title={crud=='create'? 'Add Privilege':'Edit Privilege'} isOpen={form_privilege} onClose={() => setForm_privilege(false)} width="max-w-xl">
+                        <div className="space-y-4">
+                            <Grid className="md:grid-cols-2">
+        
+                                {/* 1) */}
+                                <Field
+                                    label="Code"
+                                    placeholder="Enter a code"
+                                    value={voucher[index]?.code ?? ''}
+                                    onChange={(e) => (
+                                        setVoucher(
+                                            voucher.map((item, i) =>
+                                                i === index
+                                                    ? { ...item, code: e.target.value }
+                                                    : item
+                                            )
+                                        )
+                                    )}
+                                />
+                                {/* 2) */}
+                                <Field
+                                    label="Description"
+                                    placeholder="Enter a description"
+                                    value={voucher[index]?.description ?? ''}
+                                    onChange={(e) => (
+                                        setVoucher(
+                                            voucher.map((item, i) =>
+                                                i === index
+                                                    ? { ...item, description: e.target.value }
+                                                    : item
+                                            )
+                                        )
+                                    )}
+                                    type="textarea"
+                                />
+                                {/* 3) */}
+                                <Field
+                                    label="Date expired"
+                                    value={voucher[index]?.date_expired ?? ''}
+                                    onChange={(e) => (
+                                        setVoucher(
+                                            voucher.map((item, i) =>
+                                                i === index
+                                                    ? { ...item, date_expired: e.target.value }
+                                                    : item
+                                            )
+                                        )
+                                    )}
+                                    type="date"
+                                    disabled
+                                />
+                                {/* 4) */}
+                                <Field
+                                    label="Customer"
+                                    value={selectedCustomer[index] ?? 'all'}
+                                    onChange={(e) => (
+                                        setSelected_customer((prev) =>
+                                            prev.map((item, i) =>
+                                                i === index
+                                                    ? e.target.value
+                                                    : item
+                                            )
+                                        )
+                                    )}
+                                    type="select"
+                                    options={[
+                                        { label:'-- All customer --', value: 'all'},
+                                        { label:'-- Blank voucher --', value: 'blank'},
+                                        ...databaseUser.map((user) => ({
+                                            label: user.name,
+                                            value: user.id
+                                        }))
+                                    ]}
+                                    disabled
+                                />
+                                {/* 5) + 6) */}
+                                <Field
+                                    label="Type"
+                                    placeholder="Choose a type"
+                                    value={voucher[index]?.type ?? ''}
+                                    onChange={(e) => (
+                                        setVoucher(
+                                            voucher.map((item, i) =>
+                                                i === index
+                                                    ? { ...item, type: e.target.value as 'gift' | 'promo' }
+                                                    : item
+                                            )
+                                        )
+                                    )}
+                                    type="select"
+                                    options={[
+                                        { label: 'Gift', value: 'gift' },
+                                        { label: 'Promotional', value: 'promo' },
+                                    ]}
+                                />
+                                <div className="grid grid-cols-6">
+                                    <div className="col-span-3">
+                                        { unlimited[index] ? (
+                                            <Field
+                                                label="Quantity"
+                                                value='∞'
+                                                disabled
+                                            />
+                                        ) : (
+                                            <Field
+                                                label="Quantity"
+                                                value={voucher[index]?.quantity ?? ''}
+                                                onChange={(e) => (
+                                                    setVoucher(
+                                                        voucher.map((item, i) =>
+                                                            i === index
+                                                                ? { ...item, quantity: Number(e.target.value) }
+                                                                : item
+                                                        )
+                                                    )
+                                                )}
+                                                type="number"
+                                            />
+                                        )}
+                                        
+                                    </div>
+                                    <div className="col-start-5 col-span-2">
+                                        <Field
+                                            label="Unlimited"
+                                            value={unlimited[index] ?? 'false'}
+                                            onChange={(e) => (
+                                                setUnlimited((prev) =>
+                                                    prev.map((item, i) =>
+                                                        i === index
+                                                            ? (e.target as HTMLInputElement).checked
+                                                            : item
+                                                    )
+                                                )
+                                            )}
+                                            type="switch"
+                                        />
+                                    </div>
+                                </div>
+                                {/* 7) */}
+                                <Field
+                                    label="Discount type"
+                                    placeholder="Choose discount's type"
+                                    value={voucher[index]?.discount_type ?? ''}
+                                    onChange={(e) => (
+                                        setVoucher(
+                                            voucher.map((item, i) =>
+                                                i === index
+                                                    ? { ...item, discount_type: e.target.value as 'discount_amount' | 'discount_percentage' | 'time_extension' |  'complimentary' }
+                                                    : item
+                                            )
+                                        )
+                                    )}
+                                    type="select"
+                                    options={[
+                                        { label: 'Price (amount)', value: 'discount_amount' },
+                                        { label: 'Price (percent)', value: 'discount_percentage' },
+                                        { label: 'Time extension', value: 'time_extension' }, 
+                                        { label: 'Complimentary', value: 'complimentary' }, 
+                                    ]}
+                                />
+                                {/* 8) */}
+                                { voucher[index]?.discount_type == 'complimentary' ? (
+                                    <Field
+                                        label="Value (disable)"
+                                        value='-'
+                                        disabled
+                                    />
+                                ) : (
+                                    <Field
+                                        label={
+                                            voucher[index]?.discount_type=='discount_amount' ? 'Value (RM)' : 
+                                            voucher[index]?.discount_type=='discount_percentage' ? 'Value (%)' :
+                                            voucher[index]?.discount_type=='time_extension' ? 'Value (minute)' : ''
+                                        }
+                                        // placeholder="Enter"
+                                        value={voucher[index]?.discount_value ?? ''}
+                                        onChange={(e) => (
+                                            setVoucher(
+                                                voucher.map((item, i) =>
+                                                    i === index
+                                                        ? { ...item, discount_value: Number(e.target.value) }
+                                                        : item
+                                                )
+                                            )
+                                        )}
+                                        type="number"
+                                    />
+                                )}
+                            </Grid>
                         </div>
                     </Form>
                 </>

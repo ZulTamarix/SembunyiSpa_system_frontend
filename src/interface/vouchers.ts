@@ -5,9 +5,9 @@ export interface Voucher_type {
     code: string;
     description: string;
     type: 'gift' | 'promo';
-    date_expired: string;
+    date_expired: string | null;
     status: string;
-    discount_type: 'discount_amount' | 'discount_percentage' | 'time_deduction' | 'complimentary';
+    discount_type: 'discount_amount' | 'discount_percentage' | 'time_extension' | 'complimentary';
     discount_value: number | '';
     quantity: number | ''
 }

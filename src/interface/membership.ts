@@ -7,6 +7,7 @@ export interface Membership_type {
 export interface Membership_privilege_type {
     id: number;
     membership_id: number,
+    voucher_id: number,
     list: string;
 }
 

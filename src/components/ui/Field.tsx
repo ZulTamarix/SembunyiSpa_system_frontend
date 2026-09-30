@@ -5,7 +5,7 @@ interface FieldOption {
 
 interface FieldProps {
     label: string;
-    type?: 'text' | 'number' | 'date' | 'time' | 'select' | 'file' | 'textarea' | 'switch';
+    type?: 'text' | 'number' | 'date' | 'time' | 'button' | 'select' | 'file' | 'textarea' | 'switch';
     placeholder?: string;
     value?: string | number | boolean;
     accept?: string;
@@ -14,13 +14,14 @@ interface FieldProps {
             HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
         >
     ) => void;
+    onClick?: () => void;
     error?: string;
     required?: boolean;
     disabled?: boolean;
     options?: FieldOption[];
 }
 
-export default function Field({ label, type = "text", placeholder, value, accept, onChange, error, required = false, disabled = false, options = [] }: FieldProps) {
+export default function Field({ label, type = "text", placeholder, value, accept, onChange, onClick, error, required = false, disabled = false, options = [] }: FieldProps) {
     return (
         <div>
             <label className="block mb-1.5 text-sm font-medium text-title">
@@ -28,8 +29,18 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 {required && <span className="ml-1 text-red-500">*</span>}
             </label>
 
-            {/* 1) select option */}
-            {type === "select" ? (
+            {/* 1) button */}
+            {type === "button" ? (
+                <input
+                    type="button"
+                    value={value as string}
+                    onClick={onClick}
+                    disabled={disabled}
+                    className="w-full rounded-lg border border-gray-300 bg-secondary px-3 py-2.5 text-sm text-black font-bold cursor-pointer transition-all hover:-translate-x-3 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+            ) :
+            // 2) select option 
+            type === "select" ? (
                 <select
                     value={value as string | number}
                     onChange={onChange}
@@ -54,7 +65,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 </select>
 
             ) :
-            // 2) switch
+            // 3) switch
             type === "switch" ? (
                 <div className="flex items-center h-10.5">
                     <label className="inline-flex items-center cursor-pointer">
@@ -70,7 +81,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     </label>
                 </div>
             ) :
-            // 3) file
+            // 4) file
             type === "file" ? (
                 <input
                     type="file"
@@ -85,7 +96,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 />
 
             ) :
-            // 4) textarea
+            // 5) textarea
             type === "textarea" ? (
                 <textarea
                     placeholder={placeholder}
@@ -101,7 +112,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 />
 
             ) :
-            // 5) others
+            // 6) others
             (
                 <input
                     type={type}

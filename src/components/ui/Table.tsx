@@ -3,6 +3,7 @@ import React from "react";
 export interface Column<T> {
   key: string;
   header: string;
+  align?: "left" | "center" | "right";
   render?: (row: T) => React.ReactNode;
 }
 
@@ -13,13 +14,15 @@ interface TableProps<T> {
 
 export function Table<T>({ fieldName, data }: TableProps<T>) {
   return (
-    <div className="border border-border  rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
+    <div className="border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
       <table className="w-full border-collapse">
         <thead>
-        {/* <thead className="bg-[#F0E8D8]"> */}
           <tr className="border-b border-border">
             {fieldName.map((col) => (
-              <th key={col.key} className="text-left px-6 py-3 text-xs font-bold uppercase tracking-wider text-title whitespace-nowrap">
+              <th
+                key={col.key}
+                className={`px-6 py-3 text-xs font-bold uppercase tracking-wider text-title whitespace-nowrap text-${col.align ?? "left"}`}
+              >
                 {col.header}
               </th>
             ))}
@@ -28,9 +31,15 @@ export function Table<T>({ fieldName, data }: TableProps<T>) {
 
         <tbody className="bg-white">
           {data.map((row, i) => (
-            <tr key={i} className="border-b border-border last:border-0 hover:bg-hover transition-colors">
+            <tr
+              key={i}
+              className="border-b border-border last:border-0 hover:bg-hover transition-colors"
+            >
               {fieldName.map((col) => (
-                <td key={col.key} className="px-6 py-3 align-middle text-title text-sm whitespace-nowrap">
+                <td
+                  key={col.key}
+                  className={`px-6 py-3 align-middle text-title text-sm whitespace-nowrap text-${col.align ?? "left"}`}
+                >
                   {col.render
                     ? col.render(row)
                     : (row as any)[col.key] ?? "—"}

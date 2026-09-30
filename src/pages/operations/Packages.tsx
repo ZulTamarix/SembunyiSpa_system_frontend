@@ -204,7 +204,7 @@ const Packages: React.FC = () => {
 
                 // CREATE data
                 try {
-                    await api.post('/package', formData);
+                    await api.post(`/package`, formData);
 
                     fetchData_package()
                     setForm(false)
@@ -230,7 +230,7 @@ const Packages: React.FC = () => {
         // a) therapist
         const fetchData_therapist = useCallback(() => {
 
-            api.get('/user', {
+            api.get(`/user`, {
                 params: {
                     role: 'therapist'
                 }
@@ -244,7 +244,7 @@ const Packages: React.FC = () => {
         }, [])
         // c) package
         const fetchData_package = useCallback(() => {
-            api.get('/package')
+            api.get(`/package`)
             .then((response) => {
 
                 setDatabase_package(response.data)

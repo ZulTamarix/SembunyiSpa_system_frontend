@@ -1,3 +1,5 @@
+import type { Voucher_type } from "./vouchers";
+
 export interface User_type {
   id: number | "";
   role: 'admin' | 'therapist' | 'customer' | 'walkin' | '';
@@ -10,6 +12,8 @@ export interface User_type {
   membership_id?: number | "";
   specialty: string;
   code: string;
+
+  voucher_customers?: Voucher_type[]
 }
 
 // JSON

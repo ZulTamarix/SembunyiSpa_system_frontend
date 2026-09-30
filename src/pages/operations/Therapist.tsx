@@ -51,7 +51,7 @@ const Therapist: React.FC = () => {
         // a) fetch 'user'
         const fetchData_user = useCallback(() => {
 
-            api.get('/user', {
+            api.get(`/user`, {
                 params: {
                     role: 'therapist',
                 }
@@ -137,7 +137,7 @@ const Therapist: React.FC = () => {
             // a) fetch 'user'
             const fetchData_roster = useCallback((currentYear: number, currentMonth: number) => {
 
-                api.get('/roster', {
+                api.get(`/roster`, {
                     params: {
                         switch: 'roster',
 
@@ -351,7 +351,7 @@ const Therapist: React.FC = () => {
 
             // fetch database
             const fetchData_shift = useCallback(() => {
-                api.get('/roster', {
+                api.get(`/roster`, {
                     params: {
                         switch: 'shift'
                     }
@@ -449,7 +449,7 @@ const Therapist: React.FC = () => {
 
             // fetch database
             const fetchData_leave = useCallback(() => {
-                api.get('/roster', {
+                api.get(`/roster`, {
                     params: {
                         switch: 'leave'
                     }

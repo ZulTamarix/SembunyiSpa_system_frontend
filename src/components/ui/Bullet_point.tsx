@@ -11,7 +11,7 @@ const Bullet_point = ({
     value,
     onChange,
     label = "Details",
-    placeholder = "Press ENTER to add more",
+    placeholder,
 }: Bullet_pointProps) => {
     const [details, setDetails] = useState<string[]>(value?.length ? value : [""]);
 
@@ -31,6 +31,8 @@ const Bullet_point = ({
         index: number,
         e: React.KeyboardEvent<HTMLInputElement>
     ) => {
+
+        // 1) ADD bullet point
         if (e.key === "Enter") {
             e.preventDefault();
 
@@ -44,22 +46,23 @@ const Bullet_point = ({
             }, 0);
         }
 
-        if (
-            e.key === "Backspace" &&
-            details[index] === "" &&
-            details.length > 1
-        ) {
-            e.preventDefault();
+        // 2_ REDUCE bullet point
+        // if (
+        //     e.key === "Backspace" &&
+        //     details[index] === "" &&
+        //     details.length > 1
+        // ) {
+        //     e.preventDefault();
 
-            const updatedDetails = [...details];
-            updatedDetails.splice(index, 1);
+        //     const updatedDetails = [...details];
+        //     updatedDetails.splice(index, 1);
 
-            updateDetails(updatedDetails);
+        //     updateDetails(updatedDetails);
 
-            setTimeout(() => {
-                document.getElementById(`detail-${index - 1}`)?.focus();
-            }, 0);
-        }
+        //     setTimeout(() => {
+        //         document.getElementById(`detail-${index - 1}`)?.focus();
+        //     }, 0);
+        // }
     };
 
     return (

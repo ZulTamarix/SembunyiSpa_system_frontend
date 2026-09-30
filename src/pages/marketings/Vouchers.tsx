@@ -61,7 +61,9 @@ const Membership: React.FC = () => {
                     discount_value: voucher.discount_value,
                     quantity: voucher.quantity,
 
-                    selected_customer: selectedCustomer
+                    selected_customer: selectedCustomer,
+
+                    switch: 'voucher'
                 });
 
                 fetchData_voucher()
@@ -99,39 +101,38 @@ const Membership: React.FC = () => {
             }
         }, [form_voucher])
 
-        // logic for 'dicount_type' + 'quantity'
+        // a) logic for 'dicount_type'
         useEffect(() => {
-            // a) discount_type
-            if(voucher.discount_type == 'complimentary') {
-                
+
+            // discount_type
+            if(voucher.discount_type == 'complimentary') 
                 setVoucher ((prev) => ({
                     ...prev,
                     discount_value: ''
                 }))
-            }
-            else {
+            else 
                 setVoucher ((prev) => ({
                     ...prev,
                     discount_value: 0
                 }))
 
-            }
-
-            // b) quantity
-            if(unlimited) {
+        }, [voucher.discount_type])
+        
+        // b) logic for 'quantity'
+        useEffect(() => {
+            //  quantity
+            if(unlimited) 
                 setVoucher ((prev) => ({
                     ...prev,
                     quantity: ''
                 }))
-            }
-            else {
+            else 
                 setVoucher ((prev) => ({
                     ...prev,
                     quantity: 1
                 }))
-            }
 
-        }, [voucher.discount_type, unlimited])
+        }, [unlimited])
 
     //#endregion
     
@@ -140,7 +141,7 @@ const Membership: React.FC = () => {
         const [databaseVoucher, setDatabase_voucher] = useState<Voucher_type[]>([])
         const [databaseUser, setDatabase_user] = useState<User_type[]>([])
         const fetchData_voucher = useCallback(() => {
-            api.get('/voucher')
+            api.get(`/voucher`)
             .then((response) => {
                 console.log('data = ',response.data)
                 setDatabase_voucher(response.data)
@@ -151,7 +152,7 @@ const Membership: React.FC = () => {
         }, [])
         const fetchData_user = useCallback(() => {
 
-            api.get('/user', {
+            api.get(`/user`, {
                 params: {
                     role: 'customer',
                 }
@@ -301,14 +302,15 @@ const Membership: React.FC = () => {
                             onChange={(e) => setSelected_customer(e.target.value)}
                             type="select"
                             options={[
-                                { label:'All', value: 'all'},
+                                { label:'-- All customer --', value: 'all'},
+                                { label:'-- Blank voucher --', value: 'blank'},
                                 ...databaseUser.map((user) => ({
                                     label: user.name,
                                     value: user.id
                                 }))
                             ]}
                         />
-                        {/* 5) */}
+                        {/* 5) + 6) */}
                         <Field
                             label="Type"
                             placeholder="Choose a type"
@@ -345,7 +347,7 @@ const Membership: React.FC = () => {
                                 <Field
                                     label="Unlimited"
                                     value={unlimited}
-                                    onChange={(e) => setUnlimited(e.target.checked)}
+                                    onChange={(e) => setUnlimited((e.target as HTMLInputElement).checked)}
                                     type="switch"
                                 />
                             </div>
@@ -355,25 +357,29 @@ const Membership: React.FC = () => {
                             label="Discount type"
                             placeholder="Choose discount's type"
                             value={voucher.discount_type}
-                            onChange={(e) => setVoucher({...voucher, discount_type: e.target.value as 'discount_amount' | 'discount_percentage' | 'time_deduction' |  'complimentary'})}
+                            onChange={(e) => setVoucher({...voucher, discount_type: e.target.value as 'discount_amount' | 'discount_percentage' | 'time_extension' |  'complimentary'})}
                             type="select"
                             options={[
                                 { label: 'Price (amount)', value: 'discount_amount' },
                                 { label: 'Price (percent)', value: 'discount_percentage' },
-                                { label: 'Time deduction', value: 'time_deduction' }, 
+                                { label: 'Time extension', value: 'time_extension' }, 
                                 { label: 'Complimentary', value: 'complimentary' }, 
                             ]}
                         />
                         {/* 8) */}
                         { voucher.discount_type == 'complimentary' ? (
                             <Field
-                                label="Value"
+                                label="Value (disable)"
                                 value='-'
                                 disabled
                             />
                         ) : (
                             <Field
-                                label="Value"
+                                label={
+                                    voucher.discount_type=='discount_amount' ? 'Value (RM)' : 
+                                    voucher.discount_type=='discount_percentage' ? 'Value (%)' :
+                                    voucher.discount_type=='time_extension' ? 'Value (minute)' : ''
+                                }
                                 // placeholder="Enter"
                                 value={voucher.discount_value}
                                 onChange={(e) => setVoucher({
