@@ -15,118 +15,117 @@ import TextEditor from "../../components/ui/TextEditor";
 
 // #region 0) a) --> Multi select
 
-interface MultiSelectOption {
-    id: number;
-    name: string;
-    description?: string;
-    price?: number | "";
-    gender?: string;
-    type?: string;
-    duration?: number | "";
-}
+    interface MultiSelectOption {
+        id: number;
+        name: string;
+        description?: string;
+        price?: number | "";
+        gender?: string;
+        type?: string;
+        duration?: number | "";
+    }
 
-interface MultiSelectProps {
-    label: string;
-    options: MultiSelectOption[];
-    selected: number[];
-    onChange: (selected: number[]) => void;
-}
+    interface MultiSelectProps {
+        label: string;
+        options: MultiSelectOption[];
+        selected: number[];
+        onChange: (selected: number[]) => void;
+    }
 
-function MultiSelect({ label, options, selected, onChange }: MultiSelectProps) {
+    function MultiSelect({ label, options, selected, onChange }: MultiSelectProps) {
 
-    const toggleOption = (id: number) => {
-        onChange(
-            selected.includes(id)
-                ? selected.filter((selectedId) => selectedId !== id)
-                : [...selected, id]
-        );
-    };
+        const toggleOption = (id: number) => {
+            onChange(
+                selected.includes(id)
+                    ? selected.filter((selectedId) => selectedId !== id)
+                    : [...selected, id]
+            );
+        };
 
-    return (
-        <div>
-            {/* Label */}
-            <label className="block mb-1.5 text-sm font-medium text-title">
-                {label}
-            </label>
+        return (
+            <div>
+                {/* Label */}
+                <label className="block mb-1.5 text-sm font-medium text-title">
+                    {label}
+                </label>
 
-            <div className="rounded-lg border border-gray-300 overflow-hidden">
+                <div className="rounded-lg border border-gray-300 overflow-hidden">
 
-                {/* Header */}
-                <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50 border-b border-gray-200">
-                    <span className="text-sm text-title">
-                        Select {label.toLowerCase()}
-                    </span>
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50 border-b border-gray-200">
+                        <span className="text-sm text-title">
+                            Select {label.toLowerCase()}
+                        </span>
 
-                    <span className="text-xs text-secondary">
-                        {selected.length} selected
-                    </span>
-                </div>
+                        <span className="text-xs text-secondary">
+                            {selected.length} selected
+                        </span>
+                    </div>
 
-                {/* List */}
-                <div className="max-h-60 overflow-y-auto bg-white">
-                    {options.map((option) => {
-                        const isSelected = selected.includes(option.id);
+                    {/* List */}
+                    <div className="max-h-60 overflow-y-auto bg-white">
+                        {options.map((option) => {
+                            const isSelected = selected.includes(option.id);
 
-                        return (
-                            <label
-                                key={option.id}
-                                className="flex items-center gap-3 px-3 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 transition hover:bg-gray-100"
-                            >
-                                {/* Checkbox */}
-                                <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={() => toggleOption(option.id)}
-                                    className="h-4 w-4 rounded border-gray-300 text-border focus:ring-border"
-                                />
+                            return (
+                                <label
+                                    key={option.id}
+                                    className="flex items-center gap-3 px-3 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 transition hover:bg-gray-100"
+                                >
+                                    {/* Checkbox */}
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => toggleOption(option.id)}
+                                        className="h-4 w-4 rounded border-gray-300 text-border focus:ring-border"
+                                    />
 
-                                {/* Details */}
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-title">
-                                        {option.name}
-                                    </p>
-
-                                    {option.description && (
-                                        <p className="text-xs text-secondary">
-                                            {option.description}
+                                    {/* Details */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-title">
+                                            {option.name}
                                         </p>
-                                    )}
 
-                                    {(option.price !== undefined ||
-                                        option.gender ||
-                                        option.type) && (
-                                        <ul className="mt-1 text-xs text-title list-disc list-inside">
+                                        {option.description && (
+                                            <p className="text-xs text-secondary">
+                                                {option.description}
+                                            </p>
+                                        )}
 
-                                            {option.type && (
-                                                <li>{option.type}</li>
-                                            )}
+                                        {(option.price !== undefined ||
+                                            option.gender ||
+                                            option.type) && (
+                                            <ul className="mt-1 text-xs text-title list-disc list-inside">
 
-                                            {option.price !== undefined && (
-                                                <li>RM {option.price}</li>
-                                            )}
+                                                {option.type && (
+                                                    <li>{option.type}</li>
+                                                )}
 
-                                            {option.duration && (
-                                                <li>{option.duration} minutes</li>
-                                            )}
+                                                {option.price !== undefined && (
+                                                    <li>RM {option.price}</li>
+                                                )}
 
-                                            {option.gender && (
-                                                <li>{option.gender}</li>
-                                            )}
-                                        </ul>
-                                    )}
-                                </div>
-                            </label>
-                        );
-                    })}
+                                                {option.duration && (
+                                                    <li>{option.duration} minutes</li>
+                                                )}
+
+                                                {option.gender && (
+                                                    <li>{option.gender}</li>
+                                                )}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </label>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
 
 
 //#endregion
-
 
 // #region 0) b) --> Package + Service form
 
@@ -297,6 +296,91 @@ function MultiSelect({ label, options, selected, onChange }: MultiSelectProps) {
 
 //#endregion
 
+// #region 0) c) --> Package + Service table
+    interface PackageCardProps {
+        poster: string | File | null;
+        title: string;
+        description: string;
+        price: number | "";
+        duration: number | "";
+        category?: string;
+        onEdit?: () => void;
+        onDelete?: () => void;
+    }
+
+    function PackageCard({ poster, title, description, price, duration, category, onEdit, onDelete }: PackageCardProps) {
+        return (
+            <div className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+                {/* Poster */}
+                <div className="mb-5 h-48 w-full overflow-hidden rounded-2xl">
+                    <img
+                        src={`http://localhost:8000/${poster}`}
+                        alt={title}
+                        className="h-full w-full"
+                    />
+                </div>
+
+                {/* Header */}
+                <div className="flex h-8 items-center justify-between">
+                    {category ? (
+                        <span className="whitespace-nowrap rounded-full bg-tertiary px-3 py-1.5 text-xs font-bold tracking-wide text-title uppercase">
+                            {category}
+                        </span>
+                    ) : (
+                        <span />
+                    )}
+
+                    <span className="text-lg font-bold">
+                        RM {price}
+                    </span>
+                </div>
+
+                {/* Title */}
+                <div className="mt-3 h-6">
+                    <h2 className="text-base font-serif font-bold text-stone-900 uppercase">
+                        {title}
+                    </h2>
+                </div>
+
+                {/* Description */}
+                <div className="mt-3 flex-1">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-title font-semibold">
+                            {description.length > 150
+                                ? `${description.slice(0, 150)}...`
+                                : description}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Duration */}
+                <div className="mt-3">
+                    <span className="text-xs font-semibold text-title">
+                        {duration} min
+                    </span>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-3 flex gap-3">
+                    <button
+                        onClick={onEdit}
+                        className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50"
+                    >
+                        Edit
+                    </button>
+
+                    <button
+                        onClick={onDelete}
+                        className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+                    >
+                        Remove
+                    </button>
+                </div>
+            </div>
+        );
+    }
+//#endregion
+
 
 const Packages: React.FC = () => {
     
@@ -331,7 +415,7 @@ const Packages: React.FC = () => {
         
         // fetch database by default
         useEffect(() => {
-            fetchData_therapist()
+            // fetchData_therapist()
             fetchData_room()
             fetchData_category()
         }, [])
@@ -418,11 +502,21 @@ const Packages: React.FC = () => {
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
-                    console.error('Response:', error.response?.data);
+                    // console.error('Response:', error.response?.data);
                 }
                 finally {
                     setIsLoading(false)
                 }
+            }
+            // EDIT package
+            const handleEdit_package = (data: any) => {
+                console.log('data = ',data)
+
+            }
+            // DELETE package
+            const handleDelete_package = (id: number) => {
+                console.log('id = ',id)
+
             }
         //#endregion
 
@@ -432,34 +526,24 @@ const Packages: React.FC = () => {
             const [databaseTherapist, setDatabase_therapist] = useState<User_type[]>([])
             // c) package
             const [databasePackage, setDatabase_package] = useState<Package_json[]>([])
-
-            // a) therapist
-            const fetchData_therapist = useCallback(() => {
-
-                api.get(`/user`, {
+            const fetchData_package = useCallback(() => {
+                api.get(`/package`, {
                     params: {
-                        role: 'therapist'
+                        switch: 'package'
                     }
                 })
                 .then((response) => {
-                    setDatabase_therapist(response.data)
-                })
-                .catch((error) => {
-                    console.error('Error fetching data:', error);
-                });
-            }, [])
-            // c) package
-            const fetchData_package = useCallback(() => {
-                api.get(`/package`)
-                .then((response) => {
-
+                    console.log('data = ',response.data)
+                    // 1) normal
                     setDatabase_package(response.data)
-                    // console.log('data = ',response.data)
                 })
                 .catch((error) => {
-                    console.error('Error fetching data:', error);
+                    console.error('Error fetching data:', error.data);
                 });
             }, [])
+            useEffect(()=> {
+                fetchData_package()
+            }, []) 
 
         //#endregion
     
@@ -493,7 +577,8 @@ const Packages: React.FC = () => {
         //#endregion
 
         // #region 3) --> method
-            // CREATE package
+
+            // CREATE service
             const handleCreate_service = async () => {
                 // loading
                 setIsLoading(true)
@@ -539,14 +624,21 @@ const Packages: React.FC = () => {
                     setIsLoading(false)
                 }
             }
+            
+            // EDIT service
+            const handleEdit_service = (data: any) => {
+                console.log('data = ',data)
+            }
+            // DELETE service
+            const handleDelete_service = (id: number) => {
+                console.log('id = ',id)
+            }
         //#endregion
 
         // #region 4) --> database
 
-            // c) package
+            // service
             const [databaseService, setDatabase_service] = useState<Service_json[]>([])
-
-            // c) package
             const fetchData_service = useCallback(() => {
                 api.get(`/package`, {
                     params: {
@@ -566,7 +658,6 @@ const Packages: React.FC = () => {
                     console.error('Error fetching data:', error.data);
                 });
             }, [])
-
             useEffect(()=> {
                 fetchData_service()
             }, []) 
@@ -579,7 +670,6 @@ const Packages: React.FC = () => {
     //#region 3 --> setting
 
         // #region a) --> category
-
             // #region 1) --> useState
                 // form
                 const [form_category, setForm_category] = useState(false);
@@ -801,10 +891,24 @@ const Packages: React.FC = () => {
                         <Label>{databasePackage.length} Package</Label>
                         <Button onClick={()=> {setForm_package(true); setCrud('create')}} icon={Plus} label='Add Package' className="md:col-start-5"/>
                     </Grid>
+                    
+                    <Grid className="md:grid-cols-2">
+                        {databasePackage.map((data) => (
+                            <PackageCard
+                                key={data.package.id}
+                                poster={data.package.poster}
+                                title={data.package.title}
+                                description={data.package.description}
+                                price={data.package.price}
+                                duration={data.package.duration}
+                                onEdit={() => handleEdit_package(data.package)}
+                                onDelete={() => handleDelete_package(data.package.id)}
+                            />
+                        ))}
+                    </Grid>
 
                     {/* Form */}
                     <Form title={crud=='create'? 'Add Package':'Edit Package'} isOpen={form_package} onClose={() => setForm_package(false)} width="max-w-3xl"
-                        
                         footer={
                             <>
                                 <Button
@@ -833,6 +937,7 @@ const Packages: React.FC = () => {
                             </>
                         }
                     >
+
                         <div className="space-y-4">
                             {/* (1+2+3+4+5+6+7) reusable form */}
                             <PackageForm
@@ -843,7 +948,9 @@ const Packages: React.FC = () => {
                                 setContent={setDetail_package}
                             />
                         </div>
+
                         <Grid>
+                            
                             {/* 8) Service */}
                             <MultiSelect
                                 label="Service"
@@ -876,66 +983,17 @@ const Packages: React.FC = () => {
                     
                     <Grid className="md:grid-cols-2">
                         {databaseService.map((data) => (
-                            <div key={data.service.id} className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
-                                {/* Poster */}
-                                <div className="mb-5 h-48 w-full overflow-hidden rounded-2xl">
-                                    <img
-                                        src={`http://localhost:8000/${data.service.poster}`}
-                                        alt={data.service.title}
-                                        className="h-full w-full"
-                                    />
-                                </div>
-                            
-                                {/* Header */}
-                                <div className="flex h-8 items-center justify-between">
-                                    <span className="whitespace-nowrap rounded-full bg-tertiary px-3 py-1.5 text-xs font-bold tracking-wide text-title uppercase">
-                                        {data.service_category.name}
-                                    </span>
-
-                                    <span className="text-lg font-bold">
-                                        RM {data.service.price}
-                                    </span>
-                                </div>
-
-                                {/* Title */}
-                                <div className="mt-3 h-6">
-                                    <h2 className="text-base font-serif font-bold text-stone-900 uppercase">
-                                        {data.service.title}
-                                    </h2>
-                                </div>
-
-                                {/* Description */}
-                                <div className="mt-3 flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-title font-semibold">
-                                            {data.service.description.length > 150 ? (
-                                                `${data.service.description.slice(0, 150)}...`
-                                            ) : ( 
-                                                data.service.description
-                                            )}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-
-                                {/* Duration */}
-                                <div className="mt-3">
-                                    <span className="text-xs font-semibold text-title">
-                                        {data.service.duration} min
-                                    </span>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="mt-3 flex gap-3">
-                                    <button className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50">
-                                        Edit
-                                    </button>
-
-                                    <button className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50">
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
+                            <PackageCard
+                                key={data.service.id}
+                                poster={data.service.poster}
+                                title={data.service.title}
+                                description={data.service.description}
+                                price={data.service.price}
+                                duration={data.service.duration}
+                                category={data.service_category.name}
+                                onEdit={() => handleEdit_service(data.service)}
+                                onDelete={() => handleDelete_service(data.service.id)}
+                            />
                         ))}
                     </Grid>
 

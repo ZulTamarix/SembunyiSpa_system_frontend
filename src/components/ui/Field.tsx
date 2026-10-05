@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface FieldOption {
     label: string;
     value: string | number;
@@ -5,7 +7,7 @@ interface FieldOption {
 
 interface FieldProps {
     label: string;
-    type?: 'text' | 'number' | 'date' | 'time' | 'button' | 'select' | 'file' | 'textarea' | 'switch';
+    type?: 'text' | 'number' | 'date' | 'time' | 'button' | 'select' | 'searchable-select' | 'file' | 'textarea' | 'switch';
     placeholder?: string;
     value?: string | number | boolean;
     accept?: string;
@@ -22,6 +24,15 @@ interface FieldProps {
 }
 
 export default function Field({ label, type = "text", placeholder, value, accept, onChange, onClick, error, required = false, disabled = false, options = [] }: FieldProps) {
+    
+    
+    // for 'searchable-select' only
+    const [search, setSearch] = useState("");
+    const [open, setOpen] = useState(false);
+    const filteredOptions = options.filter((option) =>
+        option.label.toLowerCase().includes(search.toLowerCase())
+    );
+    
     return (
         <div>
             <label className="block mb-1.5 text-sm font-medium text-title">
@@ -39,7 +50,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     className="w-full rounded-lg border border-gray-300 bg-secondary px-3 py-2.5 text-sm text-black font-bold cursor-pointer transition-all hover:-translate-x-3 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
             ) :
-            // 2) select option 
+            // 2) select option (normal)
             type === "select" ? (
                 <select
                     value={value as string | number}
@@ -65,7 +76,66 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 </select>
 
             ) :
-            // 3) switch
+            // 3) select option (searchable)
+            type === "searchable-select" ? (
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder={placeholder || "Search..."}
+                        value={
+                            open
+                                ? search
+                                : options.find((option) => option.value === value)?.label || ""
+                        }
+                        onFocus={() => {
+                            setOpen(true);
+                            setSearch("");
+                        }}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setOpen(true);
+                        }}
+                        disabled={disabled}
+                        className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                            error
+                                ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                                : "border-gray-300 focus:border-border focus:ring-2 focus:ring-border"
+                        }`}
+                    />
+
+                    {open && (
+                        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
+                            {filteredOptions.length > 0 ? (
+                                filteredOptions.map((option) => (
+                                    <div
+                                        key={option.value}
+                                        onMouseDown={() => {
+                                            const fakeEvent = {
+                                                target: {
+                                                    value: option.value,
+                                                },
+                                            } as React.ChangeEvent<HTMLSelectElement>;
+
+                                            onChange?.(fakeEvent);
+
+                                            setSearch("");
+                                            setOpen(false);
+                                        }}
+                                        className="cursor-pointer px-3 py-2.5 text-sm text-title hover:bg-tertiary"
+                                    >
+                                        {option.label}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="px-3 py-2.5 text-sm text-gray-400">
+                                    No results found
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            ) :
+            // 4) switch
             type === "switch" ? (
                 <div className="flex items-center h-10.5">
                     <label className="inline-flex items-center cursor-pointer">
@@ -81,7 +151,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     </label>
                 </div>
             ) :
-            // 4) file
+            // 5) file
             type === "file" ? (
                 <input
                     type="file"
@@ -96,7 +166,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 />
 
             ) :
-            // 5) textarea
+            // 6) textarea
             type === "textarea" ? (
                 <textarea
                     placeholder={placeholder}
@@ -112,7 +182,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                 />
 
             ) :
-            // 6) others
+            // 7) others
             (
                 <input
                     type={type}
