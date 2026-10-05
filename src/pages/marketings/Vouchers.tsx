@@ -360,9 +360,9 @@ const Membership: React.FC = () => {
                             onChange={(e) => setVoucher({...voucher, discount_type: e.target.value as 'discount_amount' | 'discount_percentage' | 'time_extension' |  'complimentary'})}
                             type="select"
                             options={[
-                                { label: 'Price (amount)', value: 'discount_amount' },
-                                { label: 'Price (percent)', value: 'discount_percentage' },
-                                { label: 'Time extension', value: 'time_extension' }, 
+                                { label: 'Price (fixed amount)', value: 'discount_amount' },
+                                { label: 'Price (by percentage)', value: 'discount_percentage' },
+                                { label: 'Free minutes', value: 'time_extension' }, 
                                 { label: 'Complimentary', value: 'complimentary' }, 
                             ]}
                         />

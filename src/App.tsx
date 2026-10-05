@@ -33,6 +33,7 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-y-auto pt-6 bg-tertiary">
         {/* <main className="pt-24 pb-20 bg-tertiary"> */}
           <Routes>
+
             {/* 1) Home */}
             <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />

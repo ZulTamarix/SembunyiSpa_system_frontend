@@ -14,7 +14,7 @@ interface TableProps<T> {
 
 export function Table<T>({ fieldName, data }: TableProps<T>) {
   return (
-    <div className="border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
+    <div className=" border border-border rounded-2xl overflow-hidden overflow-x-auto scrollbar-hide shadow-sm">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-border">

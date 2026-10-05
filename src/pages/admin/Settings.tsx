@@ -3,7 +3,6 @@ import Grid from "../../components/ui/Grid";
 import Field from "../../components/ui/Field";
 import { useCallback, useEffect, useState } from "react";
 import { Table, type Column } from "../../components/ui/Table";
-import type { Room_type } from "../../interface/room";
 import { ClipboardList, Component, Plus, Sparkles, Warehouse } from "lucide-react";
 import Form from "../../components/ui/Form";
 import api from "../../api/axios";

@@ -1,7 +1,7 @@
 // sidebar.tsx
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutGrid, CalendarDays, User, Disc, Ticket, Image as ImageIcon, Bell, BarChart3, Astroid, Diamond, Settings, Wrench, CornerDownLeft, CalendarCheck2 } from "lucide-react";
+import { LayoutGrid, CalendarDays, User, Disc, Ticket, Image as ImageIcon, Bell, BarChart3, Astroid, Diamond, Wrench, CornerDownLeft, CalendarCheck2, Users } from "lucide-react";
 import logo from '../assets/logo_rectangle.png'; 
 
 interface NavItem {
@@ -15,47 +15,6 @@ interface NavSection {
   title: string;
   items: NavItem[];
 }
-
-// const sections: NavSection[] = [
-//   {
-//     title: "OVERVIEW",
-//     items: [
-//       { label: "Dashboard", path: "/dashboard", icon: <LayoutGrid size={18} /> },
-//     ],
-//   },
-//   {
-//     title: "OPERATIONS",
-//     items: [
-//       { label: "Bookings",              path: "/bookings",    icon: <CalendarDays size={18} className="text-sky-400" /> },
-//       { label: "Customers",             path: "/customers",   icon: <User size={18} className="text-purple-300" /> },
-//       { label: "Therapists & Roster",   path: "/therapist",   icon: <Astroid size={18} className="text-white"/> },
-//       { label: "Packages",              path: "/packages",    icon: <Diamond size={18} /> },
-//       { label: "Membership",            path: "/memberships", icon: <Disc size={18} /> },
-//     ],
-//   },
-//   {
-//     title: "MARKETING",
-//     items: [
-//       { label: "Vouchers",      path: "/vouchers",      icon: <Ticket size={18} /> },
-//       { label: "Banners",       path: "/banners",       icon: <ImageIcon size={18} /> },
-//       { label: "Notifications", path: "/notifications", icon: <Bell size={18} className="text-amber-400" /> },
-//     ],
-//   },
-//   {
-//     title: "ANALYTICS",
-//     items: [
-//       { label: "Reports", path: "/reports", icon: <BarChart3 size={18} className="text-emerald-400" /> },
-//       { label: "Documents", path: "/documents", icon: <FileText size={18} /> },
-//     ],
-//   },
-//   {
-//     title: "ADMIN",
-//     items: [
-//       { label: "User Management", path: "/user", icon: <Settings size={18} /> },
-//       { label: "System Settings", path: "/settings", icon: <Wrench size={18} /> },
-//     ],
-//   },
-// ];
 
 const sections: NavSection[] = [
   {
@@ -94,7 +53,7 @@ const sections: NavSection[] = [
   {
     title: "ADMIN",
     items: [
-      { label: "User Management", path: "/user",    icon: <Settings size={18} />, icon_selected: <Settings size={18} className="text-violet-400" /> },
+      { label: "User Management", path: "/user",    icon: <Users size={18} />, icon_selected: <Users size={18} className="text-violet-400" /> },
       { label: "System Settings", path: "/settings", icon: <Wrench size={18} />, icon_selected: <Wrench size={18} className="text-slate-500" /> },
     ],
   },

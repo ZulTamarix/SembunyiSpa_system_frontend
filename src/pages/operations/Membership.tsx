@@ -376,7 +376,7 @@ const Membership: React.FC = () => {
             const tableTitle_membership: Column<Membership_json>[] = [
                 {
                     key: "tier",
-                    header: "Tier",
+                    header: "Privilege name",
                     render: (row) => row.membership.tier
                 },
                 {
@@ -727,9 +727,9 @@ const Membership: React.FC = () => {
                                     )}
                                     type="select"
                                     options={[
-                                        { label: 'Price (amount)', value: 'discount_amount' },
-                                        { label: 'Price (percent)', value: 'discount_percentage' },
-                                        { label: 'Time extension', value: 'time_extension' }, 
+                                        { label: 'Price (fixed amount)', value: 'discount_amount' },
+                                        { label: 'Price (by percentage)', value: 'discount_percentage' },
+                                        { label: 'Free minutes', value: 'time_extension' }, 
                                         { label: 'Complimentary', value: 'complimentary' }, 
                                     ]}
                                 />
