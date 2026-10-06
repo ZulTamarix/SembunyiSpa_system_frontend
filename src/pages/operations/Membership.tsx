@@ -309,10 +309,6 @@ const Membership: React.FC = () => {
                 // loading
                 setIsLoading(true)
 
-                console.log('membership = ',membership)
-                console.log('privilege = ',privilege)
-                console.log('voucher = ',voucher)
-
                 // clean any blank or ""
                 const privilege_cleaned = privilege.filter(privilege => privilege !== "");
                 try {

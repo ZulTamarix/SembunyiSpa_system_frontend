@@ -1,17 +1,17 @@
 import React from "react";
 
 interface CardProps {
-  children: React.ReactNode;
-  className?: string;
+    children: React.ReactNode;
+    className?: string;
 }
 
 export default function Card({ children, className }: CardProps) {
-  return (
-    <div className={`rounded-2xl border border-border bg-white overflow-hidden ${className}`}>
-        {/* body */}
-        <div className="p-5 bg-white">
-            {children}
+    return (
+        <div className={`rounded-2xl border border-border bg-white ${className}`}>
+            {/* body */}
+            <div className="rounded-2xl bg-white p-5">
+                {children}
+            </div>
         </div>
-    </div>
-  );
+    );
 }

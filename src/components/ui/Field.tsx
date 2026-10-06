@@ -3,11 +3,13 @@ import { useState } from "react";
 interface FieldOption {
     label: string;
     value: string | number;
+    search?: string[];
+    display?: string[];
 }
 
 interface FieldProps {
     label: string;
-    type?: 'text' | 'number' | 'date' | 'time' | 'button' | 'select' | 'searchable-select' | 'file' | 'textarea' | 'switch';
+    type?: 'text' | 'number' | 'date' | 'time' | 'button' | 'select' | 'select-searchable' | 'file' | 'textarea' | 'switch';
     placeholder?: string;
     value?: string | number | boolean;
     accept?: string;
@@ -25,14 +27,19 @@ interface FieldProps {
 
 export default function Field({ label, type = "text", placeholder, value, accept, onChange, onClick, error, required = false, disabled = false, options = [] }: FieldProps) {
     
-    
-    // for 'searchable-select' only
+    // for 'select-searchable' only
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
-    const filteredOptions = options.filter((option) =>
-        option.label.toLowerCase().includes(search.toLowerCase())
-    );
-    
+    const filteredOptions = options.filter((option) => {
+        if (!option.search) {
+            return option.label.toLowerCase().includes(search.toLowerCase());
+        }
+
+        return option.search.some((item) =>
+            item.toLowerCase().includes(search.toLowerCase())
+        );
+    });
+
     return (
         <div>
             <label className="block mb-1.5 text-sm font-medium text-title">
@@ -77,7 +84,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
 
             ) :
             // 3) select option (searchable)
-            type === "searchable-select" ? (
+            type === "select-searchable" ? (
                 <div className="relative">
                     <input
                         type="text"
@@ -123,7 +130,15 @@ export default function Field({ label, type = "text", placeholder, value, accept
                                         }}
                                         className="cursor-pointer px-3 py-2.5 text-sm text-title hover:bg-tertiary"
                                     >
-                                        {option.label}
+                                        {option.display ? (
+                                            <div>
+                                                {option.display.map((item, index) => (
+                                                    <div key={index}>{item}</div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            option.label
+                                        )}
                                     </div>
                                 ))
                             ) : (

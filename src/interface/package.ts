@@ -7,11 +7,11 @@ export interface Package_type {
     price: number | "";
     gender: string;
     
-    service_category_id?: number
+    package_category_id?: number
     is_standalone?: boolean
 }
 
-export interface Service_category_type {
+export interface Package_category_type {
     id: number
     name: string
 }
@@ -27,5 +27,5 @@ export interface Package_json {
 }
 export interface Service_json {
     service: Package_type,
-    service_category: Service_category_type
+    package_category: Package_category_type
 }

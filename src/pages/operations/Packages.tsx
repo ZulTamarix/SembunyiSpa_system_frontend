@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import api from "../../api/axios";
 import Field from "../../components/ui/Field";
-import { type Service_category_type, type Package_json, type Package_type, type Service_json } from "../../interface/package";
+import { type Package_category_type, type Package_json, type Package_type, type Service_json } from "../../interface/package";
 import type { Room_type } from "../../interface/room";
 import Label from "../../components/ui/Label";
 import type { User_type } from "../../interface/user";
@@ -135,7 +135,7 @@ import TextEditor from "../../components/ui/TextEditor";
         posterPreview: string | null;
         setPosterPreview: React.Dispatch<React.SetStateAction<string | null>>;
         setContent: React.Dispatch<React.SetStateAction<string>>;
-        databaseCategory?: Service_category_type[]
+        databaseCategory?: Package_category_type[]
     }
 
     function PackageForm({ data, setData, posterPreview, setPosterPreview, setContent, databaseCategory }: PackageFormProps) {
@@ -158,8 +158,8 @@ import TextEditor from "../../components/ui/TextEditor";
                         
                         <Field
                             label="Category"
-                            value={data.service_category_id}
-                            onChange={(e) => setData({ ...data, service_category_id: Number(e.target.value)})}
+                            value={data.package_category_id}
+                            onChange={(e) => setData({ ...data, package_category_id: Number(e.target.value)})}
                             type="select"
                             options={
                                 databaseCategory.map((category:any) => ({
@@ -403,9 +403,9 @@ const Packages: React.FC = () => {
         useEffect(() => {
             switch(active) {
                 case 'package': 
+                    fetchData_package()
                 break;
                 case 'service': 
-                    fetchData_service()
                 break;
                 case 'room': 
                 break;
@@ -415,9 +415,30 @@ const Packages: React.FC = () => {
         
         // fetch database by default
         useEffect(() => {
-            // fetchData_therapist()
+            fetchData_service()
+            fetchData_therapist()
             fetchData_room()
             fetchData_category()
+        }, [])
+
+
+        // a) therapist
+        const [databaseTherapist, setDatabase_therapist] = useState<User_type[]>([])
+        const fetchData_therapist = useCallback(() => {
+        
+            api.get(`/user`, {
+                params: {
+                    role: 'therapist',
+                }
+            })
+            .then((response) => {
+                console.log('data = ',response.data)
+                // 1) normal
+                setDatabase_therapist(response.data)
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error.data);
+            });
         }, [])
     //#endregion
 
@@ -442,7 +463,6 @@ const Packages: React.FC = () => {
             // form
             const [form_package, setForm_package] = useState(false);
             const [selectedService, setSelected_service] = useState<number[]>([]);
-            const [databaseService_standalone, setDatabase_serviceStandalone] = useState<Service_json[]>([])
         //#endregion
 
         // #region 2) --> useEffect
@@ -469,8 +489,6 @@ const Packages: React.FC = () => {
             const handleCreate_package = async () => {
                 // loading
                 setIsLoading(true)
-
-                console.log('data = ',packages)
 
                 // format data to allow image uploading
                 const formData = new FormData();
@@ -510,21 +528,17 @@ const Packages: React.FC = () => {
             }
             // EDIT package
             const handleEdit_package = (data: any) => {
-                console.log('data = ',data)
 
             }
             // DELETE package
             const handleDelete_package = (id: number) => {
-                console.log('id = ',id)
 
             }
         //#endregion
 
         // #region 4) --> database
 
-            // a) therapist
-            const [databaseTherapist, setDatabase_therapist] = useState<User_type[]>([])
-            // c) package
+            // package
             const [databasePackage, setDatabase_package] = useState<Package_json[]>([])
             const fetchData_package = useCallback(() => {
                 api.get(`/package`, {
@@ -533,7 +547,6 @@ const Packages: React.FC = () => {
                     }
                 })
                 .then((response) => {
-                    console.log('data = ',response.data)
                     // 1) normal
                     setDatabase_package(response.data)
                 })
@@ -541,9 +554,6 @@ const Packages: React.FC = () => {
                     console.error('Error fetching data:', error.data);
                 });
             }, [])
-            useEffect(()=> {
-                fetchData_package()
-            }, []) 
 
         //#endregion
     
@@ -563,7 +573,7 @@ const Packages: React.FC = () => {
                 price: 0,
                 gender: '',
 
-                service_category_id: 0,
+                package_category_id: 0,
                 is_standalone: true,
             })
             // content / details
@@ -576,6 +586,28 @@ const Packages: React.FC = () => {
             const [selectedRoom, setSelected_room] = useState<number[]>([]);
         //#endregion
 
+        // #region 2) --> useEffect
+            // reset fieldname everytime form closed
+            useEffect(() => {
+                if(!form_service) { 
+                    setServices ({
+                        id: 0,
+                        poster: null,
+                        title: '',
+                        description: '',
+                        duration: 0,
+                        price: 0,
+                        gender: '',
+
+                        package_category_id: databaseCategory[0]?.id,
+                        is_standalone: true,
+                    })
+                }
+                setPosterPreview_service(null)
+            }, [form_service])
+
+        //#endregion
+     
         // #region 3) --> method
 
             // CREATE service
@@ -597,7 +629,7 @@ const Packages: React.FC = () => {
                 formData.append('price', services.price.toString());
                 formData.append('gender', services.gender);
                 formData.append('detail', JSON.stringify(detail_service));
-                formData.append('service_category_id', services.service_category_id?.toString() || '');
+                formData.append('package_category_id', services.package_category_id?.toString() || '');
                 formData.append('is_standalone', services.is_standalone ? '1' : '0');
 
                 formData.append('therapist_list', JSON.stringify(selectedTherapist));
@@ -605,9 +637,9 @@ const Packages: React.FC = () => {
 
                 formData.append('switch', 'service');
 
-                // for (const [key, value] of formData.entries()) {
-                //     console.log(key, value);
-                // }
+                for (const [key, value] of formData.entries()) {
+                    console.log(key, value);
+                }
 
                 // CREATE data
                 try {
@@ -618,7 +650,7 @@ const Packages: React.FC = () => {
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response:', error.response?.data);
+                    console.error('Response:', error.response?.data);
                 }
                 finally {
                     setIsLoading(false)
@@ -627,11 +659,9 @@ const Packages: React.FC = () => {
             
             // EDIT service
             const handleEdit_service = (data: any) => {
-                console.log('data = ',data)
             }
             // DELETE service
             const handleDelete_service = (id: number) => {
-                console.log('id = ',id)
             }
         //#endregion
 
@@ -646,21 +676,13 @@ const Packages: React.FC = () => {
                     }
                 })
                 .then((response) => {
-                    console.log('data = ',response.data)
                     // 1) normal
                     setDatabase_service(response.data)
-
-                    // 2) if standalone only
-                    const standaloneServices = response.data.filter((item: any) => item.service?.is_standalone == 1);
-                    setDatabase_serviceStandalone(standaloneServices);
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error.data);
                 });
             }, [])
-            useEffect(()=> {
-                fetchData_service()
-            }, []) 
 
         //#endregion
         
@@ -674,7 +696,7 @@ const Packages: React.FC = () => {
                 // form
                 const [form_category, setForm_category] = useState(false);
                 // fieldname
-                const [category, setCategory] = useState<Service_category_type>({
+                const [category, setCategory] = useState<Package_category_type>({
                     id: 0,
                     name: ''
                 });
@@ -690,7 +712,7 @@ const Packages: React.FC = () => {
                         await api.post(`/package`, {
                             name: category.name,
 
-                            switch: 'service_category'
+                            switch: 'category'
                         });
 
                         fetchData_category()
@@ -709,12 +731,12 @@ const Packages: React.FC = () => {
             // #region 3) --> database
                 
                 // database
-                const [databaseCategory, setDatabase_category] = useState<Service_category_type[]>([])
+                const [databaseCategory, setDatabase_category] = useState<Package_category_type[]>([])
                 // fetch database
                 const fetchData_category = useCallback(() => {
                     api.get(`/package`, {
                         params: {
-                            switch: 'service_category'
+                            switch: 'category'
                         }
                     })
                     .then((response) => {
@@ -724,7 +746,7 @@ const Packages: React.FC = () => {
                         // set data (KIV)
                         setServices(prev => ({
                             ...prev,
-                            service_category_id: response.data[0].name
+                            package_category_id: response.data[0].id
                         }))
                     })
                     .catch((error) => {
@@ -733,7 +755,7 @@ const Packages: React.FC = () => {
                 }, []);
                 
                 // tableTitle_category
-                const tableTitle_category: Column<Service_category_type>[] = [
+                const tableTitle_category: Column<Package_category_type>[] = [
                     {
                         key: "name",
                         header: "Name",
@@ -954,13 +976,13 @@ const Packages: React.FC = () => {
                             {/* 8) Service */}
                             <MultiSelect
                                 label="Service"
-                                options={databaseService_standalone.map((service) => ({
+                                options={databaseService.map((service) => ({
                                     id: service.service?.id || 0,
                                     name: service.service.title,
                                     // description: service.service.description,
                                     price: service.service.price, 
                                     gender: service.service.gender,
-                                    type: service.service_category.name,
+                                    type: service.package_category.name,
                                     duration: service.service.duration,
                                 }))}
                                 selected={selectedService}
@@ -990,7 +1012,7 @@ const Packages: React.FC = () => {
                                 description={data.service.description}
                                 price={data.service.price}
                                 duration={data.service.duration}
-                                category={data.service_category.name}
+                                category={data.package_category.name}
                                 onEdit={() => handleEdit_service(data.service)}
                                 onDelete={() => handleDelete_service(data.service.id)}
                             />

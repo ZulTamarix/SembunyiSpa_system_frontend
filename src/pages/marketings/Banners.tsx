@@ -36,8 +36,6 @@ const Banners: React.FC = () => {
             // loading
             setIsLoading(true)
 
-            console.log('data = ',banner)
-
             // format data to allow image uploading
             const formData = new FormData();
 
@@ -71,13 +69,9 @@ const Banners: React.FC = () => {
         
             // EDIT package
             const handleEdit_banner = (data: any) => {
-                console.log('data = ',data)
-
             }
             // DELETE package
             const handleDelete_banner = (id: number) => {
-                console.log('id = ',id)
-
             }
     //#endregion
     // #region 4) --> database
@@ -87,7 +81,6 @@ const Banners: React.FC = () => {
         const fetchData_banner = useCallback(() => {
             api.get(`/banner`)
             .then((response) => {
-                console.log('data = ',response.data)
                 // 1) normal
                 setDatabase_banner(response.data)
             })
@@ -112,27 +105,25 @@ const Banners: React.FC = () => {
             {/* Table */}
             <Grid className="md:grid-cols-2">
                 {databaseBanner.map((data) => (
-                    <div className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
-                        {/* Poster */}
-                        <div className="mb-5 h-48 w-full overflow-hidden rounded-2xl">
+                    <div className="flex w-full flex-col rounded-[28px] border border-stone-200 bg-white shadow-sm">
+                        <div className="relative mb-2 h-48 w-full overflow-hidden rounded-t-2xl">
+                            {/* Poster */}
                             <img
                                 src={`http://localhost:8000/${data.poster}`}
                                 alt={data.title}
                                 className="h-full w-full"
                             />
-                        </div>
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
-                        {/* Title */}
-                        <div className="mt-3 h-6">
-                            <h2 className="text-base font-serif font-bold text-stone-900 uppercase">
-                                {data.title}
-                            </h2>
-                        </div>
+                            <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                                {/* Title */}
+                                <h2 className="text-sm font-serif font-bold text-white uppercase">
+                                    {data.title}
+                                </h2>
 
-                        {/* Description */}
-                        <div className="mt-3 flex-1">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs text-title font-semibold">
+                                {/* Description */}
+                                <span className="text-xs text-white">
                                     {data.description.length > 150
                                         ? `${data.description.slice(0, 150)}...`
                                         : data.description}
@@ -141,20 +132,28 @@ const Banners: React.FC = () => {
                         </div>
 
                         {/* Actions */}
-                        <div className="mt-3 flex gap-3">
-                            <button
-                                onClick={handleEdit_banner}
-                                className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50"
-                            >
-                                Edit
-                            </button>
+                        {/* <div className="flex items-center justify-between "> */}
+                        <div className="flex items-center justify-between px-5 pb-2">
+                            {/* Status */}
+                            <span className={`rounded-full border border-border px-4 py-1 text-sm font-semibold transition-colors
+                                ${data.status == 'active'
+                                    ? 'border-green-200 bg-green-50 text-green-600'
+                                    : 'border-rose-200 bg-rose-50 text-rose-500'
+                                }    
+                            `}>
+                                {data.status}
+                            </span>
 
-                            <button
-                                onClick={() =>handleDelete_banner(data.id)}
-                                className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
-                            >
-                                Remove
-                            </button>
+                            {/* Actions */}
+                            <div className="flex gap-3">
+                                <button onClick={handleEdit_banner} className="rounded-full border border-border px-4 py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50">
+                                    Edit
+                                </button>
+
+                                <button onClick={() => handleDelete_banner(data.id)} className="rounded-full border border-border px-4 py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50">
+                                    Remove
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}

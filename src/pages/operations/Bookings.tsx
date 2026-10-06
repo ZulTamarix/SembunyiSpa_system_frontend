@@ -5,9 +5,12 @@ import Grid from "../../components/ui/Grid";
 import Button from "../../components/ui/Button";
 import { Plus } from "lucide-react";
 import Searchbar from "../../components/ui/Searchbar";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
+import type { User_type } from "../../interface/user";
+import api from "../../api/axios";
+import Card from "../../components/ui/Card";
 
 const Bookings: React.FC = () => {
 
@@ -18,13 +21,28 @@ const Bookings: React.FC = () => {
         const [isLoading, setIsLoading] = useState(false);
         // form
         const [form_booking, setForm_booking] = useState(false);
-
+        // fieldname
+        const [booking, setBooking] = useState<Booking_type>({
+            id: 0,
+            user_id: 0,
+            package_id: 0,
+            code: '',
+            date_start: '',
+            time_start: '',
+            time_end: '',
+            booking_type: 'prepaid',
+            status: 'booked',
+            payment: 'pending'
+        })
     //#endregion
+   
+   
     // #region 3) --> method
         const handleCreate_booking = () => {
 
         }
     //#endregion
+
 
     // #region 4) --> database
         // tableTitle
@@ -62,6 +80,29 @@ const Bookings: React.FC = () => {
             { key: "status", header: "Status" },
             { key: "payment", header: "Payment" },
         ];
+
+        const [databaseUser, setDatabase_user] = useState<User_type[]>([])
+        // customer
+        const fetchData_user = useCallback(() => {
+
+            api.get(`/user`, {
+                params: {
+                    role: 'customer',
+                    extra_1: 'include walk in',
+                }
+            })
+            .then((response) => {
+                console.log('data = ',response.data)
+                setDatabase_user(response.data)
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            });
+        }, [])
+
+        useEffect(() => {
+            fetchData_user()
+        }, [])
     //#endregion
 
 
@@ -82,6 +123,7 @@ const Bookings: React.FC = () => {
                         <option value=''>Cancelled</option>
                     </select>
                     <Button onClick={() => { setForm_booking(true); setCrud('create')}} icon={Plus} label='Create Booking' className="md:col-start-5"/>
+                    {/* <Button onClick={() => navigate("/packages/create")} icon={Plus} label='Create Booking' className="md:col-start-5"/> */}
                 </div>
             </Grid>
             
@@ -91,7 +133,7 @@ const Bookings: React.FC = () => {
             </Grid> */}
             
             {/* Create */}
-            <Form title={crud=='create'? 'Add Category':'Edit Category'} isOpen={form_booking} onClose={() => setForm_booking(false)} width="max-w-lg"
+            <Form title={crud=='create'? 'Add Booking':'Edit Booking'} isOpen={form_booking} onClose={() => setForm_booking(false)} width="max-w-2xl"
                 
                 footer={
                     <>
@@ -123,12 +165,39 @@ const Bookings: React.FC = () => {
                 }
             >
                 <div className="space-y-4">
-                    {/* <Field
-                        label="Name"
-                        placeholder="Body Message, Facial, ..."
-                        value={category.name}
-                        onChange={(e) => setCategory({...category, name:e.target.value})}
-                    /> */}
+
+                    {/* 1) customer */}
+                    <Card>
+                        <Field
+                            label="Select Customer"
+                            placeholder="Search by phone number"
+                            value={booking.user_id}
+                            onChange={(e) => {
+                                setBooking({...booking, user_id: Number(e.target.value)});
+                            }}
+                            type="select-searchable"
+                            options={[
+                                ...databaseUser.map((user) => ({
+                                    label: user.name,
+                                    value: user.id,
+                                    search: [
+                                        user.name,
+                                        user.phoneNo
+                                    ],
+                                    display: [
+                                        user.name,
+                                        `+ ${user.phoneNo}`
+                                    ],
+                                }))
+                            ]}
+                        />
+                    </Card>
+
+                    {/* 2) package */}
+                    {/* <Card>
+
+                    </Card> */}
+
                 </div>
             </Form>
         </>

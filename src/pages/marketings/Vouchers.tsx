@@ -45,8 +45,6 @@ const Membership: React.FC = () => {
 
         const handleCreate_voucher = async () => {
 
-            console.log('voucher = ',voucher)
-            console.log('selected = ',selectedCustomer)
             // CREATE data
             try {
                 await api.post(`/voucher`, {
@@ -143,7 +141,6 @@ const Membership: React.FC = () => {
         const fetchData_voucher = useCallback(() => {
             api.get(`/voucher`)
             .then((response) => {
-                console.log('data = ',response.data)
                 setDatabase_voucher(response.data)
             })
             .catch((error) => {
@@ -158,7 +155,6 @@ const Membership: React.FC = () => {
                 }
             })
             .then((response) => {
-                console.log('data = ',response.data)
                 setDatabase_user(response.data)
             })
             .catch((error) => {

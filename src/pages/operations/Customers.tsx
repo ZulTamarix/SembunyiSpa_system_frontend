@@ -183,22 +183,11 @@ const Customers: React.FC = () => {
         }
         // UPDATE
         const handleUpdate_voucher = async () => {
-            // console.log('voucher = ',selectedVoucher)
-            // console.log('customer = ',selectedCustomer)
 
             // find index
             const selectedIndex = databaseVoucher.findIndex(
                 (voucher) => voucher.id === selectedVoucher.id
             );
-            console.log('index = ',selectedIndex)
-            const test = {
-                       user_id: selectedCustomer.id,
-                    voucher_id: selectedVoucher.id,
-                    quantity: databaseVoucher[selectedIndex].quantity,
-
-                    switch: 'voucher_customer'
-            }
-            console.log('test = ',test)
             // loading
             setIsLoading(true)
             try {
