@@ -15,7 +15,8 @@ const Customers: React.FC = () => {
     //#region 1) --> useState
 
         // set CRUD's State
-        const [crud, setCrud] = useState<'create'|'edit'>('create')
+        const [crud, ] = useState<'create'|'edit'>('create')
+        // const [crud, setCrud] = useState<'create'|'edit'>('create')
         // form
         const [form_voucher, setForm_voucher] = useState(false);
         // loading

@@ -141,6 +141,7 @@ const User: React.FC = () => {
         }
         const handleDelete_user = async (data: User_type) => {
             setOpen(true)
+            console.log('KIV = ',data)
         }
 
     //#endregion

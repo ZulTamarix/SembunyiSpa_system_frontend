@@ -1,22 +1,16 @@
-import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
-import Field from "../../components/ui/Field";
-import { useCallback, useEffect, useState } from "react";
-import { Table, type Column } from "../../components/ui/Table";
-import { ClipboardList, Component, Plus, Sparkles, Warehouse } from "lucide-react";
-import Form from "../../components/ui/Form";
-import api from "../../api/axios";
+import { useEffect, useState } from "react";
+import { ClipboardList, Sparkles } from "lucide-react";
 import Tabs from "../../components/ui/Tab";
-import Label from "../../components/ui/Label";
 
 const Settings: React.FC = () => {
     
     //#region 0 --> main
     
         // set CRUD's State
-        const [crud, setCrud] = useState<'create'|'edit'>('create')
+        // const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
-        const [isLoading, setIsLoading] = useState(false);
+        // const [isLoading, setIsLoading] = useState(false);
 
         // swap section
         const [active, setActive] = useState("staff");

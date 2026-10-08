@@ -69,9 +69,11 @@ const Banners: React.FC = () => {
         
             // EDIT package
             const handleEdit_banner = (data: any) => {
+                console.log('KIV = ',data)
             }
             // DELETE package
             const handleDelete_banner = (id: number) => {
+                console.log('KIV = ',id)
             }
     //#endregion
     // #region 4) --> database
@@ -202,7 +204,7 @@ const Banners: React.FC = () => {
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => {
-                                    const file = e.target.files?.[0];
+                                    const file = (e.target as HTMLInputElement).files?.[0];
 
                                     if (file) {
                                         setBanner({

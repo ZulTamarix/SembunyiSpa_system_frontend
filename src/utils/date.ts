@@ -19,7 +19,7 @@ export function getToday() {
         monthIndex: today.getMonth(),
     };
 }
-export function formatTime(time24) {
+export function formatTime(time24: any) {
     const [hourStr, minuteStr] = time24.split(":");
     let hour = parseInt(hourStr, 10);
     const period = hour >= 12 ? "PM" : "AM";
@@ -45,16 +45,16 @@ export const getCurrentTime = (): string => {
     return `${hours}:${minutes}`;
 };
 // Convert a number into a 2-digit string.
-export function pad2(n) {
+export function pad2(n: any) {
     return String(n).padStart(2, "0");
 }
 
 // Create a date in YYYY-MM-DD format.
-export function toISODate(year, monthIndex, day) {
+export function toISODate(year: any, monthIndex: any, day: any) {
     return `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
 }
 
 // Get the number of days in a specific month.
-export function daysInMonth(year, monthIndex) {
+export function daysInMonth(year: any, monthIndex: any) {
     return new Date(year, monthIndex + 1, 0).getDate();
 }

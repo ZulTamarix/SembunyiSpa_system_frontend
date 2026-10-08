@@ -1,4 +1,3 @@
-import { Table, type Column } from "../../components/ui/Table";
 import type { Booking_selected_type, Booking_type } from "../../interface/booking";
 import Grid from "../../components/ui/Grid";
 import Button from "../../components/ui/Button";
@@ -10,7 +9,6 @@ import Field from "../../components/ui/Field";
 import type { User_type } from "../../interface/user";
 import api from "../../api/axios";
 import Card from "../../components/ui/Card";
-import { getCurrentDate } from "../../utils/date";
 // import { getCurrentDate, getCurrentTime } from "../../utils/date";
 
 
@@ -60,7 +58,8 @@ const Bookings: React.FC = () => {
         // })
         // temporary
         const [temp_package, setTemp_package] = useState<any | null>(null)
-        const [new_therapist, setNew_therapist] = useState<any | null>(null)
+        const [new_therapist, ] = useState<any | null>(null)
+        // const [new_therapist, setNew_therapist] = useState<any | null>(null)
     //#endregion
    
 
@@ -117,9 +116,9 @@ const Bookings: React.FC = () => {
                     }))
 
                 // 2) fetch all 'therapist_id'
-                    const therapist_list = temp_package.package_therapist.map(
-                        (item: any) => item.user_id
-                    );
+                    // const therapist_list = temp_package.package_therapist.map(
+                    //     (item: any) => item.user_id
+                    // );
                     // console.log('date = ',booking.date_start);
                     // console.log('time start = ',booking.time_start); 
                     // console.log('time end = ',time_end);
@@ -178,7 +177,7 @@ const Bookings: React.FC = () => {
             }
             catch(error) {
                 console.error('Error:', error); // use only to remove warning on vscode
-                console.error('Response status:', error.response?.data);
+                // console.error('Response status:', error.response?.data);
             }
             finally {
                 setIsLoading(false)

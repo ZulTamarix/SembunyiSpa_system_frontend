@@ -1,45 +1,45 @@
 import Card from "../../components/ui/Card";
 import Grid from "../../components/ui/Grid";
-import { Table, type Column } from "../../components/ui/Table";
-import type { Booking_type } from "../../interface/booking";
-import bookings from "../../JSON/booking.json"
+// import { Table, type Column } from "../../components/ui/Table";
+// import type { Booking_type } from "../../interface/booking";
+// import bookings from "../../JSON/booking.json"
 
 const Dashboard: React.FC = () => {
 
     // 1) tableTitle
-    const tableTitle: Column<Booking_type>[] = [
-        {
-            key: "id",
-            header: "Booking ID",
-            render: (row) => (
-            <span className="text-sm text-[#8a8175] font-mono">{row.id}</span>
-            ),
-        },
-        {
-            key: "name",
-            header: "Customer",
-            render: (row) => (
-                <div>
-                    <div className="font-semibold text-black">{row.name}</div>
-                    <span>{row.phoneNo}</span>
-                </div>
-            )
-        },
-        { key: "treatment", header: "Treatment" },
-        {
-            key: "date",
-            header: "Date & Time",
-            render: (row) => (
-            <div>
-                <div>{row.date}</div>
-                <div className="text-sm text-[#8a8175]">{row.time}</div>
-            </div>
-            ),
-        },
-        { key: "therapist", header: "Therapist" },
-        { key: "status", header: "Status" },
-        { key: "payment", header: "Payment" },
-    ];
+    // const tableTitle: Column<Booking_type>[] = [
+    //     {
+    //         key: "id",
+    //         header: "Booking ID",
+    //         render: (row) => (
+    //         <span className="text-sm text-[#8a8175] font-mono">{row.id}</span>
+    //         ),
+    //     },
+    //     // {
+    //     //     key: "name",
+    //     //     header: "Customer",
+    //     //     render: (row) => (
+    //     //         <div>
+    //     //             <div className="font-semibold text-black">{row.name}</div>
+    //     //             <span>{row.phoneNo}</span>
+    //     //         </div>
+    //     //     )
+    //     // },
+    //     { key: "treatment", header: "Treatment" },
+    //     // {
+    //     //     key: "date",
+    //     //     header: "Date & Time",
+    //     //     render: (row) => (
+    //     //     <div>
+    //     //         <div>{row.date}</div>
+    //     //         <div className="text-sm text-[#8a8175]">{row.time}</div>
+    //     //     </div>
+    //     //     ),
+    //     // },
+    //     { key: "therapist", header: "Therapist" },
+    //     { key: "status", header: "Status" },
+    //     { key: "payment", header: "Payment" },
+    // ];
 
     // 2) card style
     const titleStyle = "text-sm text-title font-semibold";
@@ -81,9 +81,9 @@ const Dashboard: React.FC = () => {
             </Grid>
 
             {/* Table */}
-            <Grid>
+            {/* <Grid>
                 <Table fieldName={tableTitle} data={bookings.slice(0, 2)} />
-            </Grid>
+            </Grid> */}
         </>
     )
 }
