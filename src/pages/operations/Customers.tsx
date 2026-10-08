@@ -195,6 +195,7 @@ const Customers: React.FC = () => {
                     user_id: selectedCustomer.id,
                     voucher_id: selectedVoucher.id,
                     quantity: databaseVoucher[selectedIndex].quantity,
+                    date_expired: databaseVoucher[selectedIndex].date_expired,
 
                     switch: 'voucher_customer'
                 });

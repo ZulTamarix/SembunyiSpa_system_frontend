@@ -36,6 +36,14 @@ export const getCurrentDate = (): string => {
 
     return `${year}-${month}-${day}`;
 };
+export const getCurrentTime = (): string => {
+    const date = new Date();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${hours}:${minutes}`;
+};
 // Convert a number into a 2-digit string.
 export function pad2(n) {
     return String(n).padStart(2, "0");

@@ -10,7 +10,6 @@ import api from "../../api/axios";
 import Tabs from "../../components/ui/Tab";
 import type { User_type } from "../../interface/user";
 import Label from "../../components/ui/Label";
-import Bullet_point from "../../components/ui/Bullet_point";
 import type { Voucher_type } from "../../interface/vouchers";
 import { getCurrentDate } from "../../utils/date";
 
@@ -34,16 +33,16 @@ const Membership: React.FC = () => {
         useEffect(() => {
             switch(active) {
                 case 'customer': 
-                    fetchData_user()
-                    fetchData_customer()
                 break;
                 case 'membership': 
                 break;
             }
         },[active])
-        // useEffect(() => {
-        //     fetchData_membership()
-        // }, [])
+        useEffect(() => {
+            fetchData_user()
+            fetchData_customer()
+            fetchData_membership()
+        }, [])
     //#endregion
 
 
@@ -63,6 +62,7 @@ const Membership: React.FC = () => {
                 password: '',
                 date_joined: '',
                 membership_id: 0,
+                membership_date_expired: getCurrentDate(),
                 specialty: '',
                 code: ''
             })
@@ -74,18 +74,13 @@ const Membership: React.FC = () => {
             // UPDATE
             const handleUpdate_customer = async() => {
                 // loading
-                // setIsLoading(true)
-                const test = {
-                    id: customer.id,
-                    membership_id: customer.membership_id,
-                    code: customer.code,
-                }
-                console.log(test)
-
+                setIsLoading(true)
+                
                 try {
                     
                     await api.put(`/user/${customer.id}`, {
                         membership_id: customer.membership_id,
+                        membership_date_expired: customer.membership_date_expired,
                         code: customer.code,
 
                         switch: 'membership'
@@ -121,6 +116,7 @@ const Membership: React.FC = () => {
                         password: '',
                         date_joined: '',
                         membership_id: databaseMembership[0]?.membership.id ?? 1,
+                        membership_date_expired: getCurrentDate(),
                         specialty: '',
                         code: ''
                     })
@@ -166,7 +162,7 @@ const Membership: React.FC = () => {
                     }
                 })
                 .then((response) => {
-                    // console.log('customer = ',response.data)
+                    console.log('customer = ',response.data)
                     setDatabase_customer(response.data)
                 })
                 .catch((error) => {
@@ -197,7 +193,7 @@ const Membership: React.FC = () => {
                 {
                     key: "privilege",
                     header: "Privilege",
-                    render: (row) => `${row.membership_privilege.length} privileges`
+                    render: (row) => `${row.membership.voucher?.length} privileges`
                 },
                 {
                     key: "",
@@ -219,7 +215,7 @@ const Membership: React.FC = () => {
         //#region 1) --> useState
             // form
             const [form_membership, setForm_membership] = useState(false);
-            const [form_privilege, setForm_privilege] = useState(false);
+            const [form_voucher, setForm_voucher] = useState(false);
             // fieldname (privilege)
             const [membership, setMembership] = useState<Membership_type> ({
                 id: 0,
@@ -243,13 +239,12 @@ const Membership: React.FC = () => {
         //#region 2) --> method
         
             // open popup (privilege)
-            const handleOpen_privilege = (index: number) => {
-
+            const handleOpen_voucher = (index: number) => {
+                console.log('index = ',index)
                 // a) voucher
                 setVoucher((prev) => {
                     if (prev[index]) {
                         // return prev;
-
                         return prev.map((item, i) =>
                             i === index
                                 ? {
@@ -301,20 +296,26 @@ const Membership: React.FC = () => {
                 });
 
                 setIndex(index)
-                setForm_privilege(true)
+                setForm_voucher(true)
+                console.log('voucher = ',voucher)
+            }
+
+            const handleAdd_voucher = () => {
+                // console.log('voucher = ',voucher)\
+                setIndex(prev => prev+1)
+                setForm_voucher(false)
             }
 
             // CREATE (membership)
             const handleCreate_membership = async() => {
                 // loading
                 setIsLoading(true)
+                console.log('memebrship = ',membership)
+                console.log('voucher = ',voucher)
 
-                // clean any blank or ""
-                const privilege_cleaned = privilege.filter(privilege => privilege !== "");
                 try {
                     await api.post(`/membership`, {
                         tier: membership.tier,
-                        privilege_list: privilege_cleaned,
                         voucher_list: voucher
                     });
 
@@ -323,7 +324,7 @@ const Membership: React.FC = () => {
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
-                    console.error('Response status:', error.response?.data);
+                    // console.error('Response status:', error.response?.data);
                 }
                 finally {
                     setIsLoading(false)
@@ -378,7 +379,41 @@ const Membership: React.FC = () => {
                 {
                     key: "privilege",
                     header: "Privilege",
-                    render: (row) => row.membership_privilege.length
+                    render: (row) => row.voucher.length
+                },
+                {
+                    key: "",
+                    header: "Action",
+                    render: () => (
+                        <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
+                            Edit
+                        </button>
+                    )
+                },
+            ];
+            const tableTitle_voucher: Column<Voucher_type>[] = [
+                {
+                    key: "code",
+                    header: "Code",
+                    render: (row) => row.code
+                },
+                {
+                    key: "description",
+                    header: "Description",
+                    render: (row) => row.description
+                },
+                {
+                    key: "type",
+                    header: "Type",
+                    render: (row) => (
+                        <>
+                            {row.type == 'gift' ? (
+                                <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Gift</span>
+                            ) : (
+                                <span className="py-1 px-2 rounded-full bg-purple-100 text-purple-600">Promotional</span>
+                            )} 
+                        </>
+                    )
                 },
                 {
                     key: "",
@@ -487,6 +522,14 @@ const Membership: React.FC = () => {
                                 value={customer.code || ''}
                                 onChange={(e) => setCustomer({...customer, code: e.target.value})}
                             />
+                            {/* 4)  */}
+                            <Field
+                                label="Expired Date (1 year after subscription date)"
+                                // placeholder="2026-03-12"
+                                value={customer.membership_date_expired}
+                                onChange={(e) => setCustomer({...customer, membership_date_expired: e.target.value})}
+                                type="date"
+                            />
                         </div>
                     </Form>
                 </>
@@ -544,32 +587,72 @@ const Membership: React.FC = () => {
                                 onChange={(e) => setMembership({ ...membership, tier : e.target.value })}
                             />
                             {/* 2) */}
-                            <div className="grid grid-cols-4">
-                                <div className="col-span-3">
+                            <div className="grid md:grid-cols-4">
+                                {/* <div className="col-span-3">
                                     <Bullet_point
                                         value={privilege}
                                         onChange={setPrivilege}
                                         label="Privilege"
                                         placeholder="20% Discount on Food and Beverage"
                                     />
+                                </div> */}
+                                <div className="col-start-4">
+                                <Field
+                                    key={index}
+                                    label="Add voucher"
+                                    type="button"
+                                    value="+"
+                                    onClick={() => handleOpen_voucher(index)}
+                                />
                                 </div>
-                                <div className="col-span-1 space-y-2">
+                                {/* <div className="col-span-1 space-y-2">
                                     {privilege.map((_, index) => (
                                         <Field
                                             key={index}
                                             label={index === 0 ? "Add voucher" : ""}
                                             type="button"
                                             value="+"
-                                            onClick={() => handleOpen_privilege(index)}
+                                            onClick={() => handleOpen_voucher(index)}
                                         />
                                     ))}
-                                </div>
+                                </div> */}
                             </div>
+                            {}
+                            <Table fieldName={tableTitle_voucher} data={voucher} />
                         </div>
                     </Form>
 
                     {/* Form (privilege)(voucher) */}
-                    <Form title={crud=='create'? 'Add Privilege':'Edit Privilege'} isOpen={form_privilege} onClose={() => setForm_privilege(false)} width="max-w-xl">
+                    <Form title={crud=='create'? 'Add Privilege':'Edit Privilege'} isOpen={form_voucher} onClose={() => setForm_voucher(false)} width="max-w-xl"
+                    
+                        footer={
+                            <>
+                                <Button
+                                    label="Cancel"
+                                    className="w-24"
+                                    onClick={() => setForm_voucher(false)}
+                                    disabled={isLoading}
+                                />
+
+                                {crud == 'create' ? (
+                                    <Button
+                                        label="Save"
+                                        className="w-24"
+                                        onClick={handleAdd_voucher}
+                                        // onClick={() => setIndex(prev => prev+1)}
+                                    />
+                                ) : (
+                                    <Button
+                                        label="Update"
+                                        className="w-24"
+                                        onClick={handleAdd_voucher}
+                                        disabled={isLoading}
+                                    />
+                                )}
+
+                            </>
+                        }
+                    >
                         <div className="space-y-4">
                             <Grid className="md:grid-cols-2">
         

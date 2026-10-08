@@ -59,6 +59,7 @@ const App: React.FC = () => {
             {/* 5) Admin */}
             <Route path="/user" element={<User />} />
             <Route path="/settings" element={<Settings />} />
+
           </Routes>
         </main>
       </div>

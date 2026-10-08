@@ -8,7 +8,7 @@ interface FieldOption {
 }
 
 interface FieldProps {
-    label: string;
+    label?: string;
     type?: 'text' | 'number' | 'date' | 'time' | 'button' | 'select' | 'select-searchable' | 'file' | 'textarea' | 'switch';
     placeholder?: string;
     value?: string | number | boolean;
@@ -27,18 +27,19 @@ interface FieldProps {
 
 export default function Field({ label, type = "text", placeholder, value, accept, onChange, onClick, error, required = false, disabled = false, options = [] }: FieldProps) {
     
-    // for 'select-searchable' only
-    const [search, setSearch] = useState("");
-    const [open, setOpen] = useState(false);
-    const filteredOptions = options.filter((option) => {
-        if (!option.search) {
-            return option.label.toLowerCase().includes(search.toLowerCase());
-        }
+    // #region 1) --> 'select-searchable' only
+        const [search, setSearch] = useState("");
+        const [open, setOpen] = useState(false);
+        const filteredOptions = options.filter((option) => {
+            if (!option.search) {
+                return option.label.toLowerCase().includes(search.toLowerCase());
+            }
 
-        return option.search.some((item) =>
-            item.toLowerCase().includes(search.toLowerCase())
-        );
-    });
+            return option.search.some((item) =>
+                item.toLowerCase().includes(search.toLowerCase())
+            );
+        });
+    //#endregion
 
     return (
         <div>
@@ -205,6 +206,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     value={value as string | number}
                     onChange={onChange}
                     disabled={disabled}
+                    step={type === "time" ? 900 : undefined}
                     className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
                         error
                             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"

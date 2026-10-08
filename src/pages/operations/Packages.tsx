@@ -127,176 +127,7 @@ import TextEditor from "../../components/ui/TextEditor";
 
 //#endregion
 
-// #region 0) b) --> Package + Service form
-
-    interface PackageFormProps {
-        data: Package_type;
-        setData: React.Dispatch<React.SetStateAction<Package_type>>;
-        posterPreview: string | null;
-        setPosterPreview: React.Dispatch<React.SetStateAction<string | null>>;
-        setContent: React.Dispatch<React.SetStateAction<string>>;
-        databaseCategory?: Package_category_type[]
-    }
-
-    function PackageForm({ data, setData, posterPreview, setPosterPreview, setContent, databaseCategory }: PackageFormProps) {
-        return (
-            <>
-                <Grid className="md:grid-cols-2">
-                    {/* 0) Standalone / Optional */}
-                    {databaseCategory && (
-                        <>
-                            <Field
-                                label="Available as Standalone Service?"
-                                value={data.is_standalone}
-                                onChange={(e) => setData({ ...data, is_standalone: e.target.value == 'true'})}
-                                type="select"
-                                options={[
-                                    { label:'Yes', value: 'true'},
-                                    { label:'No', value: 'false'},
-                                ]}
-                            />
-                        
-                        <Field
-                            label="Category"
-                            value={data.package_category_id}
-                            onChange={(e) => setData({ ...data, package_category_id: Number(e.target.value)})}
-                            type="select"
-                            options={
-                                databaseCategory.map((category:any) => ({
-                                    label: category.name,
-                                    value: category.id
-                                }))
-                            }
-                        />
-                        </>
-                    )}
-
-                    {/* 1) Poster */}
-                    <div className="col-span-2">
-                        <Field
-                            label="Poster"
-                            placeholder="Set a poster"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-
-                                if (file) {
-                                    setData({
-                                        ...data,
-                                        poster: file,
-                                    });
-
-                                    setPosterPreview(URL.createObjectURL(file));
-                                }
-                            }}
-                        />
-
-                        {posterPreview && (
-                            <div className="mt-3">
-                                <img
-                                    src={posterPreview}
-                                    alt="Poster preview"
-                                    className="w-48 h-48 object-cover rounded-lg border"
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* 2) Title */}
-                    <Field
-                        label="Title"
-                        placeholder="Enter a title"
-                        value={data.title}
-                        onChange={(e) =>
-                            setData({
-                                ...data,
-                                title: e.target.value,
-                            })
-                        }
-                    />
-
-                    {/* 3) Duration */}
-                    <Field
-                        label="Duration (minutes)"
-                        placeholder="Set duration in minute"
-                        value={data.duration}
-                        onChange={(e) =>
-                            setData({
-                                ...data,
-                                duration: e.target.value === ""
-                                    ? ""
-                                    : Number(e.target.value),
-                            })
-                        }
-                        type="number"
-                    />
-
-                    {/* 4) Price */}
-                    <Field
-                        label="Price (RM)"
-                        placeholder="Enter price"
-                        value={data.price}
-                        onChange={(e) =>
-                            setData({
-                                ...data,
-                                price: e.target.value === ""
-                                    ? ""
-                                    : Number(e.target.value),
-                            })
-                        }
-                        type="number"
-                    />
-
-                    {/* 5) Gender */}
-                    <Field
-                        label="Gender"
-                        placeholder="Select a gender"
-                        value={data.gender}
-                        onChange={(e) =>
-                            setData({
-                                ...data,
-                                gender: e.target.value,
-                            })
-                        }
-                        type="select"
-                        options={[
-                            { label: "Man", value: "man" },
-                            { label: "Woman", value: "woman" },
-                            { label: "Unisex", value: "unisex" },
-                            { label: "Couple", value: "couple" },
-                        ]}
-                    />
-
-                    {/* 6) Description */}
-                    <div className="cols-span-2">
-                        <Field
-                            label="Description"
-                            placeholder="Enter a description"
-                            value={data.description}
-                            onChange={(e) =>
-                                setData({
-                                    ...data,
-                                    description: e.target.value,
-                                })
-                            }
-                            type="textarea"
-                        />
-                    </div>
-
-                    {/* 7) Details / What to expect */}
-                    <div className="col-span-2">
-                        <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
-                        <TextEditor onChange={setContent} />
-                    </div>
-                </Grid>
-            </>
-        );
-    }
-
-//#endregion
-
-// #region 0) c) --> Package + Service table
+// #region 0) b) --> Package + Service table
     interface PackageCardProps {
         poster: string | File | null;
         title: string;
@@ -394,7 +225,7 @@ const Packages: React.FC = () => {
         // const [content, setContent] = useState("");
 
         // swap section
-        const [active, setActive] = useState("package");
+        const [active, setActive] = useState("service");
         const tabs = [
             { id: "package", label: "Package", icon: Package },
             { id: "service", label: "Service", icon: Sparkles },
@@ -413,7 +244,7 @@ const Packages: React.FC = () => {
         },[active])
 
         
-        // fetch database by default
+        // fetch database on load
         useEffect(() => {
             fetchData_service()
             fetchData_therapist()
@@ -432,7 +263,7 @@ const Packages: React.FC = () => {
                 }
             })
             .then((response) => {
-                console.log('data = ',response.data)
+                // console.log('data = ',response.data)
                 // 1) normal
                 setDatabase_therapist(response.data)
             })
@@ -443,8 +274,8 @@ const Packages: React.FC = () => {
     //#endregion
 
 
-    //#region 1) --> package
-   
+    // #region 1) + 2) --> package + service
+
         // #region 1) --> useState
             // fieldname
             const [packages, setPackages] = useState<Package_type> ({
@@ -455,15 +286,21 @@ const Packages: React.FC = () => {
                 duration: 0,
                 price: 0,
                 gender: '',
+                detail: '',
+                type: active=='package'? 'package' : 'service',
+                package_category_id: 0,
+                is_standalone: null
             })
             // preview poster
-            const [posterPreview_package, setPosterPreview_package] = useState<string | null>(null);
-            // content / details
-            const [detail_package, setDetail_package] = useState('');
+            const [posterPreview, setPosterPreview] = useState<string | null>(null);
             // form
             const [form_package, setForm_package] = useState(false);
+
+            const [selectedTherapist, setSelected_therapist] = useState<number[]>([]);
+            const [selectedRoom, setSelected_room] = useState<number[]>([]);
             const [selectedService, setSelected_service] = useState<number[]>([]);
         //#endregion
+
 
         // #region 2) --> useEffect
             // reset fieldname everytime form closed
@@ -477,18 +314,74 @@ const Packages: React.FC = () => {
                         duration: 0,
                         price: 0,
                         gender: '',
+                        detail: '',
+                        type: active=='package'? 'package' : 'service',
+                        package_category_id: databaseCategory[0]?.id,
+                        is_standalone: null
                     })
                 }
-                setPosterPreview_package(null)
+                setPosterPreview(null)
+                setSelected_room([])
+                setSelected_therapist([])
+                setSelected_service([])
             }, [form_package])
 
+            // change 'type'
+            useEffect(() => {
+                if(active == 'package') { 
+                    setPackages ((prev) => ({
+                        ...prev,
+                        is_standalone: null,
+                        type: 'package'
+                    }))
+                }
+                else if(active == 'service') { 
+                    setPackages ((prev) => ({
+                        ...prev,
+                        is_standalone: false,
+                        type: 'service'
+                    }))
+                }
+            }, [active])
+
+            // set duration + price
+            useEffect(() => {
+                console.log('testing')
+
+                const selectedTotal = databaseService
+                    .filter(item => selectedService.includes(item?.service.id || 0))
+                    .reduce(
+                        (total, item) => {
+                            total.duration += Number(item.service.duration || 0);
+                            total.price += Number(item.service.price || 0);
+
+                            return total;
+                        },
+                        { duration: 0, price: 0 }
+                    );
+
+                console.log('total = ', selectedTotal);
+
+                setPackages((prev) => ({
+                    ...prev,
+                    duration: selectedTotal.duration,
+                    price: selectedTotal.price,
+                }))
+            }, [selectedService])
         //#endregion
+        
 
         // #region 3) --> method
-            // CREATE package
+
+            // CREATE service
             const handleCreate_package = async () => {
                 // loading
                 setIsLoading(true)
+
+                // console.log('data = ',packages)
+                // console.log('therapist = ',selectedTherapist)
+                // console.log('room = ',selectedRoom)
+                // console.log('service = ',selectedService)
 
                 // format data to allow image uploading
                 const formData = new FormData();
@@ -501,11 +394,21 @@ const Packages: React.FC = () => {
                 formData.append('duration', packages.duration.toString());
                 formData.append('price', packages.price.toString());
                 formData.append('gender', packages.gender);
-                formData.append('detail', JSON.stringify(detail_package));
+                formData.append('type', packages.type);
+                formData.append('detail', packages.detail);
+                formData.append('package_category_id', packages.package_category_id?.toString() || '');
 
-                formData.append('service_list', JSON.stringify(selectedService));
-
-                formData.append('switch', 'package');
+                // optional
+                if(active == 'package') {
+                    formData.append('service_list', JSON.stringify(selectedService));
+                    formData.append('switch', 'package');
+                }
+                else if(active == 'service') {
+                    formData.append('therapist_list', JSON.stringify(selectedTherapist));
+                    formData.append('room_list', JSON.stringify(selectedRoom));
+                    formData.append('switch', 'service');
+                    formData.append('is_standalone', packages.is_standalone ? '1' : '0');
+                }
 
                 // for (const [key, value] of formData.entries()) {
                 //     console.log(key, value);
@@ -515,8 +418,12 @@ const Packages: React.FC = () => {
                 try {
                     await api.post(`/package`, formData);
 
-                    // fetchData_package()
-                    // setForm_package(false)
+                    if(active == 'package') 
+                        fetchData_package()
+                    else if(active == 'service') 
+                        fetchData_service()
+
+                    setForm_package(false)
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
@@ -526,15 +433,17 @@ const Packages: React.FC = () => {
                     setIsLoading(false)
                 }
             }
-            // EDIT package
+            
+            // EDIT service
             const handleEdit_package = (data: any) => {
-
+                console.log('data = ',data)
             }
-            // DELETE package
+            // DELETE service
             const handleDelete_package = (id: number) => {
-
+                console.log('id = ',id)
             }
         //#endregion
+
 
         // #region 4) --> database
 
@@ -555,118 +464,7 @@ const Packages: React.FC = () => {
                 });
             }, [])
 
-        //#endregion
-    
-    //#endregion
-
-
-    //#region 2) --> service
-   
-        // #region 1) --> useState
-            // fieldname
-            const [services, setServices] = useState<Package_type> ({
-                id: 0,
-                poster: null,
-                title: '',
-                description: '',
-                duration: 0,
-                price: 0,
-                gender: '',
-
-                package_category_id: 0,
-                is_standalone: true,
-            })
-            // content / details
-            const [detail_service, setDetail_service] = useState('');
-            // preview poster
-            const [posterPreview_service, setPosterPreview_service] = useState<string | null>(null);
-            // form
-            const [form_service, setForm_service] = useState(false);
-            const [selectedTherapist, setSelected_therapist] = useState<number[]>([]);
-            const [selectedRoom, setSelected_room] = useState<number[]>([]);
-        //#endregion
-
-        // #region 2) --> useEffect
-            // reset fieldname everytime form closed
-            useEffect(() => {
-                if(!form_service) { 
-                    setServices ({
-                        id: 0,
-                        poster: null,
-                        title: '',
-                        description: '',
-                        duration: 0,
-                        price: 0,
-                        gender: '',
-
-                        package_category_id: databaseCategory[0]?.id,
-                        is_standalone: true,
-                    })
-                }
-                setPosterPreview_service(null)
-            }, [form_service])
-
-        //#endregion
-     
-        // #region 3) --> method
-
-            // CREATE service
-            const handleCreate_service = async () => {
-                // loading
-                setIsLoading(true)
-
-                // console.log('data = ',services)
-
-                // format data to allow image uploading
-                const formData = new FormData();
-
-                if(services.poster)
-                    formData.append('poster', services.poster);
-
-                formData.append('title', services.title);
-                formData.append('description', services.description);
-                formData.append('duration', services.duration.toString());
-                formData.append('price', services.price.toString());
-                formData.append('gender', services.gender);
-                formData.append('detail', JSON.stringify(detail_service));
-                formData.append('package_category_id', services.package_category_id?.toString() || '');
-                formData.append('is_standalone', services.is_standalone ? '1' : '0');
-
-                formData.append('therapist_list', JSON.stringify(selectedTherapist));
-                formData.append('room_list', JSON.stringify(selectedRoom));
-
-                formData.append('switch', 'service');
-
-                for (const [key, value] of formData.entries()) {
-                    console.log(key, value);
-                }
-
-                // CREATE data
-                try {
-                    await api.post(`/package`, formData);
-
-                    fetchData_service()
-                    setForm_service(false)
-                }
-                catch(error) {
-                    console.error('Error:', error); // use only to remove warning on vscode
-                    console.error('Response:', error.response?.data);
-                }
-                finally {
-                    setIsLoading(false)
-                }
-            }
             
-            // EDIT service
-            const handleEdit_service = (data: any) => {
-            }
-            // DELETE service
-            const handleDelete_service = (id: number) => {
-            }
-        //#endregion
-
-        // #region 4) --> database
-
             // service
             const [databaseService, setDatabase_service] = useState<Service_json[]>([])
             const fetchData_service = useCallback(() => {
@@ -685,7 +483,7 @@ const Packages: React.FC = () => {
             }, [])
 
         //#endregion
-        
+    
     //#endregion
     
 
@@ -744,7 +542,7 @@ const Packages: React.FC = () => {
                         setDatabase_category(response.data);
 
                         // set data (KIV)
-                        setServices(prev => ({
+                        setPackages(prev => ({
                             ...prev,
                             package_category_id: response.data[0].id
                         }))
@@ -928,69 +726,6 @@ const Packages: React.FC = () => {
                             />
                         ))}
                     </Grid>
-
-                    {/* Form */}
-                    <Form title={crud=='create'? 'Add Package':'Edit Package'} isOpen={form_package} onClose={() => setForm_package(false)} width="max-w-3xl"
-                        footer={
-                            <>
-                                <Button
-                                    label="Cancel"
-                                    className="w-24"
-                                    onClick={() => setForm_package(false)}
-                                    disabled={isLoading}
-                                />
-
-                                {crud == 'create' ? (
-                                    <Button
-                                        label="Save"
-                                        className="w-24"
-                                        onClick={handleCreate_package}
-                                        disabled={isLoading}
-                                    />
-                                ) : (
-                                    <Button
-                                        label="Update"
-                                        className="w-24"
-                                        onClick={handleCreate_package}
-                                        disabled={isLoading}
-                                    />
-                                )}
-
-                            </>
-                        }
-                    >
-
-                        <div className="space-y-4">
-                            {/* (1+2+3+4+5+6+7) reusable form */}
-                            <PackageForm
-                                data={packages}
-                                setData={setPackages}
-                                posterPreview={posterPreview_package}
-                                setPosterPreview={setPosterPreview_package}
-                                setContent={setDetail_package}
-                            />
-                        </div>
-
-                        <Grid>
-                            
-                            {/* 8) Service */}
-                            <MultiSelect
-                                label="Service"
-                                options={databaseService.map((service) => ({
-                                    id: service.service?.id || 0,
-                                    name: service.service.title,
-                                    // description: service.service.description,
-                                    price: service.service.price, 
-                                    gender: service.service.gender,
-                                    type: service.package_category.name,
-                                    duration: service.service.duration,
-                                }))}
-                                selected={selectedService}
-                                onChange={setSelected_service}
-                            />
-                        </Grid>
-
-                    </Form>
                 </>  
             )}
 
@@ -1000,7 +735,7 @@ const Packages: React.FC = () => {
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
                         <Label>{databaseService.length} Service</Label>
-                        <Button onClick={()=> {setForm_service(true); setCrud('create')}} icon={Plus} label='Add Service' className="md:col-start-5"/>
+                        <Button onClick={()=> {setForm_package(true); setCrud('create')}} icon={Plus} label='Add Service' className="md:col-start-5"/>
                     </Grid>
                     
                     <Grid className="md:grid-cols-2">
@@ -1013,80 +748,11 @@ const Packages: React.FC = () => {
                                 price={data.service.price}
                                 duration={data.service.duration}
                                 category={data.package_category.name}
-                                onEdit={() => handleEdit_service(data.service)}
-                                onDelete={() => handleDelete_service(data.service.id)}
+                                onEdit={() => handleEdit_package(data.service)}
+                                onDelete={() => handleDelete_package(data.service.id)}
                             />
                         ))}
                     </Grid>
-
-                    {/* Form */}
-                    <Form title={crud=='create'? 'Add Service':'Edit Service'} isOpen={form_service} onClose={() => setForm_service(false)} width="max-w-3xl"
-                        
-                        footer={
-                            <>
-                                <Button
-                                    label="Cancel"
-                                    className="w-24"
-                                    onClick={() => setForm_service(false)}
-                                    disabled={isLoading}
-                                />
-
-                                {crud == 'create' ? (
-                                    <Button
-                                        label="Save"
-                                        className="w-24"
-                                        onClick={handleCreate_service}
-                                        disabled={isLoading}
-                                    />
-                                ) : (
-                                    <Button
-                                        label="Update"
-                                        className="w-24"
-                                        onClick={handleCreate_service}
-                                        disabled={isLoading}
-                                    />
-                                )}
-
-                            </>
-                        }
-                    >
-                        <div className="space-y-4">
-                            {/* (0+1+2+3+4+5+6+7) reusable form */}
-                            <PackageForm
-                                data={services}
-                                setData={setServices}
-                                posterPreview={posterPreview_service}
-                                setPosterPreview={setPosterPreview_service}
-                                setContent={setDetail_service}
-                                databaseCategory={databaseCategory}
-                            />
-
-                            <Grid className="md:grid-cols-2">
-                                {/* 9) Therapist */}
-                                <MultiSelect
-                                    label="Therapist"
-                                    options={databaseTherapist.map((therapist) => ({
-                                        id: therapist?.id || 0,
-                                        name: therapist.name,
-                                        description: therapist.specialty,
-                                    }))}
-                                    selected={selectedTherapist}
-                                    onChange={setSelected_therapist}
-                                />
-                                {/* 10) Room */}
-                                <MultiSelect
-                                    label="Room"
-                                    options={databaseRoom.map((room) => ({
-                                        id: room.id,
-                                        name: room.name,
-                                        description: room.description
-                                    }))}
-                                    selected={selectedRoom}
-                                    onChange={setSelected_room}
-                                />
-                            </Grid>
-                        </div>
-                    </Form>
                 </>  
             )}
     
@@ -1217,6 +883,249 @@ const Packages: React.FC = () => {
                     </>
                 </>
             )}
+
+            {/* Form for both package + service */}
+            <Form title={crud=='create'? `Add  ${active=='package'? 'Package': 'Service'}`:`Edit ${active=='package'? 'Package': 'Service'}`} isOpen={form_package} onClose={() => setForm_package(false)} width="max-w-3xl"
+                
+                footer={
+                    <>
+                        <Button
+                            label="Cancel"
+                            className="w-24"
+                            onClick={() => setForm_package(false)}
+                            disabled={isLoading}
+                        />
+
+                        {crud == 'create' ? (
+                            <Button
+                                label="Save"
+                                className="w-24"
+                                onClick={handleCreate_package}
+                                disabled={isLoading}
+                            />
+                        ) : (
+                            <Button
+                                label="Update"
+                                className="w-24"
+                                onClick={handleCreate_package}
+                                disabled={isLoading}
+                            />
+                        )}
+
+                    </>
+                }
+            >
+                <div className="space-y-4">
+                    {/* (0+1+2+3+4+5+6+7) reusable form */}
+                   
+                    <Grid className="md:grid-cols-2">
+
+                        {/* 1) */}
+                        <div className="col-span-2">
+                            <Field
+                                label="Poster"
+                                placeholder="Set a poster"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+
+                                    if (file) {
+                                        setPackages({
+                                            ...packages,
+                                            poster: file,
+                                        });
+
+                                        setPosterPreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                            />
+
+                            {posterPreview && (
+                                <div className="mt-3">
+                                    <img
+                                        src={posterPreview}
+                                        alt="Poster preview"
+                                        className="w-48 h-48 object-cover rounded-lg border"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 2) */}
+                        <Field
+                            label="Title"
+                            placeholder="Enter a title"
+                            value={packages.title}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    title: e.target.value,
+                                })
+                            }
+                        />
+                    
+                        {/* 3) */}
+                        <Field
+                            label="Category"
+                            value={packages.package_category_id}
+                            onChange={(e) => setPackages({ ...packages, package_category_id: Number(e.target.value)})}
+                            type="select"
+                            options={
+                                databaseCategory.map((category:any) => ({
+                                    label: category.name,
+                                    value: category.id
+                                }))
+                            }
+                        />
+
+                        {/* 4) */}
+                        <Field
+                            label="Duration (minutes)"
+                            placeholder="Set duration in minute"
+                            value={packages.duration}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    duration: e.target.value === ""
+                                        ? ""
+                                        : Number(e.target.value),
+                                })
+                            }
+                            type="number"
+                            disabled
+                        />
+
+                        {/* 5)e */}
+                        <Field
+                            label="Price (RM)"
+                            placeholder="Enter price"
+                            value={packages.price}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    price: e.target.value === ""
+                                        ? ""
+                                        : Number(e.target.value),
+                                })
+                            }
+                            type="number"
+                        />
+
+                        {/* 6) */}
+                        <Field
+                            label="Gender"
+                            placeholder="Select a gender"
+                            value={packages.gender}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    gender: e.target.value,
+                                })
+                            }
+                            type="select"
+                            options={[
+                                { label: "Man", value: "man" },
+                                { label: "Woman", value: "woman" },
+                                { label: "Unisex", value: "unisex" },
+                                { label: "Couple", value: "couple" },
+                            ]}
+                        />
+
+                        {/* 7) */}
+                        <div className="cols-span-2">
+                            <Field
+                                label="Description"
+                                placeholder="Enter a description"
+                                value={packages.description}
+                                onChange={(e) =>
+                                    setPackages({
+                                        ...packages,
+                                        description: e.target.value,
+                                    })
+                                }
+                                type="textarea"
+                            />
+                        </div>
+
+                        
+                        {/* 8) / Optional */}
+                        {active == 'service' && (
+                            <div className="col-span-2">
+                                <Field
+                                    label="Available as Standalone Service?"
+                                    value={packages?.is_standalone || ''}
+                                    onChange={(e) => setPackages({ ...packages, is_standalone: e.target.value == 'true'})}
+                                    type="select"
+                                    options={[
+                                        { label:'Yes', value: 'true'},
+                                        { label:'No', value: 'false'},
+                                    ]}
+                                />
+                            </div>
+                        )}
+
+                        {/* 9) Details / What to expect */}
+                        <div className="col-span-2">
+                            <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
+                            <TextEditor
+                                onChange={(value) => setPackages({
+                                    ...packages,
+                                    detail: value
+                                })}
+                            />
+                        </div>
+
+                    </Grid>
+
+                    {/* Situational */}
+                    {active == 'package' ? (
+                        <Grid>
+                            
+                            {/* 10) Service */}
+                            <MultiSelect
+                                label="Service"
+                                options={databaseService.map((service) => ({
+                                    id: service.service?.id || 0,
+                                    name: service.service.title,
+                                    // description: service.service.description,
+                                    price: service.service.price, 
+                                    gender: service.service.gender,
+                                    type: service.package_category.name,
+                                    duration: service.service.duration,
+                                }))}
+                                selected={selectedService}
+                                onChange={setSelected_service}
+                            />
+                        </Grid>
+                    ) : (
+                        <Grid className="md:grid-cols-2">
+                            {/* 11) Therapist */}
+                            <MultiSelect
+                                label="Therapist"
+                                options={databaseTherapist.map((therapist) => ({
+                                    id: therapist?.id || 0,
+                                    name: therapist.name,
+                                    description: therapist.specialty,
+                                }))}
+                                selected={selectedTherapist}
+                                onChange={setSelected_therapist}
+                            />
+                            {/* 12) Room */}
+                            <MultiSelect
+                                label="Room"
+                                options={databaseRoom.map((room) => ({
+                                    id: room.id,
+                                    name: room.name,
+                                    description: room.description
+                                }))}
+                                selected={selectedRoom}
+                                onChange={setSelected_room}
+                            />
+                        </Grid>
+                    )}
+                </div>
+            </Form>
         </>
     )
 }

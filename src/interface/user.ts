@@ -10,6 +10,7 @@ export interface User_type {
   password: string;
   date_joined: string;
   membership_id?: number | "";
+  membership_date_expired?: string;
   specialty: string;
   code: string;
 
