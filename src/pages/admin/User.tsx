@@ -9,6 +9,7 @@ import Field from "../../components/ui/Field";
 import api from "../../api/axios";
 import Label from "../../components/ui/Label";
 import { getCurrentDate } from "../../utils/date";
+import Alert from "../../components/ui/Alert";
 
 const User: React.FC = () => {
 
@@ -27,13 +28,13 @@ const User: React.FC = () => {
             code: ''
         })
         // a) detect error -> common
-        const [error, setError] = useState<Partial<Record<keyof User_type, string>>>({});
+        const [open, setOpen] = useState(false);
         // set CRUD's State
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
         const [isLoading, setIsLoading] = useState(false);
-        // form
-        const [form, setForm] = useState(false);
+        // form_user
+        const [form_user, setForm_user] = useState(false);
         // database
         const [databaseUser, setDatabase_user] = useState<User_type[]>([])
         
@@ -41,10 +42,9 @@ const User: React.FC = () => {
 
 
     // #region 2) --> useEffect
-        // reset fieldname everytime form closed
+        // reset fieldname everytime form_user closed
         useEffect(() => {
-            if(!form) {
-                setError({})  
+            if(!form_user) {
                 setUser ({
                     id: 0,
                     role: '',
@@ -58,15 +58,95 @@ const User: React.FC = () => {
                     code: ''
                 })
             }
-        }, [form])
-        // fetch 'user' database
-        useEffect(() => {
-            fetchData_user()
-        }, [])
+        }, [form_user])
     //#endregion
 
 
     // #region 3) --> method
+        // edit user
+        const handleEdit_user = (data: User_type) => {
+            setUser(data)
+            setForm_user(true)
+            setCrud('edit')
+        }
+
+        // CREATE user
+        const handleCreate_user = async () => {
+
+            // loading
+            setIsLoading(true)
+
+            // CREATE data
+            try {
+                await api.post(`/user`, {
+                    role: user.role,
+                    name: user.name,
+                    email: user.email,
+                    phoneNo: user.phoneNo,
+                    password: user.password,
+                    date_joined: user.date_joined,
+
+                    ...(user.role === 'therapist' && {
+                        specialty: user.specialty,
+                        code: user.code
+                    }),
+                });
+
+                fetchData_user()
+                setForm_user(false)
+            }
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response status:', error.response?.data);
+            }
+            finally {
+                setIsLoading(false)
+            }
+        }
+
+        // UPDATE user
+        const handleUpdate_user = async () => {
+
+            // loading
+            setIsLoading(true)
+
+            // UPDATE data
+            try {
+                await api.put(`/user/${user.id}`, {
+                    role: user.role,
+                    name: user.name,
+                    email: user.email,
+                    phoneNo: user.phoneNo,
+                    password: user.password,
+                    date_joined: user.date_joined,
+
+                    ...(user.role === 'therapist' && {
+                        specialty: user.specialty,
+                        code: user.code
+                    }),
+
+                    switch: 'user'
+                });
+
+                fetchData_user()
+                setForm_user(false)
+            }
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response status:', error.response?.data);
+            }
+            finally {
+                setIsLoading(false)
+            }
+        }
+        const handleDelete_user = async (data: User_type) => {
+            setOpen(true)
+        }
+
+    //#endregion
+    
+    // #region 4) --> database
+    
         // tableTitle
         const tableTitle: Column<User_type>[] = [
             {
@@ -123,13 +203,20 @@ const User: React.FC = () => {
             {
                 key: "",
                 header: "Action",
-                render: () => (
-                    <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
-                        Edit
-                    </button>
+                render: (row) => (
+                    <div className="flex gap-3">
+                        <button onClick={() => handleEdit_user(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                            Edit
+                        </button>
+                        
+                        <button onClick={() => handleDelete_user(row)} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                            Delete
+                        </button>
+                    </div>
                 )
             },
         ];
+
         // fetch database
         const fetchData_user = useCallback(() => {
             api.get(`/user`)
@@ -141,77 +228,22 @@ const User: React.FC = () => {
                 console.error('Error fetching:', error);
             });
         }, []);
-        // CREATE user
-        const handleCreate_user = async () => {
 
-            // check error
-            const newError: Partial<Record<keyof User_type, string>> = {};
-            if (!user.role.trim()) 
-                newError.role = "Role is required";
-            if (!user.name.trim()) 
-                newError.name = "Name is required";
-            if (!user.email.trim()) 
-                newError.email = "Email is required";
-            if (!user.phoneNo.trim()) 
-                newError.phoneNo = "Phone number is required";
-            if (!user.password.trim()) 
-                newError.password = "Password is required";
-            if (!user.date_joined.trim()) 
-                newError.date_joined = "Date joined is required";
+        // fetch 'user' database
+        useEffect(() => {
+            fetchData_user()
+        }, [])
 
-            if(user.role == 'therapist') {
-                if (!user.specialty.trim()) 
-                    newError.specialty = "Position is required";
-                if (!user.code.trim()) 
-                    newError.code = "Code is required";
-            }
-
-            setError(newError);
-
-            // Stop here if there are errorRoom
-            if (Object.keys(newError).length > 0) 
-                return;
-
-            // loading
-            setIsLoading(true)
-
-            // CREATE data
-            try {
-                await api.post(`/user`, {
-                    role: user.role,
-                    name: user.name,
-                    email: user.email,
-                    phoneNo: user.phoneNo,
-                    password: user.password,
-                    date_joined: user.date_joined,
-
-                    ...(user.role === 'therapist' && {
-                        specialty: user.specialty,
-                        code: user.code
-                    }),
-                });
-
-                fetchData_user()
-                setForm(false)
-            }
-            catch(error) {
-                console.error('Error:', error); // use only to remove warning on vscode
-                // console.error('Response status:', error.response?.data);
-            }
-            finally {
-                setIsLoading(false)
-            }
-        }
     //#endregion
-    
 
     
     return (
         <>
+        test = {open}
             {/* Create */}
             <Grid className="md:grid-cols-5 items-center">
                 <Label>{databaseUser.length} User</Label>
-                <Button onClick={()=> {setForm(true); setCrud('create')}} icon={Plus} label='Add User' className="md:col-start-5"/>
+                <Button onClick={()=> {setForm_user(true); setCrud('create')}} icon={Plus} label='Add User' className="md:col-start-5"/>
             </Grid>
 
             {/* table */}
@@ -220,14 +252,14 @@ const User: React.FC = () => {
             </Grid>
 
             {/* create user */}
-            <Form title={crud=='create'? 'Add User':'Edit User'} isOpen={form} onClose={() => setForm(false)} width="max-w-lg"
+            <Form title={crud=='create'? 'Add User':'Edit User'} isOpen={form_user} onClose={() => setForm_user(false)} width="max-w-lg"
                 
                 footer={
                     <>
                         <Button
                             label="Cancel"
                             className="w-24"
-                            onClick={() => setForm(false)}
+                            onClick={() => setForm_user(false)}
                             disabled={isLoading}
                         />
 
@@ -243,7 +275,7 @@ const User: React.FC = () => {
                             <Button
                                 label="Update"
                                 className="w-24"
-                                onClick={handleCreate_user}
+                                onClick={handleUpdate_user}
                                 disabled={isLoading}
                             />
                         )}
@@ -256,7 +288,6 @@ const User: React.FC = () => {
                         label="Role"
                         placeholder="Select role"
                         value={user.role}
-                        error={error.role}
                         onChange={(e) => setUser({ ...user, role: e.target.value as 'admin' | 'therapist' | 'customer' | 'walkin' })}
                         type="select"
                         options={[
@@ -273,14 +304,12 @@ const User: React.FC = () => {
                                 label="Specialty"
                                 placeholder="Spa Manager"
                                 value={user.specialty}
-                                error={error.specialty}
                                 onChange={(e) => setUser({ ...user, specialty: e.target.value })}
                             />
                             <Field
                                 label="Code"
                                 placeholder="C1763"
                                 value={user.code}
-                                error={error.code}
                                 onChange={(e) => setUser({ ...user, code: e.target.value })}
                             />
                         </>
@@ -290,40 +319,49 @@ const User: React.FC = () => {
                         label="Name"
                         placeholder="Enter name"
                         value={user.name}
-                        error={error.name}
                         onChange={(e) => setUser({ ...user, name: e.target.value })}
                     />
                     <Field
                         label="Email"
                         placeholder="Enter email"
                         value={user.email}
-                        error={error.email}
                         onChange={(e) => setUser({ ...user, email: e.target.value })}
                     />
                     <Field
                         label="Phone"
                         placeholder="Enter phone number"
                         value={user.phoneNo}
-                        error={error.phoneNo}
                         onChange={(e) => setUser({ ...user, phoneNo: e.target.value })}
                     />
                     <Field
                         label="Password"
                         placeholder="Enter password"
                         value={user.password}
-                        error={error.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
+                        type="password"
                     />
                     <Field
                         label="Date joined"
                         // placeholder="2026-03-12"
                         value={user.date_joined}
-                        error={error.date_joined}
                         onChange={(e) => setUser({ ...user, date_joined: e.target.value })}
                         type="date"
                     />
                 </div>
             </Form>
+
+            {/* Delete user */}
+            <Alert
+                open={open}
+                title="Delete this project?"
+                description="All files and settings in this project will be removed. This can't be undone."
+                confirmLabel="Delete project"
+                onCancel={() => setOpen(false)}
+                onConfirm={() => {
+                    // do your action here
+                    setOpen(false);
+                }}
+            />
         </>
     )
 }

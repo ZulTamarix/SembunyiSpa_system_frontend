@@ -379,7 +379,7 @@ const Membership: React.FC = () => {
                 {
                     key: "privilege",
                     header: "Privilege",
-                    render: (row) => row.voucher.length
+                    render: (row) => row.voucher?.length
                 },
                 {
                     key: "",

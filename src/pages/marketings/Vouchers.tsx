@@ -287,7 +287,7 @@ const Membership: React.FC = () => {
                         {/* 3) */}
                         <Field
                             label="Date expired"
-                            value={voucher.date_expired}
+                            value={voucher?.date_expired || ''}
                             onChange={(e) => setVoucher({...voucher, date_expired: e.target.value})}
                             type="date"
                         />
