@@ -8,6 +8,7 @@ import type { Banner_type } from "../../interface/banner";
 import { getCurrentDate } from "../../utils/date";
 import Field from "../../components/ui/Field";
 import api from "../../api/axios";
+import Alert from "../../components/ui/Alert";
 
 const Banners: React.FC = () => {
     
@@ -18,6 +19,9 @@ const Banners: React.FC = () => {
         const [isLoading, setIsLoading] = useState(false);
         // form
         const [form_banner, setForm_banner] = useState(false);
+        // selected id
+        const [selectedId, setSelected_id] = useState(0);
+        const [isAlert, setIs_alert] = useState(false);
         // fieldname
         const [banner, setBanner] = useState<Banner_type> ({
             id: 0,
@@ -30,7 +34,18 @@ const Banners: React.FC = () => {
         const [posterPreview_banner, setPosterPreview_banner] = useState<string | null>(null);
 
     //#endregion
+    
     // #region 3) --> method
+
+        // EDIT package
+        const handleEdit_banner = (data: Banner_type) => {
+            setBanner(data)
+
+            setForm_banner(true)
+            setCrud('edit')
+        }
+
+        // CREATE banner
         const handleCreate_banner = async () => {
 
             // loading
@@ -66,16 +81,69 @@ const Banners: React.FC = () => {
                 setIsLoading(false)
             }
         }
-        
-            // EDIT package
-            const handleEdit_banner = (data: any) => {
-                console.log('KIV = ',data)
+
+        // UPDATE banner
+        const handleUpdate_banner = async () => {
+
+            // loading
+            setIsLoading(true)
+
+            // format data to allow image uploading
+            const formData = new FormData();
+
+            // if(banner.poster)
+                // formData.append('poster', banner.poster);
+
+            formData.append('title', banner.title);
+            formData.append('description', banner.description);
+            formData.append('status', banner.status);
+            formData.append('date_expired', banner.date_expired);
+
+            // for (const [key, value] of formData.entries()) {
+            //     console.log(key, value);
+            // }
+
+            // CREATE data
+            try {
+                await api.put(`/banner/${banner.id}`, formData);
+
+                fetchData_banner()
+                setForm_banner(false)
             }
-            // DELETE package
-            const handleDelete_banner = (id: number) => {
-                console.log('KIV = ',id)
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response:', error.response?.data);
             }
+            finally {
+                setIsLoading(false)
+            }
+        }
+
+        // DELETE package
+        const handleDelete_banner = async () => {
+            
+            setIsLoading(true)
+
+            // DELETE data
+            try {
+                await  api.delete(`/banner/${selectedId}`)
+
+                fetchData_banner()
+                setForm_banner(false)
+                setIs_alert(false)
+            }
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response status:', error.response?.data);
+            }
+            finally {
+                setIsLoading(false)
+            }
+        }
+
     //#endregion
+
+
     // #region 4) --> database
 
         // c) banner
@@ -95,6 +163,7 @@ const Banners: React.FC = () => {
         }, []) 
 
     //#endregion
+
 
     return (
         <>
@@ -148,12 +217,12 @@ const Banners: React.FC = () => {
 
                             {/* Actions */}
                             <div className="flex gap-3">
-                                <button onClick={handleEdit_banner} className="rounded-full border border-border px-4 py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50">
+                                <button onClick={() => handleEdit_banner(data)} className="rounded-full border border-border px-4 py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50 cursor-pointer">
                                     Edit
                                 </button>
 
-                                <button onClick={() => handleDelete_banner(data.id)} className="rounded-full border border-border px-4 py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50">
-                                    Remove
+                                <button onClick={() => {setIs_alert(true), setSelected_id(data?.id|| 0)}} className="rounded-full border border-border px-4 py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50 cursor-pointer">
+                                    Delete
                                 </button>
                             </div>
                         </div>
@@ -185,7 +254,7 @@ const Banners: React.FC = () => {
                             <Button
                                 label="Update"
                                 className="w-24"
-                                onClick={handleCreate_banner}
+                                onClick={handleUpdate_banner}
                                 disabled={isLoading}
                             />
                         )}
@@ -196,38 +265,43 @@ const Banners: React.FC = () => {
                 <div className="space-y-4">
                 
                     {/* 1) Poster */}
-                    <Grid className="md:grid-cols-2">
-                        <div className="col-span-2">
-                            <Field
-                                label="Poster"
-                                placeholder="Set a poster"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = (e.target as HTMLInputElement).files?.[0];
+                    {crud == 'create' && ( 
+                        <Grid className="md:grid-cols-2">
 
-                                    if (file) {
-                                        setBanner({
-                                            ...banner,
-                                            poster: file,
-                                        });
+                            {/* 1) Poster */}
+                            <div className="col-span-2">
+                                <Field
+                                    label="Poster"
+                                    placeholder="Set a poster"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = (e.target as HTMLInputElement).files?.[0];
 
-                                        setPosterPreview_banner(URL.createObjectURL(file));
-                                    }
-                                }}
-                            />
+                                        if (file) {
+                                            setBanner({
+                                                ...banner,
+                                                poster: file,
+                                            });
 
-                            {posterPreview_banner && (
-                                <div className="mt-3">
-                                    <img
-                                        src={posterPreview_banner}
-                                        alt="Poster preview"
-                                        className="w-48 h-48 object-cover rounded-lg border"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </Grid>
+                                            setPosterPreview_banner(URL.createObjectURL(file));
+                                        }
+                                    }}
+                                />
+
+                                {posterPreview_banner && (
+                                    <div className="mt-3">
+                                        <img
+                                            src={posterPreview_banner}
+                                            alt="Poster preview"
+                                            className="w-48 h-48 object-cover rounded-lg border"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                        </Grid>
+                    )}
 
                     <Grid className="md:grid-cols-2">
                         {/* 2) Title */}
@@ -237,7 +311,7 @@ const Banners: React.FC = () => {
                             value={banner.title}                            
                             onChange={(e) => setBanner({ ...banner, title: e.target.value })}
                         />
-                        {/* 4) Date */}
+                        {/* 3) Date */}
                         <Field
                             label="Date expired"
                             placeholder="Enter a title"
@@ -248,6 +322,21 @@ const Banners: React.FC = () => {
                     </Grid>
 
                     <Grid className="md:grid-cols-1">
+                        
+                        {/* 4) Status (optional) */}
+                        {crud == 'edit' && (
+                            <Field
+                                label="Status"
+                                value={banner.status}
+                                onChange={(e) => setBanner({ ...banner, status: e.target.value as 'active' | 'inactive' })}
+                                type="select"
+                                options={[
+                                    { label: 'Active', value: 'active' },
+                                    { label: 'Inactive', value: 'inactive' },
+                                ]}
+                            />
+                        )}
+
                         {/* 5) Description */}
                         <Field
                             label="Description"
@@ -259,6 +348,20 @@ const Banners: React.FC = () => {
                     </Grid>
                 </div>
             </Form>
+
+            {/* Delete voucher */}
+            <Alert
+                open={isAlert}
+                title="Delete this banner?"
+                description="This action can't be undone."
+                isLoading={isLoading}
+                confirmLabel="Delete"
+                onCancel={() => setIs_alert(false)}
+                onConfirm={() => {
+                    // do your action here
+                    handleDelete_banner()
+                }}
+            />
         </>
     )
 }

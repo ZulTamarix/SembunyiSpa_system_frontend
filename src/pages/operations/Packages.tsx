@@ -5,13 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import api from "../../api/axios";
 import Field from "../../components/ui/Field";
-import { type Package_category_type, type Package_json, type Package_type, type Service_json } from "../../interface/package";
+import { type Package_category_type, type Package_json, type Package_type } from "../../interface/package";
 import type { Room_type } from "../../interface/room";
 import Label from "../../components/ui/Label";
 import type { User_type } from "../../interface/user";
 import Table, { type Column } from "../../components/ui/Table";
 import Tabs from "../../components/ui/Tab";
 import TextEditor from "../../components/ui/TextEditor";
+import Alert from "../../components/ui/Alert";
 
 // #region 0) a) --> Multi select
 
@@ -193,17 +194,11 @@ import TextEditor from "../../components/ui/TextEditor";
 
                 {/* Actions */}
                 <div className="mt-3 flex gap-3">
-                    <button
-                        onClick={onEdit}
-                        className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50"
-                    >
+                    <button onClick={onEdit} className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-title transition-colors hover:bg-stone-50 cursor-pointer">
                         Edit
                     </button>
 
-                    <button
-                        onClick={onDelete}
-                        className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
-                    >
+                    <button onClick={onDelete} className="flex-1 rounded-full border border-border py-1 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50 cursor-pointer">
                         Remove
                     </button>
                 </div>
@@ -225,7 +220,7 @@ const Packages: React.FC = () => {
         // const [content, setContent] = useState("");
 
         // swap section
-        const [active, setActive] = useState("service");
+        const [active, setActive] = useState("package");
         const tabs = [
             { id: "package", label: "Package", icon: Package },
             { id: "service", label: "Service", icon: Sparkles },
@@ -295,6 +290,9 @@ const Packages: React.FC = () => {
             const [posterPreview, setPosterPreview] = useState<string | null>(null);
             // form
             const [form_package, setForm_package] = useState(false);
+            // selected id
+            const [selectedId, setSelected_id] = useState(0);
+            const [isAlert, setIs_alert] = useState(false);
 
             const [selectedTherapist, setSelected_therapist] = useState<number[]>([]);
             const [selectedRoom, setSelected_room] = useState<number[]>([]);
@@ -321,9 +319,11 @@ const Packages: React.FC = () => {
                     })
                 }
                 setPosterPreview(null)
-                setSelected_room([])
-                setSelected_therapist([])
-                setSelected_service([])
+                if(crud == 'create') {
+                    setSelected_room([])
+                    setSelected_therapist([])
+                    setSelected_service([])
+                }
             }, [form_package])
 
             // change 'type'
@@ -346,21 +346,17 @@ const Packages: React.FC = () => {
 
             // set duration + price
             useEffect(() => {
-                console.log('testing')
-
                 const selectedTotal = databaseService
-                    .filter(item => selectedService.includes(item?.service.id || 0))
+                    .filter(item => selectedService.includes(item?.package.id || 0))
                     .reduce(
                         (total, item) => {
-                            total.duration += Number(item.service.duration || 0);
-                            total.price += Number(item.service.price || 0);
+                            total.duration += Number(item.package.duration || 0);
+                            total.price += Number(item.package.price || 0);
 
                             return total;
                         },
                         { duration: 0, price: 0 }
                     );
-
-                console.log('total = ', selectedTotal);
 
                 setPackages((prev) => ({
                     ...prev,
@@ -436,11 +432,43 @@ const Packages: React.FC = () => {
             
             // EDIT service
             const handleEdit_package = (data: any) => {
-                console.log('data = ',data)
+                // get selected
+                if(active == 'package') {
+                    const serviceIds = data.package_service.map((item:any) => item.id);
+                    setSelected_service(serviceIds)
+                }
+                else if(active == 'service') {
+                    const roomIds = data.package_room.map((item:any) => item.id);
+                    const therapistIds = data.package_therapist.map((item:any) => item.id);
+
+                    setSelected_room(roomIds)
+                    setSelected_therapist(therapistIds)
+                }
+
+                setPackages(data.package)
+                setForm_package(true)
+                setCrud('edit')
             }
             // DELETE service
-            const handleDelete_package = (id: number) => {
-                console.log('id = ',id)
+            const handleDelete_package = async() => {
+            
+                // setIsLoading(true)
+
+                // // DELETE data
+                // try {
+                //     await  api.delete(`/package/${selectedId}`)
+
+                //     fetchData_package()
+                //     setForm_package(false)
+                //     setIs_alert(false)
+                // }
+                // catch(error) {
+                //     console.error('Error:', error); // use only to remove warning on vscode
+                //     console.error('Response status:', error.response?.data);
+                // }
+                // finally {
+                //     setIsLoading(false)
+                // }
             }
         //#endregion
 
@@ -466,7 +494,7 @@ const Packages: React.FC = () => {
 
             
             // service
-            const [databaseService, setDatabase_service] = useState<Service_json[]>([])
+            const [databaseService, setDatabase_service] = useState<Package_json[]>([])
             const fetchData_service = useCallback(() => {
                 api.get(`/package`, {
                     params: {
@@ -692,6 +720,7 @@ const Packages: React.FC = () => {
 
     //#endregion
 
+    console.log('data = ',packages)
 
     return (
         <>
@@ -712,6 +741,7 @@ const Packages: React.FC = () => {
                         <Button onClick={()=> {setForm_package(true); setCrud('create')}} icon={Plus} label='Add Package' className="md:col-start-5"/>
                     </Grid>
                     
+                    {/* Table */}
                     <Grid className="md:grid-cols-2">
                         {databasePackage.map((data) => (
                             <PackageCard
@@ -721,8 +751,9 @@ const Packages: React.FC = () => {
                                 description={data.package.description}
                                 price={data.package.price}
                                 duration={data.package.duration}
-                                onEdit={() => handleEdit_package(data.package)}
-                                onDelete={() => handleDelete_package(data.package.id)}
+                                category={data.package_category.name}
+                                onEdit={() => handleEdit_package(data)}
+                                onDelete={() => {setIs_alert(true), setSelected_id(data?.package.id|| 0)}}
                             />
                         ))}
                     </Grid>
@@ -738,150 +769,38 @@ const Packages: React.FC = () => {
                         <Button onClick={()=> {setForm_package(true); setCrud('create')}} icon={Plus} label='Add Service' className="md:col-start-5"/>
                     </Grid>
                     
+                    {/* Table */}
                     <Grid className="md:grid-cols-2">
                         {databaseService.map((data) => (
                             <PackageCard
-                                key={data.service.id}
-                                poster={data.service.poster}
-                                title={data.service.title}
-                                description={data.service.description}
-                                price={data.service.price}
-                                duration={data.service.duration}
+                                key={data.package.id}
+                                poster={data.package.poster}
+                                title={data.package.title}
+                                description={data.package.description}
+                                price={data.package.price}
+                                duration={data.package.duration}
                                 category={data.package_category.name}
-                                onEdit={() => handleEdit_package(data.service)}
-                                onDelete={() => handleDelete_package(data.service.id)}
+                                onEdit={() => handleEdit_package(data)}
+                                onDelete={() => {setIs_alert(true), setSelected_id(data?.package.id|| 0)}}
                             />
                         ))}
                     </Grid>
+
+                    
+                    {/* Delete service */}
+                    <Alert
+                        open={isAlert}
+                        title="Delete this service?"
+                        description="This action can't be undone."
+                        isLoading={isLoading}
+                        confirmLabel="Delete"
+                        onCancel={() => setIs_alert(false)}
+                        onConfirm={() => {
+                            // do your action here
+                            handleDelete_package()
+                        }}
+                    />
                 </>  
-            )}
-    
-            {/* #region 3 --> setting */}
-            {active == 'setting' && (
-                <>
-
-                    {/* a) category */}
-                    <>
-                        {/* Create */}
-                        <Grid className="md:grid-cols-5 items-center">
-                            <Label>{databaseCategory.length} Category</Label>
-                            <Button onClick={() => { setForm_category(true); setCrud('create')}} icon={Plus} label='Add Category' className="md:col-start-5"/>
-                        </Grid>
-
-                        {/* table */}
-                        <Grid>
-                            <Table fieldName={tableTitle_category} data={databaseCategory}  />
-                        </Grid>
-
-                        {/* create category */}
-                        <Form title={crud=='create'? 'Add Category':'Edit Category'} isOpen={form_category} onClose={() => setForm_category(false)} width="max-w-lg"
-                            
-                            footer={
-                                <>
-                                    <Button
-                                        label="Cancel"
-                                        className="w-24"
-                                        onClick={() => setForm_category(false)}
-                                        disabled={isLoading}
-                                    />
-
-                                    {crud == 'create' ? (
-                                        <Button
-                                            label="Save"
-                                            className="w-24"
-                                            onClick={handleCreate_category}
-                                            disabled={isLoading}
-                                        />
-                                    ) : (
-
-                                        <Button
-                                            label="Update"
-                                            className="w-24"
-                                            onClick={handleCreate_category}
-                                            disabled={isLoading}
-                                        />
-                                    )}
-
-                                </>
-                            }
-                        >
-                            <div className="space-y-4">
-                                <Field
-                                    label="Name"
-                                    placeholder="Body Message, Facial, ..."
-                                    value={category.name}
-                                    onChange={(e) => setCategory({...category, name:e.target.value})}
-                                />
-                            </div>
-                        </Form>
-                        
-                    </>
-                    {/* b) room */}
-                    <>
-                        {/* Create */}
-                        <Grid className="md:grid-cols-5 items-center">
-                            <Label>{databaseRoom.length} Room</Label>
-                            <Button onClick={() => {setForm_room(true); setCrud('create')}} icon={Plus} label='Add Room' className="md:col-start-5"/>
-                        </Grid>
-
-                        {/* table */}
-                        <Grid>
-                            <Table fieldName={tableTitle_room} data={databaseRoom}  />
-                        </Grid>
-
-                        {/* create room */}
-                        <Form title={crud=='create'? 'Add Room':'Edit Room'} isOpen={form_room} onClose={() => setForm_room(false)} width="max-w-lg"
-                            
-                            footer={
-                                <>
-                                    <Button
-                                        label="Cancel"
-                                        className="w-24"
-                                        onClick={() => setForm_room(false)}
-                                        disabled={isLoading}
-                                    />
-
-                                    {crud == 'create' ? (
-                                        <Button
-                                            label="Save"
-                                            className="w-24"
-                                            onClick={handleCreate_room}
-                                            disabled={isLoading}
-                                        />
-                                    ) : (
-
-                                        <Button
-                                            label="Update"
-                                            className="w-24"
-                                            onClick={handleCreate_room}
-                                            disabled={isLoading}
-                                        />
-                                    )}
-
-                                </>
-                            }
-                        >
-                            <div className="space-y-4">
-                                <Field
-                                    label="Room"
-                                    placeholder="Enter room name"
-                                    value={room}
-                                    error={errorRoom.name}
-                                    onChange={(e) => setRoom(e.target.value)}
-                                />
-
-                                <Field
-                                    label="Description"
-                                    placeholder="Single room / Couple room / ...."
-                                    value={description}
-                                    error={errorRoom.description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                />
-                            </div>
-                        </Form>
-                        
-                    </>
-                </>
             )}
 
             {/* Form for both package + service */}
@@ -908,7 +827,8 @@ const Packages: React.FC = () => {
                                 label="Update"
                                 className="w-24"
                                 onClick={handleCreate_package}
-                                disabled={isLoading}
+                                // disabled={isLoading}
+                                disabled
                             />
                         )}
 
@@ -1069,6 +989,7 @@ const Packages: React.FC = () => {
                         <div className="col-span-2">
                             <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
                             <TextEditor
+                                value={packages.detail}
                                 onChange={(value) => setPackages({
                                     ...packages,
                                     detail: value
@@ -1086,19 +1007,20 @@ const Packages: React.FC = () => {
                             <MultiSelect
                                 label="Service"
                                 options={databaseService.map((service) => ({
-                                    id: service.service?.id || 0,
-                                    name: service.service.title,
-                                    // description: service.service.description,
-                                    price: service.service.price, 
-                                    gender: service.service.gender,
+                                    id: service.package?.id || 0,
+                                    name: service.package.title,
+                                    // description: service.package.description,
+                                    price: service.package.price, 
+                                    gender: service.package.gender,
                                     type: service.package_category.name,
-                                    duration: service.service.duration,
+                                    duration: service.package.duration,
                                 }))}
                                 selected={selectedService}
                                 onChange={setSelected_service}
                             />
                         </Grid>
-                    ) : (
+                    ) : 
+                    active == 'service' ? (
                         <Grid className="md:grid-cols-2">
                             {/* 11) Therapist */}
                             <MultiSelect
@@ -1123,9 +1045,140 @@ const Packages: React.FC = () => {
                                 onChange={setSelected_room}
                             />
                         </Grid>
+                    ) : (
+                        <>
+                        </>
                     )}
                 </div>
             </Form>
+    
+            {/* #region 3 --> setting */}
+            {active == 'setting' && (
+                <>
+
+                    {/* a) category */}
+                    <>
+                        {/* Create */}
+                        <Grid className="md:grid-cols-5 items-center">
+                            <Label>{databaseCategory.length} Category</Label>
+                            <Button onClick={() => { setForm_category(true); setCrud('create')}} icon={Plus} label='Add Category' className="md:col-start-5"/>
+                        </Grid>
+
+                        {/* table */}
+                        <Grid>
+                            <Table fieldName={tableTitle_category} data={databaseCategory}  />
+                        </Grid>
+
+                        {/* create category */}
+                        <Form title={crud=='create'? 'Add Category':'Edit Category'} isOpen={form_category} onClose={() => setForm_category(false)} width="max-w-lg"
+                            
+                            footer={
+                                <>
+                                    <Button
+                                        label="Cancel"
+                                        className="w-24"
+                                        onClick={() => setForm_category(false)}
+                                        disabled={isLoading}
+                                    />
+
+                                    {crud == 'create' ? (
+                                        <Button
+                                            label="Save"
+                                            className="w-24"
+                                            onClick={handleCreate_category}
+                                            disabled={isLoading}
+                                        />
+                                    ) : (
+
+                                        <Button
+                                            label="Update"
+                                            className="w-24"
+                                            onClick={handleCreate_category}
+                                            disabled={isLoading}
+                                        />
+                                    )}
+
+                                </>
+                            }
+                        >
+                            <div className="space-y-4">
+                                <Field
+                                    label="Name"
+                                    placeholder="Body Message, Facial, ..."
+                                    value={category.name}
+                                    onChange={(e) => setCategory({...category, name:e.target.value})}
+                                />
+                            </div>
+                        </Form>
+                        
+                    </>
+                    {/* b) room */}
+                    <>
+                        {/* Create */}
+                        <Grid className="md:grid-cols-5 items-center">
+                            <Label>{databaseRoom.length} Room</Label>
+                            <Button onClick={() => {setForm_room(true); setCrud('create')}} icon={Plus} label='Add Room' className="md:col-start-5"/>
+                        </Grid>
+
+                        {/* table */}
+                        <Grid>
+                            <Table fieldName={tableTitle_room} data={databaseRoom}  />
+                        </Grid>
+
+                        {/* create room */}
+                        <Form title={crud=='create'? 'Add Room':'Edit Room'} isOpen={form_room} onClose={() => setForm_room(false)} width="max-w-lg"
+                            
+                            footer={
+                                <>
+                                    <Button
+                                        label="Cancel"
+                                        className="w-24"
+                                        onClick={() => setForm_room(false)}
+                                        disabled={isLoading}
+                                    />
+
+                                    {crud == 'create' ? (
+                                        <Button
+                                            label="Save"
+                                            className="w-24"
+                                            onClick={handleCreate_room}
+                                            disabled={isLoading}
+                                        />
+                                    ) : (
+
+                                        <Button
+                                            label="Update"
+                                            className="w-24"
+                                            onClick={handleCreate_room}
+                                            disabled={isLoading}
+                                        />
+                                    )}
+
+                                </>
+                            }
+                        >
+                            <div className="space-y-4">
+                                <Field
+                                    label="Room"
+                                    placeholder="Enter room name"
+                                    value={room}
+                                    error={errorRoom.name}
+                                    onChange={(e) => setRoom(e.target.value)}
+                                />
+
+                                <Field
+                                    label="Description"
+                                    placeholder="Single room / Couple room / ...."
+                                    value={description}
+                                    error={errorRoom.description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                            </div>
+                        </Form>
+                        
+                    </>
+                </>
+            )}
         </>
     )
 }

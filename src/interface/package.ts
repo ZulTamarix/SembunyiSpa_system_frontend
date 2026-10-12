@@ -26,9 +26,5 @@ export interface Package_service_type {
 export interface Package_json {
     package: Package_type,
     package_category: Package_category_type
-    package_service: Package_service_type
-}
-export interface Service_json {
-    service: Package_type,
-    package_category: Package_category_type
+    package_service?: Package_service_type
 }

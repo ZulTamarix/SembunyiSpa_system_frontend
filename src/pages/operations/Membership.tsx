@@ -12,6 +12,7 @@ import type { User_type } from "../../interface/user";
 import Label from "../../components/ui/Label";
 import type { Voucher_type } from "../../interface/vouchers";
 import { getCurrentDate } from "../../utils/date";
+import Alert from "../../components/ui/Alert";
 
 const Membership: React.FC = () => {
 
@@ -224,6 +225,10 @@ const Membership: React.FC = () => {
             // privilege
             const [privilege, setPrivilege] = useState<string[]>([""]);
 
+            // selected id
+            const [selectedId, setSelected_id] = useState(0);
+            // a) detect error -> common
+            const [isAlert, setIs_alert] = useState(false);
             // fieldname (voucher)
             const [voucher, setVoucher] = useState<Voucher_type[]> ([])
             // set current index
@@ -299,19 +304,33 @@ const Membership: React.FC = () => {
                 setForm_voucher(true)
                 console.log('voucher = ',voucher)
             }
-
             const handleAdd_voucher = () => {
                 // console.log('voucher = ',voucher)\
                 setIndex(prev => prev+1)
                 setForm_voucher(false)
             }
 
+            const handleEdit_membership = (data: Membership_json) => {
+                setMembership(data.membership)
+                setVoucher(data.voucher ?? [])
+                setForm_membership(true)
+                setCrud('edit')
+            }
+            const handleEdit_voucher = (data: Voucher_type) => {
+                // setVoucher(data)
+                const index = voucher.findIndex((item) => item.id === data.id);
+                setForm_voucher(true)
+                setCrud('edit')
+                setIndex(index)
+
+                // console.log('data = ',data)
+            }
             // CREATE (membership)
             const handleCreate_membership = async() => {
                 // loading
                 setIsLoading(true)
-                console.log('memebrship = ',membership)
-                console.log('voucher = ',voucher)
+                // console.log('membership = ',membership)
+                // console.log('voucher = ',voucher)
 
                 try {
                     await api.post(`/membership`, {
@@ -319,8 +338,33 @@ const Membership: React.FC = () => {
                         voucher_list: voucher
                     });
 
-                    // fetchData_membership()
+                    fetchData_membership()
                     setForm_membership(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+            // UPDATE membership
+            const handleUpdate_membership = () => {
+
+            }
+            // DELETE membership
+            const handleDelete_membership = async () => {
+
+                setIsLoading(true)
+
+                // DELETE data
+                try {
+                    await  api.delete(`/membership/${selectedId}`)
+
+                    fetchData_membership()
+                    setForm_membership(false)
+                    setIs_alert(false)
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
@@ -355,7 +399,7 @@ const Membership: React.FC = () => {
                 api.get(`/membership`)
                 .then((response) => {
 
-                    // console.log('data = ',response.data)
+                    console.log('data = ',response.data)
                     setDatabase_membership(response.data)
                     
                     // set data
@@ -369,7 +413,6 @@ const Membership: React.FC = () => {
                 });
             }, [])
 
-            
             const tableTitle_membership: Column<Membership_json>[] = [
                 {
                     key: "tier",
@@ -384,10 +427,16 @@ const Membership: React.FC = () => {
                 {
                     key: "",
                     header: "Action",
-                    render: () => (
-                        <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
-                            Edit
-                        </button>
+                    render: (row) => (
+                        <div className="flex gap-3">
+                            <button onClick={() => handleEdit_membership(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                                Edit
+                            </button>
+                            
+                            <button onClick={() => {setIs_alert(true), setSelected_id(row?.membership.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                                Delete
+                            </button>
+                        </div>
                     )
                 },
             ];
@@ -418,10 +467,17 @@ const Membership: React.FC = () => {
                 {
                     key: "",
                     header: "Action",
-                    render: () => (
-                        <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
-                            Edit
-                        </button>
+                    render: (row) => (
+                        <div className="flex gap-3">
+                            <button onClick={() => handleEdit_voucher(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                            {/* <button  className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer"> */}
+                                Edit
+                            </button>
+                            
+                            <button onClick={() => {setIs_alert(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                                Delete
+                            </button>
+                        </div>
                     )
                 },
             ];
@@ -442,7 +498,7 @@ const Membership: React.FC = () => {
                 <>
                     {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
-                        <Label>{databaseMembership.length} Membership</Label>
+                        <Label>{databaseCustomer.length} Membership</Label>
                         <Button onClick={() => { setForm_customer(true); setCrud('create')}} icon={Plus} label='Add Membership' disabled={databaseUser.length==0} className="md:col-start-5"/>
                     </Grid>
 
@@ -565,6 +621,7 @@ const Membership: React.FC = () => {
                                         label="Save"
                                         className="w-24"
                                         onClick={handleCreate_membership}
+                                        disabled={isLoading}
                                     />
                                 ) : (
                                     <Button
@@ -588,14 +645,6 @@ const Membership: React.FC = () => {
                             />
                             {/* 2) */}
                             <div className="grid md:grid-cols-4">
-                                {/* <div className="col-span-3">
-                                    <Bullet_point
-                                        value={privilege}
-                                        onChange={setPrivilege}
-                                        label="Privilege"
-                                        placeholder="20% Discount on Food and Beverage"
-                                    />
-                                </div> */}
                                 <div className="col-start-4">
                                 <Field
                                     key={index}
@@ -605,19 +654,8 @@ const Membership: React.FC = () => {
                                     onClick={() => handleOpen_voucher(index)}
                                 />
                                 </div>
-                                {/* <div className="col-span-1 space-y-2">
-                                    {privilege.map((_, index) => (
-                                        <Field
-                                            key={index}
-                                            label={index === 0 ? "Add voucher" : ""}
-                                            type="button"
-                                            value="+"
-                                            onClick={() => handleOpen_voucher(index)}
-                                        />
-                                    ))}
-                                </div> */}
                             </div>
-                            {}
+                            {/* Table */}
                             <Table fieldName={tableTitle_voucher} data={voucher} />
                         </div>
                     </Form>
@@ -640,13 +678,15 @@ const Membership: React.FC = () => {
                                         className="w-24"
                                         onClick={handleAdd_voucher}
                                         // onClick={() => setIndex(prev => prev+1)}
+                                        disabled={isLoading}
                                     />
                                 ) : (
                                     <Button
                                         label="Update"
                                         className="w-24"
                                         onClick={handleAdd_voucher}
-                                        disabled={isLoading}
+                                        // disabled={isLoading}
+                                        disabled
                                     />
                                 )}
 
@@ -843,6 +883,20 @@ const Membership: React.FC = () => {
                             </Grid>
                         </div>
                     </Form>
+
+                    {/* Delete membership */}
+                    <Alert
+                        open={isAlert}
+                        title="Delete this membership?"
+                        description="This action can't be undone."
+                        isLoading={isLoading}
+                        confirmLabel="Delete"
+                        onCancel={() => setIs_alert(false)}
+                        onConfirm={() => {
+                            // do your action here
+                            handleDelete_membership()
+                        }}
+                    />
                 </>
             )}
 

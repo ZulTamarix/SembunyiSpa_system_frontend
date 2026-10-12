@@ -27,8 +27,10 @@ const User: React.FC = () => {
             specialty: '',
             code: ''
         })
+        // selected id
+        const [selectedId, setSelected_id] = useState(0);
         // a) detect error -> common
-        const [open, setOpen] = useState(false);
+        const [isAlert, setIs_alert] = useState(false);
         // set CRUD's State
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
@@ -139,9 +141,27 @@ const User: React.FC = () => {
                 setIsLoading(false)
             }
         }
-        const handleDelete_user = async (data: User_type) => {
-            setOpen(true)
-            console.log('KIV = ',data)
+
+        // DELETE user
+        const handleDelete_user = async () => {
+            
+            setIsLoading(true)
+
+            // DELETE data
+            try {
+                await  api.delete(`/user/${selectedId}`)
+
+                fetchData_user()
+                setForm_user(false)
+                setIs_alert(false)
+            }
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response status:', error.response?.data);
+            }
+            finally {
+                setIsLoading(false)
+            }
         }
 
     //#endregion
@@ -210,7 +230,7 @@ const User: React.FC = () => {
                             Edit
                         </button>
                         
-                        <button onClick={() => handleDelete_user(row)} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                        <button onClick={() => {setIs_alert(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                             Delete
                         </button>
                     </div>
@@ -240,7 +260,6 @@ const User: React.FC = () => {
     
     return (
         <>
-        test = {open}
             {/* Create */}
             <Grid className="md:grid-cols-5 items-center">
                 <Label>{databaseUser.length} User</Label>
@@ -353,14 +372,15 @@ const User: React.FC = () => {
 
             {/* Delete user */}
             <Alert
-                open={open}
-                title="Delete this project?"
-                description="All files and settings in this project will be removed. This can't be undone."
-                confirmLabel="Delete project"
-                onCancel={() => setOpen(false)}
+                open={isAlert}
+                title="Delete this user?"
+                description="This action can't be undone."
+                isLoading={isLoading}
+                confirmLabel="Delete"
+                onCancel={() => setIs_alert(false)}
                 onConfirm={() => {
                     // do your action here
-                    setOpen(false);
+                    handleDelete_user()
                 }}
             />
         </>

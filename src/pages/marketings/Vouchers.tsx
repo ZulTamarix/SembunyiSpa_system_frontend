@@ -10,6 +10,7 @@ import { getCurrentDate } from "../../utils/date";
 import api from "../../api/axios";
 import type { User_type } from "../../interface/user";
 import type { Voucher_type } from "../../interface/vouchers";
+import Alert from "../../components/ui/Alert";
 
 const Membership: React.FC = () => {
     
@@ -21,6 +22,10 @@ const Membership: React.FC = () => {
         const [isLoading, setIsLoading] = useState(false);
         // form
         const [form_voucher, setForm_voucher] = useState(false);
+        // selected id
+        const [selectedId, setSelected_id] = useState(0);
+        // a) detect error -> common
+        const [isAlert, setIs_alert] = useState(false);
         // fieldname
         const [voucher, setVoucher] = useState<Voucher_type> ({
             id: 0,
@@ -43,15 +48,24 @@ const Membership: React.FC = () => {
     
     //#region 2) --> method
 
+        // edit user
+        const handleEdit_voucher = (data: Voucher_type) => {
+            setVoucher(data)
+
+            setForm_voucher(true)
+            setCrud('edit')
+        }
+
+        // CREATE voucher
         const handleCreate_voucher = async () => {
 
+            setIsLoading(true)
             // CREATE data
             try {
                 await api.post(`/voucher`, {
                     code: voucher.code,
                     description: voucher.description,
                     type: voucher.type,
-                    // user_id: voucher.user_id,
                     user_id: 7,
                     date_expired: voucher.date_expired,
                     status: voucher.status,
@@ -66,6 +80,63 @@ const Membership: React.FC = () => {
 
                 fetchData_voucher()
                 setForm_voucher(false)
+            }
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response status:', error.response?.data);
+            }
+            finally {
+                setIsLoading(false)
+            }
+        }
+
+        // UPDATE voucher
+        const handleUpdate_voucher = async () => {
+
+            // loading
+            setIsLoading(true)
+            // UPDATE data
+            try {
+                await api.put(`/voucher/${voucher.id}`, {
+                    code: voucher.code,
+                    description: voucher.description,
+                    type: voucher.type,
+                    user_id: 7,
+                    date_expired: voucher.date_expired,
+                    status: voucher.status,
+                    discount_type: voucher.discount_type,
+                    discount_value: voucher.discount_value,
+                    quantity: voucher.quantity,
+
+                    selected_customer: selectedCustomer,
+
+                    switch: 'voucher'
+                });
+
+                fetchData_voucher()
+                setForm_voucher(false)
+            }
+            catch(error) {
+                console.error('Error:', error); // use only to remove warning on vscode
+                // console.error('Response status:', error.response?.data);
+            }
+            finally {
+                setIsLoading(false)
+            }
+        }
+
+        // DELETE voucher
+        const handleDelete_voucher = async () => {
+            
+            setIsLoading(true)
+
+            // DELETE data
+            try {
+                await  api.delete(`/voucher/${selectedId}`)
+
+                fetchData_voucher()
+                setForm_voucher(false)
+                setIs_alert(false)
             }
             catch(error) {
                 console.error('Error:', error); // use only to remove warning on vscode
@@ -97,6 +168,10 @@ const Membership: React.FC = () => {
                 })
                 setUnlimited(false)
             }
+            else {
+                if(!voucher.quantity)
+                    setUnlimited(true)
+            }
         }, [form_voucher])
 
         // a) logic for 'dicount_type'
@@ -116,7 +191,7 @@ const Membership: React.FC = () => {
 
         }, [voucher.discount_type])
         
-        // b) logic for 'quantity'
+        // // b) logic for 'quantity'
         useEffect(() => {
             //  quantity
             if(unlimited) 
@@ -212,10 +287,16 @@ const Membership: React.FC = () => {
             {
                 key: "",
                 header: "Action",
-                render: () => (
-                    <button className="border border-border p-1 px-2 text-black text-sm rounded-md">
-                        Edit
-                    </button>
+                render: (row) => (
+                    <div className="flex gap-3">
+                        <button onClick={() => handleEdit_voucher(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                            Edit
+                        </button>
+                        
+                        <button onClick={() => {setIs_alert(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                            Delete
+                        </button>
+                    </div>
                 )
             },
         ];
@@ -258,7 +339,7 @@ const Membership: React.FC = () => {
                             <Button
                                 label="Update"
                                 className="w-24"
-                                onClick={handleCreate_voucher}
+                                onClick={handleUpdate_voucher}
                                 disabled={isLoading}
                             />
                         )}
@@ -305,6 +386,7 @@ const Membership: React.FC = () => {
                                     value: user.id
                                 }))
                             ]}
+                            disabled={crud == 'edit'}
                         />
                         {/* 5) + 6) */}
                         <Field
@@ -388,6 +470,20 @@ const Membership: React.FC = () => {
                     </Grid>
                 </div>
             </Form>
+            
+            {/* Delete voucher */}
+            <Alert
+                open={isAlert}
+                title="Delete this voucher?"
+                description="This action can't be undone."
+                isLoading={isLoading}
+                confirmLabel="Delete"
+                onCancel={() => setIs_alert(false)}
+                onConfirm={() => {
+                    // do your action here
+                    handleDelete_voucher()
+                }}
+            />
         </>
     )
 }

@@ -3,14 +3,15 @@ import { useEffect } from "react";
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  description: string;
+  description?: string;
+  isLoading: boolean;
   cancelLabel?: string;
   confirmLabel?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export default function ConfirmDialog({ open, title, description, cancelLabel = "Cancel", confirmLabel = "Confirm", onCancel, onConfirm }: ConfirmDialogProps) {
+export default function ConfirmDialog({ open, title, description, isLoading, cancelLabel = "Cancel", confirmLabel = "Confirm", onCancel, onConfirm }: ConfirmDialogProps) {
     // Close on Escape
     useEffect(() => {
         if (!open) return;
@@ -39,10 +40,10 @@ export default function ConfirmDialog({ open, title, description, cancelLabel = 
                 </p>
 
                 <div className="mt-6 flex justify-end gap-3">
-                    <button onClick={onCancel} className="rounded-xl border border-gray-300 bg-secondary px-4 py-2 text-md font-bold text-black transition-all hover:-translate-y-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400">
+                    <button onClick={onCancel} disabled={isLoading} className={`rounded-xl border border-gray-300 bg-tertiary px-4 py-2 text-md font-bold text-black transition-all hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 cursor-pointer"}`}>
                         {cancelLabel}
                     </button>
-                    <button onClick={onConfirm} autoFocus className="rounded-xl bg-secondary px-4 py-2 text-md font-bold text-black transition-all hover:-translate-y-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2">
+                    <button onClick={onConfirm} disabled={isLoading} autoFocus className={`rounded-xl bg-secondary px-4 py-2 text-md font-bold text-black transition-all hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 cursor-pointer"}`}>
                         {confirmLabel}
                     </button>
                 </div>

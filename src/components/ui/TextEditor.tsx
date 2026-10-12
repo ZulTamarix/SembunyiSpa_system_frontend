@@ -7,6 +7,7 @@ const COMMANDS = [
   "insertUnorderedList",
   "insertOrderedList",
 ];
+
 const BUTTONS = [
   { cmd: "bold", label: "B", title: "Bold (Ctrl+B)", className: "font-bold" },
   { cmd: "italic", label: "I", title: "Italic (Ctrl+I)", className: "italic" },
@@ -17,16 +18,16 @@ const BUTTONS = [
 ];
 
 interface TextEditorProps {
+    value?: string;
     onChange?: (value: string) => void;
 }
 
-export default function TextEditor({ onChange }: TextEditorProps) {
+export default function TextEditor({ value = "", onChange }: TextEditorProps) {
     const editorRef = useRef<HTMLDivElement>(null);
     const [active, setActive] = useState<Record<string, boolean>>({});
     const [isEmpty, setIsEmpty] = useState(true);
     const [chars, setChars] = useState(0);
 
-    // Highlight toolbar buttons that match the formatting at the caret/selection
     const refreshActive = () => {
         const sel = window.getSelection();
         const el = editorRef.current;
@@ -35,13 +36,31 @@ export default function TextEditor({ onChange }: TextEditorProps) {
             return;
 
         const next: Record<string, boolean> = {};
+
         COMMANDS.forEach((c) => {
             next[c] = document.queryCommandState(c);
         });
+
         setActive(next);
     };
 
-    // useEffect
+    // Display existing value
+    useEffect(() => {
+        const el = editorRef.current;
+
+        if (!el) return;
+
+        // Don't reset cursor while typing
+        if (el.innerHTML !== value) {
+            el.innerHTML = value;
+        }
+
+        const text = el.innerText.replace(/\n$/, "");
+
+        setIsEmpty(text.trim() === "" && !el.querySelector("li"));
+        setChars(text.length);
+    }, [value]);
+
     useEffect(() => {
         document.addEventListener("selectionchange", refreshActive);
 
@@ -50,7 +69,6 @@ export default function TextEditor({ onChange }: TextEditorProps) {
         };
     }, []);
 
-    // handle input
     const handleInput = () => {
         const el = editorRef.current;
 
@@ -77,7 +95,6 @@ export default function TextEditor({ onChange }: TextEditorProps) {
         refreshActive();
     };
 
-    // Paste as plain text so copied web pages don't bring in messy styles
     const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
         e.preventDefault();
 
@@ -86,31 +103,33 @@ export default function TextEditor({ onChange }: TextEditorProps) {
         document.execCommand("insertText", false, text);
     };
 
-
     return (
+        <div className="flex h-75 w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm focus-within:border-border focus-within:ring-2 focus-within:ring-border">
 
-        <div className=" flex h-75 w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm focus-within:border-border focus-within:ring-2 focus-within:ring-border">
             {/* Toolbar */}
             <div className="flex items-center gap-1 border-b border-gray-200 bg-gray-50 px-2 py-1.5">
                 {BUTTONS.map((b, i) =>
                     b.divider ? (
                         <div key={i} className="mx-1 h-5 w-px bg-border" />
                     ) : (
-                    <button
-                        key={b.cmd}
-                        type="button"
-                        title={b.title}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => b.cmd && exec(b.cmd)}
-                        className={`flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm hover:bg-gray-200 ${
-                            b.cmd && active[b.cmd] ? "bg-gray-300 text-gray-900" : "text-gray-700"
-                        } ${b.className ?? ""}`}
-                    >
-                        {b.label}
-                    </button>
+                        <button
+                            key={b.cmd}
+                            type="button"
+                            title={b.title}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => b.cmd && exec(b.cmd)}
+                            className={`flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm hover:bg-gray-200 ${
+                                b.cmd && active[b.cmd] ? "bg-gray-300 text-gray-900" : "text-gray-700"
+                            } ${b.className ?? ""}`}
+                        >
+                            {b.label}
+                        </button>
                     )
                 )}
-                <span className="ml-auto pr-2 text-xs text-gray-500">{chars} chars</span>
+
+                <span className="ml-auto pr-2 text-xs text-gray-500">
+                    {chars} chars
+                </span>
             </div>
 
             {/* Editor */}
@@ -120,6 +139,7 @@ export default function TextEditor({ onChange }: TextEditorProps) {
                         Start typing...
                     </div>
                 )}
+
                 <div
                     ref={editorRef}
                     contentEditable
@@ -130,6 +150,5 @@ export default function TextEditor({ onChange }: TextEditorProps) {
                 />
             </div>
         </div>
-
     );
 }
