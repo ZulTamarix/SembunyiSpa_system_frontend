@@ -58,8 +58,8 @@ const Bookings: React.FC = () => {
         // })
         // temporary
         const [temp_package, setTemp_package] = useState<any | null>(null)
-        const [new_therapist, ] = useState<any | null>(null)
-        // const [new_therapist, setNew_therapist] = useState<any | null>(null)
+        // const [new_therapist, ] = useState<any | null>(null)
+        const [new_therapist, setNew_therapist] = useState<any | null>(null)
     //#endregion
    
 
@@ -116,37 +116,37 @@ const Bookings: React.FC = () => {
                     }))
 
                 // 2) fetch all 'therapist_id'
-                    // const therapist_list = temp_package.package_therapist.map(
-                    //     (item: any) => item.user_id
-                    // );
+                    const therapist_list = temp_package.package_therapist.map(
+                        (item: any) => item.user_id
+                    );
                     // console.log('date = ',booking.date_start);
                     // console.log('time start = ',booking.time_start); 
                     // console.log('time end = ',time_end);
                     // console.log('therapist id = ',therapist_list)
 
                 // 3) check availability
-                    // api.get(`/available/therapist`, {
-                    //     params: {
-                    //         date: booking.date_start,
-                    //         time_start: booking.time_start,
-                    //         time_end: time_end,
-                    //         therapist_list: therapist_list
-                    //     }
-                    // })
-                    // .then((response) => {
-                    //     console.log('data = ',response.data)
+                    api.get(`/available/therapist`, {
+                        params: {
+                            date: booking.date_start,
+                            time_start: booking.time_start,
+                            time_end: time_end,
+                            therapist_list: therapist_list
+                        }
+                    })
+                    .then((response) => {
+                        console.log('list of therapist = ',response.data)
 
-                    //     // store data
-                    //     setNew_therapist(response.data)
-                    //     setBooking_selected((prev) => ({
-                    //         ...prev,
-                    //         user_id: response?.data[0]?.id || 0,
-                    //         room_id: 1 //KIV
-                    //     }))
-                    // })
-                    // .catch((error) => {
-                    //     console.error('Error fetching data:', error.data);
-                    // });
+                        // store data
+                        setNew_therapist(response.data)
+                        setBooking_selected((prev) => ({
+                            ...prev,
+                            user_id: response?.data[0]?.id || 0,
+                            room_id: 1 //KIV
+                        }))
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching data:', error.data);
+                    });
 
                 // console.log('duration = ',time_end)
                 // console.log('date = ',booking.date_start)
@@ -288,7 +288,7 @@ const Bookings: React.FC = () => {
     //#endregion
 
     
-    console.log('temp = ',temp_package)
+    // console.log('temp = ',temp_package)
     // console.log('booking = ',booking)
     // console.log('booking = ',booking_selected)
 

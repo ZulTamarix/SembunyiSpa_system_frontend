@@ -720,8 +720,6 @@ const Packages: React.FC = () => {
 
     //#endregion
 
-    console.log('data = ',packages)
-
     return (
         <>
 

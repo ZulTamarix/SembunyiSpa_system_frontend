@@ -1,3 +1,4 @@
+import type { Booking_type } from "./booking";
 import type { Voucher_type } from "./vouchers";
 
 export interface User_type {
@@ -18,7 +19,22 @@ export interface User_type {
 }
 
 // JSON
-// export interface User_therapist_json {
-//   user_therapist: User_therapist_type
-//   user: User_type
+// export interface Schedule_therapist_json {
+//   user: User_type,
+//   booking_selected: Booking_type[]
 // }
+export interface Schedule_therapist_json {
+  user: User_type;
+  booking_selected: Booking_selected_type[];
+}
+
+export interface Booking_selected_type {
+  id: number;
+  booking_id: number;
+  package_id: number | null;
+  room_id: number;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  booking: Booking_type;
+}

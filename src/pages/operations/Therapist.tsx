@@ -560,6 +560,8 @@ const Therapist: React.FC = () => {
                 <>
                     {/* Roster */}
                     <Grid>
+                        {/* <div className="min-h-screen rounded-2xl border border-border bg-slate-100 p-2 text-slate-800 sm:p-6"> */}
+
                         <div className="my-auto">
                             {/* 1) Header */}
                             <div className="flex items-start justify-between mb-4">
@@ -675,6 +677,8 @@ const Therapist: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        
+                        {/* </div> */}
                     </Grid>
                     
                     {/* Legend */}

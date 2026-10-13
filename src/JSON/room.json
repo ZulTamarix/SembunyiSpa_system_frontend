@@ -1,0 +1,10 @@
+[
+  {"id":1,"name":"Bayu","description":"Single Room"},
+  {"id":2,"name":"Embun","description":"Couple Room"},
+  {"id":3,"name":"Ombak","description":"Hair Spa"},
+  {"id":4,"name":"Bunga","description":"Single Room"},
+  {"id":5,"name":"Rimba","description":"Couple Room"},
+  {"id":6,"name":"Sutra","description":"Hair Spa"},
+  {"id":7,"name":"Seri","description":"Single Room"},
+  {"id":8,"name":"Mentari","description":"Couple Room"}
+]
