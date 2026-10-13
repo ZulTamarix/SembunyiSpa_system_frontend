@@ -16,6 +16,7 @@ export interface User_type {
   code: string;
 
   voucher_customers?: Voucher_type[]
+  booking?: Booking_type[]
 }
 
 // JSON

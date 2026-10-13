@@ -218,6 +218,8 @@ const Packages: React.FC = () => {
         const [isLoading, setIsLoading] = useState(false);
         // textEditor
         // const [content, setContent] = useState("");
+        // loading state
+        const [spinner, setSpinner] = useState(false)
 
         // swap section
         const [active, setActive] = useState("package");
@@ -269,7 +271,7 @@ const Packages: React.FC = () => {
     //#endregion
 
 
-    // #region 1) + 2) --> package + service
+    //#region 1) + 2) --> package + service
 
         // #region 1) --> useState
             // fieldname
@@ -560,6 +562,10 @@ const Packages: React.FC = () => {
                 const [databaseCategory, setDatabase_category] = useState<Package_category_type[]>([])
                 // fetch database
                 const fetchData_category = useCallback(() => {
+
+                    // loading
+                    setSpinner(true)
+
                     api.get(`/package`, {
                         params: {
                             switch: 'category'
@@ -577,7 +583,10 @@ const Packages: React.FC = () => {
                     })
                     .catch((error) => {
                         console.error('Error fetching:', error);
-                    });
+                    })
+                    .finally(() => {
+                        setSpinner(false)
+                    })
                 }, []);
                 
                 // tableTitle_category
@@ -697,6 +706,10 @@ const Packages: React.FC = () => {
                 ];
                 // fetch database
                 const fetchData_room = useCallback(() => {
+
+                    // loading
+                    setSpinner(true)
+
                     api.get(`/room`)
                     .then((response) => {
                         const data = response.data ?? [];
@@ -704,7 +717,10 @@ const Packages: React.FC = () => {
                     })
                     .catch((error) => {
                         console.error('Error fetching:', error);
-                    });
+                    })
+                    .finally(() => {
+                        setSpinner(false)
+                    })
                 }, []);
                 // remove fieldname everytime form closed
                 useEffect(() => {
@@ -1064,7 +1080,7 @@ const Packages: React.FC = () => {
 
                         {/* table */}
                         <Grid>
-                            <Table fieldName={tableTitle_category} data={databaseCategory}  />
+                            <Table fieldName={tableTitle_category} data={databaseCategory} loading={spinner} />
                         </Grid>
 
                         {/* create category */}
@@ -1120,7 +1136,7 @@ const Packages: React.FC = () => {
 
                         {/* table */}
                         <Grid>
-                            <Table fieldName={tableTitle_room} data={databaseRoom}  />
+                            <Table fieldName={tableTitle_room} data={databaseRoom} loading={spinner} />
                         </Grid>
 
                         {/* create room */}

@@ -1,4 +1,4 @@
-import type { Booking_selected_type, Booking_type } from "../../interface/booking";
+import type { Booking_json, Booking_selected_type, Booking_type } from "../../interface/booking";
 import Grid from "../../components/ui/Grid";
 import Button from "../../components/ui/Button";
 import { Plus } from "lucide-react";
@@ -9,6 +9,8 @@ import Field from "../../components/ui/Field";
 import type { User_type } from "../../interface/user";
 import api from "../../api/axios";
 import Card from "../../components/ui/Card";
+import { getCurrentDate } from "../../utils/date";
+import Table, { type Column } from "../../components/ui/Table";
 // import { getCurrentDate, getCurrentTime } from "../../utils/date";
 
 
@@ -43,23 +45,27 @@ const Bookings: React.FC = () => {
             room_id: 0,
             user_id: 0,
         })
+        const [isWalkin, setIs_walkin] = useState(false)
         // walkin
-        // const [userWalkin, setUser_walkin] = useState<User_type>({
-        //     id: 0,
-        //     role: 'walkin',
-        //     name: '',
-        //     email: '',
-        //     phoneNo: '',
-        //     status: 'active',
-        //     password: '',
-        //     date_joined: getCurrentDate(),
-        //     specialty: '',
-        //     code: ''
-        // })
+        const [userWalkin, setUser_walkin] = useState<User_type>({
+            id: 0,
+            role: 'walkin',
+            name: '',
+            email: '',
+            phoneNo: '',
+            status: 'active',
+            password: '',
+            date_joined: getCurrentDate(),
+            specialty: '',
+            code: ''
+        })
         // temporary
         const [temp_package, setTemp_package] = useState<any | null>(null)
         // const [new_therapist, ] = useState<any | null>(null)
         const [new_therapist, setNew_therapist] = useState<any | null>(null)
+        // loading state
+        const [spinner, setSpinner] = useState(false)
+
     //#endregion
    
 
@@ -87,8 +93,45 @@ const Bookings: React.FC = () => {
                     room_id: 0,
                     user_id: 0,
                 })
+                setUser_walkin({
+                    id: 0,
+                    role: 'walkin',
+                    name: '',
+                    email: '',
+                    phoneNo: '',
+                    status: 'active',
+                    password: '',
+                    date_joined: getCurrentDate(),
+                    specialty: '',
+                    code: ''
+                })
+                setIs_walkin(false)
             }
         }, [form_booking])
+        
+        // reset fieldname everytime switch toggled
+        useEffect(() => {
+            if(isWalkin) {
+                setBooking((prev) => ({
+                    ...prev,
+                    user_id: 0
+                }))
+            }
+            else {
+                setUser_walkin({
+                    id: 0,
+                    role: 'walkin',
+                    name: '',
+                    email: '',
+                    phoneNo: '',
+                    status: 'active',
+                    password: '',
+                    date_joined: getCurrentDate(),
+                    specialty: '',
+                    code: ''
+                })
+            }
+        }, [isWalkin])
 
         // check availability
         useEffect(() => {
@@ -158,70 +201,130 @@ const Bookings: React.FC = () => {
 
 
     // #region 3) --> method
-        const handleCreate_booking = async() => {
-            console.log('booking = ',booking)
-            console.log('booking selected = ',booking_selected)
 
-            
-            // loading
+        const handleCreate_booking = async () => {
+
             setIsLoading(true)
-            try {
-                await api.post(`/booking`, {
-                    booking: booking,
-                    booking_selected: booking_selected
-                    // switch: 'voucher_customer'
-                });
 
-                // fetchData_user()
+            try {
+
+                if (isWalkin) {
+
+                    // 1. Create user first
+                    const response = await api.post(`/user`, {
+                        role: userWalkin.role,
+                        name: userWalkin.name,
+                        email: userWalkin.email,
+                        phoneNo: userWalkin.phoneNo,
+                        password: userWalkin.password,
+                        date_joined: userWalkin.date_joined,
+                    })
+
+                    const userId = response.data.id
+
+                    console.log('Created user id = ', userId)
+
+                    // 2. Create booking only if user creation succeeds
+                    await api.post(`/booking`, {
+                        booking: {
+                            ...booking,
+                            user_id: userId
+                        },
+                        booking_selected: booking_selected
+                    })
+
+                }
+                else {
+
+                    // Existing user - create booking directly
+                    await api.post(`/booking`, {
+                        booking: booking,
+                        booking_selected: booking_selected
+                    })
+
+                }
+
                 setForm_booking(false)
+
             }
-            catch(error) {
-                console.error('Error:', error); // use only to remove warning on vscode
-                // console.error('Response status:', error.response?.data);
+            catch (error) {
+                console.error('Error:', error)
+                // console.error('Response:', error.response?.data)
             }
             finally {
                 setIsLoading(false)
             }
         }
+
     //#endregion
 
 
     // #region 4) --> database
         // tableTitle
-        // const tableTitle: Column<Booking_type>[] = [
-        //     {
-        //         key: "id",
-        //         header: "Booking ID",
-        //         render: (row) => (
-        //         <span className="text-sm text-[#8a8175] font-mono">{row.id}</span>
-        //         ),
-        //     },
-        //     {
-        //         key: "name",
-        //         header: "Customer",
-        //         render: (row) => (
-        //             <div>
-        //                 <div className="font-semibold text-black">{row.name}</div>
-        //                 <span>{row.phoneNo}</span>
-        //             </div>
-        //         )
-        //     },
-        //     { key: "treatment", header: "Treatment" },
-        //     {
-        //         key: "date",
-        //         header: "Date & Time",
-        //         render: (row) => (
-        //         <div>
-        //             <div>{row.date}</div>
-        //             <div className="text-sm text-[#8a8175]">{row.time}</div>
-        //         </div>
-        //         ),
-        //     },
-        //     { key: "therapist", header: "Therapist" },
-        //     { key: "room", header: "Room" },
-        //     { key: "status", header: "Status" },
-        //     { key: "payment", header: "Payment" },
-        // ];
+        const tableTitle: Column<any>[] = [
+            {
+                key: "id",
+                header: "Booking ID",
+                render: (row) => (
+                    <span className="text-sm text-[#8a8175] font-mono">{row.user.id}</span>
+                ),
+            },
+            {
+                key: "name",
+                header: "Customer",
+                render: (row) => (
+                    <div>
+                        <div className="font-semibold text-black">{row.user.name}</div>
+                        <span className="text-xs">{row.user.phoneNo}</span>
+                    </div>
+                )
+            },
+            {
+                key: "treatment",
+                header: "Treatment",
+                render: (row) => (
+                    <span>{row.booking_selected.package.title}</span>
+                ),
+            },
+            {
+                key: "date",
+                header: "Date & Time",
+                render: (row) => (
+                <div>
+                    <div className="font-semibold text-black">{row.booking.date_start}</div>
+                    <span className="text-xs">{row.booking.time_start}</span>
+                </div>
+                ),
+            },
+            {
+                key: "therapist",
+                header: "Therapist",
+                render: (row) => (
+                    <span>{row.booking_selected.user.name}</span>
+                ),
+            },
+            {
+                key: "room",
+                header: "Room",
+                render: (row) => (
+                    <span>{row.booking_selected.room.name}</span>
+                ),
+            },
+            {
+                key: "status",
+                header: "Status",
+                render: (row) => (
+                    <span>{row.booking.status}</span>
+                ),
+            },
+            {
+                key: "payment",
+                header: "Payment",
+                render: (row) => (
+                    <span>{row.booking.payment}</span>
+                ),
+            },
+        ];
 
         // a) user/customer
         const [databaseUser, setDatabase_user] = useState<User_type[]>([])
@@ -280,17 +383,35 @@ const Bookings: React.FC = () => {
             });
         }, [])
 
+        // d) booking
+        const [databaseBooking, setDatabase_booking] = useState<any[]>([])
+        const fetchData_booking = useCallback(() => {
+            setSpinner(true)
+            api.get(`/booking`, {
+                params: {
+                    switch: 'booking',
+                }
+            })
+            .then((response) => {
+                console.log('data = ',response.data)
+                setDatabase_booking(response.data)
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error.data);
+            })
+            .finally(() => {
+                setSpinner(false)
+            })
+        }, [])
+
         useEffect(() => {
             fetchData_user()
             fetchData_package()
             fetchData_service()
+            fetchData_booking()
         }, [])
     //#endregion
 
-    
-    // console.log('temp = ',temp_package)
-    // console.log('booking = ',booking)
-    // console.log('booking = ',booking_selected)
 
     return (
         <>
@@ -313,9 +434,9 @@ const Bookings: React.FC = () => {
             </Grid>
             
             {/* Table */}
-            {/* <Grid>
-                <Table fieldName={tableTitle} data={bookings} />
-            </Grid> */}
+            <Grid>
+                <Table fieldName={tableTitle} data={databaseBooking} loading={spinner} />
+            </Grid>
             
             {/* Create */}
             <Form title={crud=='create'? 'Add Booking':'Edit Booking'} isOpen={form_booking} onClose={() => setForm_booking(false)} width="max-w-4xl"
@@ -354,8 +475,9 @@ const Bookings: React.FC = () => {
                     {/* 1) Customer */}
                     <Card>
                         {/* <label className="block mb-2 text-md font-medium text-title"> Select Customer </label> */}
-                        <div className="grid grid-cols-1 gap-5 mb-5 md:grid-cols-2">
-                            <div className="col-span-2">
+                        <div className="grid grid-cols-1 gap-5 mb-5 md:grid-cols-4">
+                            {/* searcbar */}
+                            <div className="col-span-3">
                                 <Field
                                     label="Select Customer"
                                     placeholder="Search by phone number"
@@ -376,25 +498,70 @@ const Bookings: React.FC = () => {
                                             ],
                                         }))
                                     ]}
+                                    disabled={isWalkin}
                                 />
                             </div>
-                            <Field
-                                label="Remark"
-                                placeholder="Make remark for therapist"
-                                value={booking.remark}
-                                onChange={(e) => setBooking({...booking, remark: e.target.value})}
-                                type="textarea"
-                            />
-                            <Field
-                                label="Booking Type"
-                                value={booking.booking_type}
-                                onChange={(e) => setBooking({...booking, booking_type: e.target.value as 'prepaid' | 'walkin'})}
-                                type="select"
-                                options={[
-                                    { label: 'Prepaid', value: 'prepaid' },
-                                    { label: 'Walk in', value: 'walkin' },
-                                ]}
-                            />
+                            {/* switch */}
+                            <div className="col-start-4">
+                                <Field
+                                    label={`${isWalkin? 'Walk in' : 'Registered customer'}`}
+                                    value={isWalkin}
+                                    onChange={(e) => setIs_walkin((e.target as HTMLInputElement).checked)}
+                                    type="switch"
+                                />
+                            </div>
+                            
+                            {/* walkin only */}
+                            {isWalkin && (
+                                <div className="col-span-4">
+                                    <div className="grid grid-cols-1 gap-5 mb-5 md:grid-cols-3">
+                                        <Field
+                                            label="Name"
+                                            placeholder="Enter name"
+                                            value={userWalkin.name}
+                                            onChange={(e) => setUser_walkin({ ...userWalkin, name: e.target.value })}
+                                        />
+                                        <Field
+                                            label="Email"
+                                            placeholder="Enter email"
+                                            value={userWalkin.email}
+                                            onChange={(e) => setUser_walkin({ ...userWalkin, email: e.target.value })}
+                                        />
+                                        <Field
+                                            label="Phone"
+                                            placeholder="Enter phone number"
+                                            value={userWalkin.phoneNo}
+                                            onChange={(e) => setUser_walkin({ ...userWalkin, phoneNo: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+
+                            {/* remark */}
+                            <div className="col-span-2">
+                                <Field
+                                    label="Remark"
+                                    placeholder="Make remark for therapist"
+                                    value={booking.remark}
+                                    onChange={(e) => setBooking({...booking, remark: e.target.value})}
+                                    type="textarea"
+                                />
+                            </div>
+
+                            {/* type */}
+                            <div className="col-span-2">
+                                <Field
+                                    label="Booking Type"
+                                    value={booking.booking_type}
+                                    onChange={(e) => setBooking({...booking, booking_type: e.target.value as 'prepaid' | 'walkin'})}
+                                    type="select"
+                                    options={[
+                                        { label: 'Prepaid', value: 'prepaid' },
+                                        { label: 'Walk in', value: 'walkin' },
+                                    ]}
+                                />
+                            </div>
                         </div>
                     </Card>
 
@@ -508,8 +675,7 @@ const Bookings: React.FC = () => {
                     </Card>
 
                     {/* 3) Schedule */}
-                    {/* { (booking.user_id!=0 && booking_selected.package_id!=0) && ( */}
-                    { (temp_package) && (
+                    {(temp_package) && (
                         <Card>
                             <label className="block mb-2 text-md font-medium text-title"> Select Date, Time & Therapist </label>
                             

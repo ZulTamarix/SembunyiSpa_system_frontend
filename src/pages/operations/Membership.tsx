@@ -23,6 +23,8 @@ const Membership: React.FC = () => {
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
         const [isLoading, setIsLoading] = useState(false);
+        // loading state
+        const [spinner, setSpinner] = useState(false)
 
         // swap section
         // const [active, setActive] = useState<'membership' | 'tier'>("membership");
@@ -132,6 +134,9 @@ const Membership: React.FC = () => {
             // a) fetch 'user'
             const fetchData_user = useCallback(() => {
 
+                // loading
+                setSpinner(true)
+
                 api.get(`/user`, {
                     params: {
                         role: 'customer',
@@ -150,11 +155,17 @@ const Membership: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, [])
 
             // b) fetch 'customer'
             const fetchData_customer = useCallback(() => {
+
+                // loading
+                setSpinner(true)
 
                 api.get(`/user`, {
                     params: {
@@ -396,6 +407,10 @@ const Membership: React.FC = () => {
             const [databaseMembership, setDatabase_membership] = useState<Membership_json[]>([])
 
             const fetchData_membership = useCallback(() => {
+
+                // loading
+                setSpinner(true)
+
                 api.get(`/membership`)
                 .then((response) => {
 
@@ -410,7 +425,10 @@ const Membership: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, [])
 
             const tableTitle_membership: Column<Membership_json>[] = [
@@ -504,7 +522,7 @@ const Membership: React.FC = () => {
 
                     {/* Table */}
                     <Grid>
-                        <Table fieldName={tableTitle_customer} data={databaseCustomer} />
+                        <Table fieldName={tableTitle_customer} data={databaseCustomer} loading={spinner} />
                     </Grid>
 
                     {/* Form */}
@@ -601,7 +619,7 @@ const Membership: React.FC = () => {
 
                     {/* Table */}
                     <Grid>
-                        <Table fieldName={tableTitle_membership} data={databaseMembership} />
+                        <Table fieldName={tableTitle_membership} data={databaseMembership} loading={spinner} />
                     </Grid>
 
                     {/* Form (membership) */}
@@ -656,7 +674,7 @@ const Membership: React.FC = () => {
                                 </div>
                             </div>
                             {/* Table */}
-                            <Table fieldName={tableTitle_voucher} data={voucher} />
+                            <Table fieldName={tableTitle_voucher} data={voucher} loading={spinner} />
                         </div>
                     </Form>
 

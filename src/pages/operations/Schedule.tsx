@@ -65,6 +65,9 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
 
     interface CalendarProps {
         type: "therapist" | "room";
+        loading?: boolean;          // new
+        skeletonRows?: number;      // new
+        emptyText?: string;         // new
         fullDate: string;
         dayName: string;
         date: string;
@@ -79,8 +82,25 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
         colorMap: Record<string, string>;
         goTo: (date: string) => void;
     }
-
-    function Calendar({ type, fullDate, dayName, date, timelineWidth, hours, startHour, endHour, showNow, nowHour, goTo, totalData, databaseRow, colorMap }: CalendarProps) {
+    function GridLines({ hours }: { hours: number[] }) {
+        return (
+            <>
+            {hours.map((h, i) => (
+                <div key={h}>
+                <div
+                    className="absolute top-0 bottom-0 border-l border-slate-300"
+                    style={{ left: i * HOUR_WIDTH }}
+                />
+                <div
+                    className="absolute top-0 bottom-0 border-l border-dashed border-slate-200"
+                    style={{ left: i * HOUR_WIDTH + HOUR_WIDTH / 2 }}
+                />
+                </div>
+            ))}
+            </>
+        );
+    }
+    function Calendar({ type, fullDate, dayName, date, timelineWidth, hours, startHour, endHour, showNow, nowHour, goTo, totalData, databaseRow, colorMap, loading = false, skeletonRows = 4, emptyText = "No bookings for this day", }: CalendarProps) {
 
         const title = type === "therapist" ? "Therapist" : "Room";
 
@@ -104,9 +124,16 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                     <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-600">
                                         {fullDate}
 
-                                        <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-white">
+                                        {/* <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-white">
                                             {totalData} {totalData === 1 ? "booking" : "bookings"}
-                                        </span>
+                                        </span> */}
+                                        {loading ? (
+                                            <span className="h-5 w-20 animate-pulse rounded-full bg-slate-300" />
+                                        ) : (
+                                            <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-white">
+                                                {totalData} {totalData === 1 ? "booking" : "bookings"}
+                                            </span>
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -140,23 +167,22 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                         </div>
 
                         {/* timeline */}
-                        <div className="overflow-x-auto rounded-xl border border-border bg-white scrollbar-hide shadow-md">
-                            <div style={{ width: COL_WIDTH + timelineWidth, minWidth: "100%" }}>
+                        <div className="relative overflow-x-auto rounded-xl border border-border bg-white scrollbar-hide shadow-md" aria-busy={loading}>
+                            {loading && (
+                                <div className="absolute top-0 left-0 right-0 z-30 h-0.5 overflow-hidden bg-border">
+                                    <div className="h-full w-1/3 animate-[slide_1.1s_ease-in-out_infinite] bg-secondary" />
+                                </div>
+                            )}
 
-                                {/* hour header */}
+                            <div style={{ width: COL_WIDTH + timelineWidth, minWidth: "100%" }}>
+                                {/* hour header: unchanged, stays visible while loading */}
                                 <div className="flex bg-primary text-xs font-bold text-white">
 
-                                    <div
-                                        className="sticky left-0 z-20 flex shrink-0 items-center border-r border-slate-700 bg-primary px-4 py-3"
-                                        style={{ width: COL_WIDTH }}
-                                    >
+                                    <div className="sticky left-0 z-20 flex shrink-0 items-center border-r border-slate-700 bg-primary px-4 py-3" style={{ width: COL_WIDTH }}>
                                         {title}
                                     </div>
 
-                                    <div
-                                        className="relative flex"
-                                        style={{ width: timelineWidth }}
-                                    >
+                                    <div className="relative flex" style={{ width: timelineWidth }}>
                                         {hours.map((h) => (
                                             <div
                                                 key={h}
@@ -169,138 +195,166 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                     </div>
                                 </div>
 
-                                {/* rows */}{databaseRow.map((row, rowIdx) => {
+                                {/* rows */}
+                                {loading ? (
+                                    Array.from({ length: skeletonRows }).map((_, rowIdx) => {
+                                        // fake booking blocks, varied per row so it looks natural
+                                        const blocks = [
+                                            { start: 1 + (rowIdx % 3), len: 2 + (rowIdx % 2) },
+                                            { start: 5 + ((rowIdx * 2) % 3), len: 2 },
+                                        ].filter((b) => (b.start + b.len) <= hours.length);
 
-    const data =
-        type === "therapist"
-            ? row.therapist
-            : row.room;
+                                        return (
+                                        <div
+                                            key={`sk-${rowIdx}`}
+                                            className={`flex border-b border-slate-300 last:border-b-0 ${
+                                            rowIdx % 2 ? "bg-slate-50" : "bg-white"
+                                            }`}
+                                            style={{ minHeight: LANE_HEIGHT + 28 }}
+                                        >
+                                            {/* sidebar skeleton */}
+                                            <div className="sticky left-0 z-10 flex shrink-0 flex-col justify-center gap-2 border-r border-slate-300 bg-tertiary px-4" style={{ width: COL_WIDTH }}>
+                                                <div className="h-3.5 w-3/4 animate-pulse rounded-md bg-slate-300" />
+                                                <div className="h-3 w-1/2 animate-pulse rounded-md bg-slate-300" />
+                                            </div>
 
-    const rowMinHeight = row.laneCount * LANE_HEIGHT + 20;
+                                            {/* timeline skeleton */}
+                                            <div className="relative shrink-0" style={{ width: timelineWidth }}>
+                                                <GridLines hours={hours} />
+                                                {blocks.map((b, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="absolute animate-pulse rounded-md bg-slate-300"
+                                                        style={{
+                                                            left: b.start * HOUR_WIDTH + 1,
+                                                            width: b.len * HOUR_WIDTH - 2,
+                                                            top: 4,
+                                                            height: LANE_HEIGHT + 8,
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        );
+                                    })
+                                    ) : databaseRow.length === 0 ? (
+                                    <div className="sticky left-0 px-6 py-12 text-center text-sm text-slate-400" style={{ width: "100%" }}>
+                                        {emptyText}
+                                    </div>
+                                    ) : (
+                                        databaseRow.map((row, rowIdx) => {
 
-    return (
-        <div
-            key={data.user?.id ?? data.id}
-            className={`flex min-h-[80px] border-b border-slate-300 last:border-b-0 ${
-                rowIdx % 2 ? "bg-slate-50" : "bg-white"
-            }`}
-            style={{ minHeight: rowMinHeight }}
-        >
+                                            const data =
+                                                type === "therapist"
+                                                    ? row.therapist
+                                                    : row.room;
 
-            {/* sidebar */}
-            <div
-                className="sticky left-0 z-10 flex shrink-0 items-center border-r border-slate-300 bg-tertiary px-4 text-sm font-bold text-sky-950"
-                style={{
-                    width: COL_WIDTH,
-                    minHeight: rowMinHeight,
-                }}
-            >
-                {type === "therapist" ? (
-                    <div>
-                        {data.user.name}
+                                            const rowMinHeight = row.laneCount * LANE_HEIGHT + 20;
 
-                        <br />
+                                            return (
+                                                <div
+                                                    key={data.user?.id ?? data.id}
+                                                    className={`flex min-h-[80px] border-b border-slate-300 last:border-b-0 ${
+                                                        rowIdx % 2 ? "bg-slate-50" : "bg-white"
+                                                    }`}
+                                                    style={{ minHeight: rowMinHeight }}
+                                                >
 
-                        <span className="text-xs font-normal">
-                            ({data.user.specialty})
-                        </span>
-                    </div>
-                ) : (
-                    <div>
-                        ({data.room.name})
+                                                    {/* sidebar */}
+                                                    <div className="sticky left-0 z-10 flex shrink-0 items-center border-r border-slate-300 bg-tertiary px-4 text-sm font-bold text-sky-950" style={{width: COL_WIDTH, minHeight: rowMinHeight}}>
+                                                        {type === "therapist" ? (
+                                                            <div>
+                                                                {data.user.name}
 
-                        <br />
+                                                                <br />
 
-                        <span className="text-xs font-normal">
-                            ({data.room.description})
-                        </span>
-                    </div>
-                )}
-            </div>
+                                                                <span className="text-xs font-normal">
+                                                                    ({data.user.specialty})
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                ({data.room.name})
 
-            {/* timeline */}
-            <div
-                className="relative shrink-0"
-                style={{
-                    width: timelineWidth,
-                    minHeight: rowMinHeight,
-                }}
-            >
+                                                                <br />
 
-                {/* grid lines */}
-                {hours.map((h, i) => (
-                    <div key={h}>
-                        <div
-                            className="absolute top-0 bottom-0 border-l border-slate-300"
-                            style={{
-                                left: i * HOUR_WIDTH,
-                            }}
-                        />
+                                                                <span className="text-xs font-normal">
+                                                                    ({data.room.description})
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                        <div
-                            className="absolute top-0 bottom-0 border-l border-dashed border-slate-200"
-                            style={{
-                                left: i * HOUR_WIDTH + HOUR_WIDTH / 2,
-                            }}
-                        />
-                    </div>
-                ))}
+                                                    {/* timeline */}
+                                                    <div className="relative shrink-0" style={{width: timelineWidth, minHeight: rowMinHeight}}>
 
-                {/* current time */}
-                {showNow && (
-                    <div
-                        className="absolute top-0 bottom-0 z-5 w-0.5 bg-red-500"
-                        style={{
-                            left: (nowHour - startHour) * HOUR_WIDTH,
-                        }}
-                    >
-                        <span className="absolute -top-0.5 -left-1 h-2.5 w-2.5 rounded-full bg-red-500" />
-                    </div>
-                )}
+                                                        {/* grid lines */}
+                                                        {hours.map((h, i) => (
+                                                            <div key={h}>
+                                                                <div className="absolute top-0 bottom-0 border-l border-slate-300" style={{left: i * HOUR_WIDTH}}/>
 
-                {/* bookings */}
-                {row.placed.map((booking) => {
+                                                                <div
+                                                                    className="absolute top-0 bottom-0 border-l border-dashed border-slate-200"
+                                                                    style={{
+                                                                        left: i * HOUR_WIDTH + HOUR_WIDTH / 2,
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        ))}
 
-                    const s = Math.max(
-                        toHours(booking.booking.time_start),
-                        startHour
-                    );
+                                                        {/* current time */}
+                                                        {showNow && (
+                                                            <div className="absolute top-0 bottom-0 z-5 w-0.5 bg-red-500" style={{left: (nowHour - startHour) * HOUR_WIDTH}}>
+                                                                <span className="absolute -top-0.5 -left-1 h-2.5 w-2.5 rounded-full bg-red-500" />
+                                                            </div>
+                                                        )}
 
-                    const e = Math.min(
-                        toHours(booking.booking.time_end),
-                        endHour
-                    );
+                                                        {/* bookings */}
+                                                        {row.placed.map((booking) => {
 
-                    if (e <= s) return null;
+                                                            const s = Math.max(
+                                                                toHours(booking.booking.time_start),
+                                                                startHour
+                                                            );
 
-                    return (
-                        <button
-                            key={booking.id}
-                            title={`${fmtTime(booking.time_start)} - ${fmtTime(booking.time_end)}`}
-                            className={`${colorMap[booking.package?.title] ?? DEFAULT_COLOR} absolute flex cursor-pointer flex-col items-start justify-center gap-1 overflow-hidden rounded-md px-2 text-left text-xs leading-tight shadow-md ring-1 ring-black/10 transition hover:-translate-y-px hover:shadow-lg`}
-                            style={{
-                                left: (s - startHour) * HOUR_WIDTH + 1,
-                                width: (e - s) * HOUR_WIDTH - 2,
-                                top: booking.lane * LANE_HEIGHT + 4,
-                                minHeight: LANE_HEIGHT + 8,
-                            }}
-                        >
-                            <span className="rounded bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
-                                {fmtTime(booking.time_start)} - {fmtTime(booking.time_end)}
-                            </span>
+                                                            const e = Math.min(
+                                                                toHours(booking.booking.time_end),
+                                                                endHour
+                                                            );
 
-                            <span className="text-[13px] font-bold">
-                                - {booking.package?.title}
-                                <br />
-                                - {booking.booking?.user?.name}
-                            </span>
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    );
-})}
+                                                            if (e <= s) return null;
+
+                                                            return (
+                                                                <button
+                                                                    key={booking.id}
+                                                                    title={`${fmtTime(booking.time_start)} - ${fmtTime(booking.time_end)}`}
+                                                                    className={`${colorMap[booking.package?.title] ?? DEFAULT_COLOR} absolute flex cursor-pointer flex-col items-start justify-center gap-1 overflow-hidden rounded-md px-2 text-left text-xs leading-tight shadow-md ring-1 ring-black/10 transition hover:-translate-y-px hover:shadow-lg`}
+                                                                    style={{
+                                                                        left: (s - startHour) * HOUR_WIDTH + 1,
+                                                                        width: (e - s) * HOUR_WIDTH - 2,
+                                                                        top: booking.lane * LANE_HEIGHT + 4,
+                                                                        minHeight: LANE_HEIGHT + 8,
+                                                                    }}
+                                                                >
+                                                                    <span className="rounded bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
+                                                                        {fmtTime(booking.time_start)} - {fmtTime(booking.time_end)}
+                                                                    </span>
+
+                                                                    <span className="text-[13px] font-bold">
+                                                                        - {booking.package?.title}
+                                                                        <br />
+                                                                        - {booking.booking?.user?.name}
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+
+                                
                             </div>
                         </div>
                     </div>
@@ -310,6 +364,7 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
     }
 
 //#endregion
+
 
 const Schedule: React.FC = () => {
 
@@ -321,6 +376,8 @@ const Schedule: React.FC = () => {
         const [isLoading, setIsLoading] = useState(false);
         // date
         const [date, setDate] = useState(toISO(new Date()));
+        // loading state
+        const [spinner, setSpinner] = useState(false)
         // swap section
         const [active, setActive] = useState("therapist");
         const tabs = [
@@ -339,7 +396,11 @@ const Schedule: React.FC = () => {
         // a) fetch 'therapist'
             const [databaseTherapist, setDatabase_therapist] = useState<Schedule_therapist_json[]>([])
             const fetchData_therapist = useCallback(() => {
-                api.get(`/schedule`, {
+                
+                // loading
+                setSpinner(true)
+
+                api.get(`/booking`, {
                     params: {
                         date: date,
                         switch: 'therapist',
@@ -351,7 +412,10 @@ const Schedule: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error.data);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, [date]);
             useEffect(() => {
                 fetchData_therapist();
@@ -360,7 +424,11 @@ const Schedule: React.FC = () => {
         // b) fetch 'throom'
             const [databaseRoom, setDatabase_room] = useState<any []>([])
             const fetchData_room = useCallback(() => {
-                api.get(`/schedule`, {
+            
+                // loading
+                setSpinner(true)
+
+                api.get(`/booking`, {
                     params: {
                         date: date,
                         switch: 'room',
@@ -372,7 +440,10 @@ const Schedule: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error.data);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, [date]);
 
             useEffect(() => {
@@ -525,6 +596,7 @@ const Schedule: React.FC = () => {
             {active === "therapist" && (
                 <Calendar
                     type="therapist"
+                    loading={spinner}
                     fullDate={full}
                     dayName={weekday}
                     date={date}
@@ -545,6 +617,7 @@ const Schedule: React.FC = () => {
             {active === "room" && (
                 <Calendar
                     type="room"
+                    loading={spinner}
                     fullDate={full}
                     dayName={weekday}
                     date={date}

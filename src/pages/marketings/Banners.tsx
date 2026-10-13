@@ -149,6 +149,7 @@ const Banners: React.FC = () => {
         // c) banner
         const [databaseBanner, setDatabase_banner] = useState<Banner_type[]>([])
         const fetchData_banner = useCallback(() => {
+
             api.get(`/banner`)
             .then((response) => {
                 // 1) normal
@@ -156,7 +157,7 @@ const Banners: React.FC = () => {
             })
             .catch((error) => {
                 console.error('Error fetching data:', error.data);
-            });
+            })
         }, [])
         useEffect(()=> {
             fetchData_banner()

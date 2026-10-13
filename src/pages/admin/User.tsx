@@ -39,6 +39,8 @@ const User: React.FC = () => {
         const [form_user, setForm_user] = useState(false);
         // database
         const [databaseUser, setDatabase_user] = useState<User_type[]>([])
+        // loading state
+        const [spinner, setSpinner] = useState(false)
         
     //#endregion
 
@@ -166,6 +168,7 @@ const User: React.FC = () => {
 
     //#endregion
     
+
     // #region 4) --> database
     
         // tableTitle
@@ -240,6 +243,10 @@ const User: React.FC = () => {
 
         // fetch database
         const fetchData_user = useCallback(() => {
+            
+            // loading
+            setSpinner(true)
+
             api.get(`/user`)
             .then((response) => {
                 const data = response.data ?? [];
@@ -247,7 +254,10 @@ const User: React.FC = () => {
             })
             .catch((error) => {
                 console.error('Error fetching:', error);
-            });
+            })
+            .finally(() => {
+                setSpinner(false)
+            })
         }, []);
 
         // fetch 'user' database
@@ -268,7 +278,7 @@ const User: React.FC = () => {
 
             {/* table */}
             <Grid>
-                <Table fieldName={tableTitle} data={databaseUser} />
+                <Table fieldName={tableTitle} data={databaseUser} loading={spinner} />
             </Grid>
 
             {/* create user */}

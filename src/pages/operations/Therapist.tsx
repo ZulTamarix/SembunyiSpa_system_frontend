@@ -23,6 +23,8 @@ const Therapist: React.FC = () => {
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
         const [isLoading, setIsLoading] = useState(false);
+        // loading state
+        const [spinner, setSpinner] = useState(false)
 
         // swap section
         const [active, setActive] = useState("therapist");
@@ -86,6 +88,7 @@ const Therapist: React.FC = () => {
                 roster_leave_id: 0,
                 roster_shift_id: 0
             })
+            
         //#endregion
 
 
@@ -137,6 +140,9 @@ const Therapist: React.FC = () => {
             // a) fetch 'user'
             const fetchData_roster = useCallback((currentYear: number, currentMonth: number) => {
 
+                // loading
+                setSpinner(true)
+
                 api.get(`/roster`, {
                     params: {
                         switch: 'roster',
@@ -151,7 +157,10 @@ const Therapist: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching data:', error.data);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, [])
         //#endregion
 
@@ -351,6 +360,10 @@ const Therapist: React.FC = () => {
 
             // fetch database
             const fetchData_shift = useCallback(() => {
+
+                // loading
+                setSpinner(true)
+
                 api.get(`/roster`, {
                     params: {
                         switch: 'shift'
@@ -361,7 +374,10 @@ const Therapist: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching:', error);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, []);
             useEffect(() => {
                 fetchData_shift()
@@ -449,6 +465,10 @@ const Therapist: React.FC = () => {
 
             // fetch database
             const fetchData_leave = useCallback(() => {
+
+                // loading
+                setSpinner(true)
+
                 api.get(`/roster`, {
                     params: {
                         switch: 'leave'
@@ -459,7 +479,10 @@ const Therapist: React.FC = () => {
                 })
                 .catch((error) => {
                     console.error('Error fetching:', error);
-                });
+                })
+                .finally(() => {
+                    setSpinner(false)
+                })
             }, []);
             useEffect(() => {
                 fetchData_leave()
@@ -560,8 +583,6 @@ const Therapist: React.FC = () => {
                 <>
                     {/* Roster */}
                     <Grid>
-                        {/* <div className="min-h-screen rounded-2xl border border-border bg-slate-100 p-2 text-slate-800 sm:p-6"> */}
-
                         <div className="my-auto">
                             {/* 1) Header */}
                             <div className="flex items-start justify-between mb-4">
@@ -677,8 +698,6 @@ const Therapist: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        
-                        {/* </div> */}
                     </Grid>
                     
                     {/* Legend */}
@@ -838,7 +857,7 @@ const Therapist: React.FC = () => {
 
                         {/* table */}
                         <Grid >
-                            <Table fieldName={tableTitle_shift} data={databaseShift}  />
+                            <Table fieldName={tableTitle_shift} data={databaseShift} loading={spinner} />
                         </Grid>
 
                         {/* form */}
@@ -915,7 +934,7 @@ const Therapist: React.FC = () => {
 
                         {/* table */}
                         <Grid>
-                            <Table fieldName={tableTitle_leave} data={databaseLeave}  />
+                            <Table fieldName={tableTitle_leave} data={databaseLeave} loading={spinner} />
                         </Grid>
 
                         {/* form */}

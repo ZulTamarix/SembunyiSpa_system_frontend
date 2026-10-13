@@ -30,6 +30,8 @@ const Customers: React.FC = () => {
             id: 0,
             quantity: 0
         })
+        // loading state
+        const [spinner, setSpinner] = useState(false)
 
     //#endregion
 
@@ -41,6 +43,9 @@ const Customers: React.FC = () => {
         
         // customer
         const fetchData_user = useCallback(() => {
+
+            // loading
+            setSpinner(true)
 
             api.get(`/user`, {
                 params: {
@@ -55,7 +60,10 @@ const Customers: React.FC = () => {
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
-            });
+            })
+            .finally(() => {
+                setSpinner(false)
+            })
         }, [])
         // voucher
         const fetchData_voucher = useCallback(() => {
@@ -136,7 +144,9 @@ const Customers: React.FC = () => {
                 key: "booking",
                 header: "Booking",
                 align: "center",
-                render: () => 0
+                render: (row) => (
+                    <span>{row.booking?.length}</span>
+                )
             },
             {
                 key: "voucher",
@@ -230,7 +240,7 @@ const Customers: React.FC = () => {
 
             {/* Table */}
             <Grid>
-                <Table fieldName={tableTitle} data={databaseUser} />
+                <Table fieldName={tableTitle} data={databaseUser} loading={spinner} />
             </Grid>
 
             

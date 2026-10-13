@@ -41,7 +41,8 @@ const Membership: React.FC = () => {
         // quantity
         const [unlimited, setUnlimited] = useState(false)
         const [selectedCustomer, setSelected_customer] = useState('all')
-           
+        // loading state
+        const [spinner, setSpinner] = useState(false)
 
     //#endregion
 
@@ -214,13 +215,20 @@ const Membership: React.FC = () => {
         const [databaseVoucher, setDatabase_voucher] = useState<Voucher_type[]>([])
         const [databaseUser, setDatabase_user] = useState<User_type[]>([])
         const fetchData_voucher = useCallback(() => {
+
+            // loading
+            setSpinner(true)
+
             api.get(`/voucher`)
             .then((response) => {
                 setDatabase_voucher(response.data)
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
-            });
+            })
+            .finally(() => {
+                setSpinner(false)
+            })
         }, [])
         const fetchData_user = useCallback(() => {
 
@@ -313,7 +321,7 @@ const Membership: React.FC = () => {
 
             {/* Table */}
             <Grid>
-                <Table fieldName={tableTitle} data={databaseVoucher} />
+                <Table fieldName={tableTitle} data={databaseVoucher} loading={spinner} />
             </Grid>
             
             {/* Form */}
