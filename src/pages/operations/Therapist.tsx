@@ -14,6 +14,7 @@ import Table, { type Column } from "../../components/ui/Table";
 import Field from "../../components/ui/Field";
 import type { Roster_adjustment_type, Roster_json, Roster_leave_type, Roster_shift_type, Roster_type } from "../../interface/roster";
 import Label from "../../components/ui/Label";
+import Alert from "../../components/ui/Alert";
 
 const Therapist: React.FC = () => {
 
@@ -107,7 +108,6 @@ const Therapist: React.FC = () => {
                         item.roster.user_id === user.id &&
                         item.roster.date === roster.iso
                 );
-                console.log('data = ',currentRoster)
                 setAdjustment(currentRoster?.roster_adjustment || [])
                 setIndex(currentRoster?.roster_adjustment.length || 0)
 
@@ -378,9 +378,14 @@ const Therapist: React.FC = () => {
     //#endregion
 
 
-    // #region 3) --> legend
+    //#region 3) --> legend
     
-        // #region a) --> shift
+        // selected id
+        const [selectedId, setSelected_id] = useState(0);
+
+        //#region a) --> shift
+            // detect error -> common
+            const [isAlert_shift, setIs_alert_shift] = useState(false);
             // form
             const [form_shift, setForm_shift] = useState(false);
             // fieldname
@@ -413,13 +418,13 @@ const Therapist: React.FC = () => {
                 {
                     key: "",
                     header: "Action",
-                    render: () => (
+                    render: (row) => (
                         <div className="flex gap-3">
-                            <button className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                            <button onClick={() => handleEdit_shift(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
                                 Edit
                             </button>
                             
-                            <button className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                            <button onClick={() => {setIs_alert_shift(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                                 Delete
                             </button>
                         </div>
@@ -489,10 +494,74 @@ const Therapist: React.FC = () => {
                     setIsLoading(false)
                 }
             }
+            
+            // edit 
+            const handleEdit_shift = (data: Roster_shift_type) => {
+                setShift(data)
+
+                setForm_shift(true)
+                setCrud('edit')
+            }
+            // UPDATE
+            const handleUpdate_shift = async () => {
+
+                // loading
+                setIsLoading(true)
+                
+                // UPDATE data
+                try {
+                    await api.put(`/roster/${shift.id}`, {
+                        icon: shift.icon,
+                        time_start: shift.time_start,
+                        time_end: shift.time_end,
+
+                        switch: 'shift'
+                    });
+
+                    fetchData_shift()
+                    setForm_shift(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+            // DELETE
+            const handleDelete_shift = async () => {
+                
+                setIsLoading(true)
+
+                // DELETE data
+                try {
+                    console.log('id = ',selectedId)
+                    await  api.delete(`/roster/${selectedId}`, {
+                        params: {
+                            switch: 'shift'
+                        }
+                    })
+
+                    fetchData_shift()
+                    setForm_shift(false)
+                    setIs_alert_shift(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+
         //#endregion
 
         //#region b) --> leave
         
+            // detect error -> common
+            const [isAlert_leave, setIs_alert_leave] = useState(false);
             // form
             const [form_leave, setForm_leave] = useState(false);
             // fieldname
@@ -519,13 +588,13 @@ const Therapist: React.FC = () => {
                 {
                     key: "",
                     header: "Action",
-                    render: () => (
+                    render: (row) => (
                         <div className="flex gap-3">
-                            <button className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                            <button onClick={() => handleEdit_leave(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
                                 Edit
                             </button>
                             
-                            <button className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                            <button onClick={() => {setIs_alert_leave(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                                 Delete
                             </button>
                         </div>
@@ -593,6 +662,66 @@ const Therapist: React.FC = () => {
                     setIsLoading(false)
                 }
             }
+
+            // edit 
+            const handleEdit_leave = (data: Roster_leave_type) => {
+                setLeave(data)
+
+                setForm_leave(true)
+                setCrud('edit')
+            }
+            // UPDATE
+            const handleUpdate_leave = async () => {
+
+                // loading
+                setIsLoading(true)
+                
+                // UPDATE data
+                try {
+                    await api.put(`roster/${leave.id}`, {
+                        icon: leave.icon,
+                        description: leave.description,
+
+                        switch: 'leave'
+                    });
+
+                    fetchData_leave()
+                    setForm_leave(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+            // DELETE
+            const handleDelete_leave = async () => {
+                
+                setIsLoading(true)
+
+                // DELETE data
+                try {
+                    await  api.delete(`/roster/${selectedId}`, {
+                        params: {
+                            switch: 'leave'
+                        }
+                    })
+
+                    fetchData_leave()
+                    setForm_leave(false)
+                    setIs_alert_leave(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+
         //#endregion
     
     //#endregion
@@ -1075,7 +1204,7 @@ const Therapist: React.FC = () => {
                                         <Button
                                             label="Update"
                                             className="w-24"
-                                            onClick={handleCreate_shift}
+                                            onClick={handleUpdate_shift}
                                             disabled={isLoading}
                                         />
                                     )}
@@ -1113,6 +1242,20 @@ const Therapist: React.FC = () => {
                                 />
                             </div>
                         </Form>
+                        
+                        {/* Delete */}
+                        <Alert
+                            open={isAlert_shift}
+                            title="Delete this shift?"
+                            description="This action can't be undone."
+                            isLoading={isLoading}
+                            confirmLabel="Delete"
+                            onCancel={() => setIs_alert_shift(false)}
+                            onConfirm={() => {
+                                // do your action here
+                                handleDelete_shift()
+                            }}
+                        />
                     </>
                     
                     {/* b) leave */}
@@ -1152,7 +1295,7 @@ const Therapist: React.FC = () => {
                                         <Button
                                             label="Update"
                                             className="w-24"
-                                            onClick={handleCreate_leave}
+                                            onClick={handleUpdate_leave}
                                             disabled={isLoading}
                                         />
                                     )}
@@ -1177,6 +1320,20 @@ const Therapist: React.FC = () => {
                                 />
                             </div>
                         </Form>
+                        
+                        {/* Delete */}
+                        <Alert
+                            open={isAlert_leave}
+                            title="Delete this leave?"
+                            description="This action can't be undone."
+                            isLoading={isLoading}
+                            confirmLabel="Delete"
+                            onCancel={() => setIs_alert_leave(false)}
+                            onConfirm={() => {
+                                // do your action here
+                                handleDelete_leave()
+                            }}
+                        />
                     </>
                 </>
 
