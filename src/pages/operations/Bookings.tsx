@@ -162,10 +162,6 @@ const Bookings: React.FC = () => {
                     const therapist_list = temp_package.package_therapist.map(
                         (item: any) => item.user_id
                     );
-                    // console.log('date = ',booking.date_start);
-                    // console.log('time start = ',booking.time_start); 
-                    // console.log('time end = ',time_end);
-                    // console.log('therapist id = ',therapist_list)
 
                 // 3) check availability
                     api.get(`/available/therapist`, {
@@ -177,23 +173,20 @@ const Bookings: React.FC = () => {
                         }
                     })
                     .then((response) => {
-                        console.log('list of therapist = ',response.data)
+                        console.log('therapist = ',response.data)
+                        console.log('room = ',temp_package.package_room)
 
                         // store data
                         setNew_therapist(response.data)
                         setBooking_selected((prev) => ({
                             ...prev,
                             user_id: response?.data[0]?.id || 0,
-                            room_id: 1 //KIV
+                            room_id: temp_package.package_room[0].room_id //KIV
                         }))
                     })
                     .catch((error) => {
                         console.error('Error fetching data:', error.data);
                     });
-
-                // console.log('duration = ',time_end)
-                // console.log('date = ',booking.date_start)
-                // console.log('time = ',booking.time_start)
             }
         }, [booking.date_start, booking.time_start])
    
@@ -204,48 +197,49 @@ const Bookings: React.FC = () => {
 
         const handleCreate_booking = async () => {
 
-            setIsLoading(true)
-
+            // setIsLoading(true)
+            console.log('book = ',booking)
+            console.log('book select = ',booking_selected)
             try {
 
-                if (isWalkin) {
+                // if (isWalkin) {
 
-                    // 1. Create user first
-                    const response = await api.post(`/user`, {
-                        role: userWalkin.role,
-                        name: userWalkin.name,
-                        email: userWalkin.email,
-                        phoneNo: userWalkin.phoneNo,
-                        password: userWalkin.password,
-                        date_joined: userWalkin.date_joined,
-                    })
+                //     // 1. Create user first
+                //     const response = await api.post(`/user`, {
+                //         role: userWalkin.role,
+                //         name: userWalkin.name,
+                //         email: userWalkin.email,
+                //         phoneNo: userWalkin.phoneNo,
+                //         password: userWalkin.password,
+                //         date_joined: userWalkin.date_joined,
+                //     })
 
-                    const userId = response.data.id
+                //     const userId = response.data.id
 
-                    console.log('Created user id = ', userId)
+                //     console.log('Created user id = ', userId)
 
-                    // 2. Create booking only if user creation succeeds
-                    await api.post(`/booking`, {
-                        booking: {
-                            ...booking,
-                            user_id: userId
-                        },
-                        booking_selected: booking_selected
-                    })
+                //     // 2. Create booking only if user creation succeeds
+                //     await api.post(`/booking`, {
+                //         booking: {
+                //             ...booking,
+                //             user_id: userId
+                //         },
+                //         booking_selected: booking_selected
+                //     })
 
-                }
-                else {
+                // }
+                // else {
 
-                    // Existing user - create booking directly
-                    await api.post(`/booking`, {
-                        booking: booking,
-                        booking_selected: booking_selected
-                    })
+                //     // Existing user - create booking directly
+                //     await api.post(`/booking`, {
+                //         booking: booking,
+                //         booking_selected: booking_selected
+                //     })
 
-                }
+                // }
 
-                setForm_booking(false)
-
+                // setForm_booking(false)
+                // fetchData_booking()
             }
             catch (error) {
                 console.error('Error:', error)

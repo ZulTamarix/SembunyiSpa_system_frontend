@@ -12,29 +12,29 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
     const LANE_HEIGHT = 80; // px per overlapping lane
     const COL_WIDTH = 160; // px
 
-    const pad = (n) => String(n).padStart(2, "0");
+    const pad = (n:any) => String(n).padStart(2, "0");
 
     /** "08:30" | "08:30:00" -> 8.5 */
-    const toHours = (t) => {
+    const toHours = (t:any) => {
         const [h, m = 0] = String(t).split(":").map(Number);
         return h + m / 60;
     };
 
-    const fmtTime = (t) => String(t).slice(0, 5);
+    const fmtTime = (t:any) => String(t).slice(0, 5);
 
     /** "YYYY-MM-DD" -> Date (local, no timezone shift) */
-    const parseDate = (s) => {
+    const parseDate = (s:any) => {
         const [y, m, d] = s.split("-").map(Number);
         return new Date(y, m - 1, d);
     };
-    const toISO = (date) =>
+    const toISO = (date:any) =>
         `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-        const addDays = (iso, n) => {
+        const addDays = (iso:any, n:any) => {
         const d = parseDate(iso);
         d.setDate(d.getDate() + n);
         return toISO(d);
     };
-    const prettyDate = (iso) => {
+    const prettyDate = (iso:any) => {
         const d = parseDate(iso);
         return {
             weekday: d.toLocaleDateString("en-GB", { weekday: "long" }),
@@ -43,14 +43,14 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
     };
 
     /** Give each activity a lane so overlapping bookings stack instead of covering each other. */
-    function assignLanes(items) {
+    function assignLanes(items:any) {
         const sorted = [...items].sort(
             (a, b) => toHours(a.time_start) - toHours(b.time_start) || toHours(a.time_end) - toHours(b.time_end)
         );
-        const laneEnds = [];
+        const laneEnds:any = [];
         const placed = sorted.map((item) => {
             const start = toHours(item.time_start);
-            let lane = laneEnds.findIndex((end) => end <= start);
+            let lane = laneEnds.findIndex((end:any) => end <= start);
             if (lane === -1) 
                 lane = laneEnds.length;
             laneEnds[lane] = toHours(item.time_end);
@@ -205,154 +205,148 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                         ].filter((b) => (b.start + b.len) <= hours.length);
 
                                         return (
-                                        <div
-                                            key={`sk-${rowIdx}`}
-                                            className={`flex border-b border-slate-300 last:border-b-0 ${
-                                            rowIdx % 2 ? "bg-slate-50" : "bg-white"
-                                            }`}
-                                            style={{ minHeight: LANE_HEIGHT + 28 }}
-                                        >
-                                            {/* sidebar skeleton */}
-                                            <div className="sticky left-0 z-10 flex shrink-0 flex-col justify-center gap-2 border-r border-slate-300 bg-tertiary px-4" style={{ width: COL_WIDTH }}>
-                                                <div className="h-3.5 w-3/4 animate-pulse rounded-md bg-slate-300" />
-                                                <div className="h-3 w-1/2 animate-pulse rounded-md bg-slate-300" />
-                                            </div>
+                                            <div key={`sk-${rowIdx}`} className={`flex border-b border-slate-300 last:border-b-0 ${rowIdx % 2 ? "bg-slate-50" : "bg-white"}`} style={{ minHeight: LANE_HEIGHT + 28 }}>
+                                                {/* sidebar skeleton */}
+                                                <div className="sticky left-0 z-10 flex shrink-0 flex-col justify-center gap-2 border-r border-slate-300 bg-tertiary px-4" style={{ width: COL_WIDTH }}>
+                                                    <div className="h-3.5 w-3/4 animate-pulse rounded-md bg-slate-300" />
+                                                    <div className="h-3 w-1/2 animate-pulse rounded-md bg-slate-300" />
+                                                </div>
 
-                                            {/* timeline skeleton */}
-                                            <div className="relative shrink-0" style={{ width: timelineWidth }}>
-                                                <GridLines hours={hours} />
-                                                {blocks.map((b, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="absolute animate-pulse rounded-md bg-slate-300"
-                                                        style={{
-                                                            left: b.start * HOUR_WIDTH + 1,
-                                                            width: b.len * HOUR_WIDTH - 2,
-                                                            top: 4,
-                                                            height: LANE_HEIGHT + 8,
-                                                        }}
-                                                    />
-                                                ))}
+                                                {/* timeline skeleton */}
+                                                <div className="relative shrink-0" style={{ width: timelineWidth }}>
+                                                    <GridLines hours={hours} />
+                                                    {blocks.map((b, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className="absolute animate-pulse rounded-md bg-slate-300"
+                                                            style={{
+                                                                left: b.start * HOUR_WIDTH + 1,
+                                                                width: b.len * HOUR_WIDTH - 2,
+                                                                top: 4,
+                                                                height: LANE_HEIGHT + 8,
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
                                         );
                                     })
-                                    ) : databaseRow.length === 0 ? (
-                                    <div className="sticky left-0 px-6 py-12 text-center text-sm text-slate-400" style={{ width: "100%" }}>
-                                        {emptyText}
-                                    </div>
-                                    ) : (
-                                        databaseRow.map((row, rowIdx) => {
+                                ) : databaseRow.length === 0 ? (
+                                <div className="sticky left-0 px-6 py-12 text-center text-sm text-slate-400" style={{ width: "100%" }}>
+                                    {emptyText}
+                                </div>
+                                ) : (
+                                    databaseRow.map((row, rowIdx) => {
 
-                                            const data =
-                                                type === "therapist"
-                                                    ? row.therapist
-                                                    : row.room;
+                                        const data =
+                                            type === "therapist"
+                                                ? row.therapist
+                                                : row.room;
 
-                                            const rowMinHeight = row.laneCount * LANE_HEIGHT + 20;
+                                        const rowMinHeight = row.laneCount * LANE_HEIGHT + 20;
 
-                                            return (
-                                                <div
-                                                    key={data.user?.id ?? data.id}
-                                                    className={`flex min-h-[80px] border-b border-slate-300 last:border-b-0 ${
-                                                        rowIdx % 2 ? "bg-slate-50" : "bg-white"
-                                                    }`}
-                                                    style={{ minHeight: rowMinHeight }}
-                                                >
+                                        return (
+                                            <div
+                                                key={data.user?.id ?? data.id}
+                                                className={`flex min-h-20 border-b border-slate-300 last:border-b-0 ${
+                                                    rowIdx % 2 ? "bg-slate-50" : "bg-white"
+                                                }`}
+                                                style={{ minHeight: rowMinHeight }}
+                                            >
 
-                                                    {/* sidebar */}
-                                                    <div className="sticky left-0 z-10 flex shrink-0 items-center border-r border-slate-300 bg-tertiary px-4 text-sm font-bold text-sky-950" style={{width: COL_WIDTH, minHeight: rowMinHeight}}>
-                                                        {type === "therapist" ? (
-                                                            <div>
-                                                                {data.user.name}
+                                                {/* sidebar */}
+                                                <div className="sticky left-0 z-10 flex shrink-0 items-center border-r border-slate-300 bg-tertiary px-4 text-sm font-bold text-sky-950" style={{width: COL_WIDTH, minHeight: rowMinHeight}}>
+                                                    {type === "therapist" ? (
+                                                        <div>
+                                                            {data.user.name}
 
-                                                                <br />
+                                                            <br />
 
-                                                                <span className="text-xs font-normal">
-                                                                    ({data.user.specialty})
-                                                                </span>
-                                                            </div>
-                                                        ) : (
-                                                            <div>
-                                                                ({data.room.name})
+                                                            <span className="text-xs font-normal">
+                                                                ({data.user.specialty})
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            ({data.room.name})
 
-                                                                <br />
+                                                            <br />
 
-                                                                <span className="text-xs font-normal">
-                                                                    ({data.room.description})
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* timeline */}
-                                                    <div className="relative shrink-0" style={{width: timelineWidth, minHeight: rowMinHeight}}>
-
-                                                        {/* grid lines */}
-                                                        {hours.map((h, i) => (
-                                                            <div key={h}>
-                                                                <div className="absolute top-0 bottom-0 border-l border-slate-300" style={{left: i * HOUR_WIDTH}}/>
-
-                                                                <div
-                                                                    className="absolute top-0 bottom-0 border-l border-dashed border-slate-200"
-                                                                    style={{
-                                                                        left: i * HOUR_WIDTH + HOUR_WIDTH / 2,
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        ))}
-
-                                                        {/* current time */}
-                                                        {showNow && (
-                                                            <div className="absolute top-0 bottom-0 z-5 w-0.5 bg-red-500" style={{left: (nowHour - startHour) * HOUR_WIDTH}}>
-                                                                <span className="absolute -top-0.5 -left-1 h-2.5 w-2.5 rounded-full bg-red-500" />
-                                                            </div>
-                                                        )}
-
-                                                        {/* bookings */}
-                                                        {row.placed.map((booking) => {
-
-                                                            const s = Math.max(
-                                                                toHours(booking.booking.time_start),
-                                                                startHour
-                                                            );
-
-                                                            const e = Math.min(
-                                                                toHours(booking.booking.time_end),
-                                                                endHour
-                                                            );
-
-                                                            if (e <= s) return null;
-
-                                                            return (
-                                                                <button
-                                                                    key={booking.id}
-                                                                    title={`${fmtTime(booking.time_start)} - ${fmtTime(booking.time_end)}`}
-                                                                    className={`${colorMap[booking.package?.title] ?? DEFAULT_COLOR} absolute flex cursor-pointer flex-col items-start justify-center gap-1 overflow-hidden rounded-md px-2 text-left text-xs leading-tight shadow-md ring-1 ring-black/10 transition hover:-translate-y-px hover:shadow-lg`}
-                                                                    style={{
-                                                                        left: (s - startHour) * HOUR_WIDTH + 1,
-                                                                        width: (e - s) * HOUR_WIDTH - 2,
-                                                                        top: booking.lane * LANE_HEIGHT + 4,
-                                                                        minHeight: LANE_HEIGHT + 8,
-                                                                    }}
-                                                                >
-                                                                    <span className="rounded bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
-                                                                        {fmtTime(booking.time_start)} - {fmtTime(booking.time_end)}
-                                                                    </span>
-
-                                                                    <span className="text-[13px] font-bold">
-                                                                        - {booking.package?.title}
-                                                                        <br />
-                                                                        - {booking.booking?.user?.name}
-                                                                    </span>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
+                                                            <span className="text-xs font-normal">
+                                                                ({data.room.description})
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            );
-                                        })
-                                    )}
+
+                                                {/* timeline */}
+                                                <div className="relative shrink-0" style={{width: timelineWidth, minHeight: rowMinHeight}}>
+
+                                                    {/* grid lines */}
+                                                    {hours.map((h, i) => (
+                                                        <div key={h}>
+                                                            <div className="absolute top-0 bottom-0 border-l border-slate-300" style={{left: i * HOUR_WIDTH}}/>
+
+                                                            <div
+                                                                className="absolute top-0 bottom-0 border-l border-dashed border-slate-200"
+                                                                style={{
+                                                                    left: i * HOUR_WIDTH + HOUR_WIDTH / 2,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ))}
+
+                                                    {/* current time */}
+                                                    {showNow && (
+                                                        <div className="absolute top-0 bottom-0 z-5 w-0.5 bg-red-500" style={{left: (nowHour - startHour) * HOUR_WIDTH}}>
+                                                            <span className="absolute -top-0.5 -left-1 h-2.5 w-2.5 rounded-full bg-red-500" />
+                                                        </div>
+                                                    )}
+
+                                                    {/* bookings */}
+                                                    {row.placed.map((booking:any) => {
+
+                                                        const s = Math.max(
+                                                            toHours(booking.booking.time_start),
+                                                            startHour
+                                                        );
+
+                                                        const e = Math.min(
+                                                            toHours(booking.booking.time_end),
+                                                            endHour
+                                                        );
+
+                                                        if (e <= s) return null;
+
+                                                        return (
+                                                            <button
+                                                                key={booking.id}
+                                                                title={`${fmtTime(booking.time_start)} - ${fmtTime(booking.time_end)}`}
+                                                                className={`${colorMap[booking.package?.title] ?? DEFAULT_COLOR} absolute flex cursor-pointer flex-col items-start justify-center gap-1 overflow-hidden rounded-md px-2 text-left text-xs leading-tight shadow-md ring-1 ring-black/10 transition hover:-translate-y-px hover:shadow-lg`}
+                                                                style={{
+                                                                    left: (s - startHour) * HOUR_WIDTH + 1,
+                                                                    width: (e - s) * HOUR_WIDTH - 2,
+                                                                    top: booking.lane * LANE_HEIGHT + 4,
+                                                                    minHeight: LANE_HEIGHT + 8,
+                                                                }}
+                                                            >
+                                                                <span className="rounded bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
+                                                                    {fmtTime(booking.time_start)} - {fmtTime(booking.time_end)}
+                                                                </span>
+
+                                                                <span className="text-[13px] font-bold">
+                                                                    - {booking.package?.title}
+                                                                    <br />
+                                                                    - {booking.booking?.user?.name}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
 
                                 
                             </div>
@@ -371,9 +365,9 @@ const Schedule: React.FC = () => {
     //#region 1) --> navbar
     
         // set CRUD's State
-        const [crud, setCrud] = useState<'create'|'edit'>('create')
+        // const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
-        const [isLoading, setIsLoading] = useState(false);
+        // const [isLoading, setIsLoading] = useState(false);
         // date
         const [date, setDate] = useState(toISO(new Date()));
         // loading state
@@ -469,14 +463,14 @@ const Schedule: React.FC = () => {
 
             const timelineWidth = hours.length * HOUR_WIDTH;
 
-            const goTo = (iso) => {
+            const goTo = (iso:any) => {
                 if (!iso) return;
                 setDate(iso);
             };
 
             // Left / right arrow keys change the day
             useEffect(() => {
-                const onKey = (e) => {
+                const onKey = (e:any) => {
                     if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
 
                     if (e.key === "ArrowLeft") goTo(addDays(date, -1));
@@ -497,9 +491,9 @@ const Schedule: React.FC = () => {
                 isToday && nowHour >= startHour && nowHour <= endHour;
 
             const { weekday, full } = prettyDate(date);
-            const todayISO = toISO(now);
+            // const todayISO = toISO(now);
 
-            const handleClick = (a) => {
+            const handleClick = (a:any) => {
                 console.log('a = ',a)        
             };
         //#endregion
@@ -548,8 +542,8 @@ const Schedule: React.FC = () => {
             const roomRows = useMemo(() => {
                 return databaseRoom.map((room) => {
                     const dayItems = room.booking_selected
-                        .filter((item) => item.booking?.date_start === date)
-                        .map((item) => ({
+                        .filter((item:any) => item.booking?.date_start === date)
+                        .map((item:any) => ({
                             ...item,
                             ...item.booking,
                         }));

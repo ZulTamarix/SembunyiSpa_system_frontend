@@ -12,7 +12,7 @@ import Button from "../../components/ui/Button";
 import type { User_type } from "../../interface/user";
 import Table, { type Column } from "../../components/ui/Table";
 import Field from "../../components/ui/Field";
-import type { Roster_json, Roster_leave_type, Roster_shift_type, Roster_type } from "../../interface/roster";
+import type { Roster_adjustment_type, Roster_json, Roster_leave_type, Roster_shift_type, Roster_type } from "../../interface/roster";
 import Label from "../../components/ui/Label";
 
 const Therapist: React.FC = () => {
@@ -77,6 +77,7 @@ const Therapist: React.FC = () => {
         // #region 1) --> useState
             // form
             const [form_roster, setForm_roster] = useState(false);
+            const [form_adjustment, setForm_adjustment] = useState(false);
             // temporary
             const [tempRoster, setTemp_roster] = useState<{ iso: string }>({ iso: '' })
             const [tempUser, setTemp_user] = useState<User_type>()
@@ -88,39 +89,93 @@ const Therapist: React.FC = () => {
                 roster_leave_id: 0,
                 roster_shift_id: 0
             })
+            const [adjustment, setAdjustment] = useState<Roster_adjustment_type[]> ([])
+            const [index, setIndex] = useState(0)
+            
             
         //#endregion
 
 
         //#region 2) --> method
-            const handleCreate_roster = (roster: any, user: any) =>{
+
+            const handleOpen_roster = (roster: any, user: any, type: 'create' | 'edit') =>{
+                setCrud(type)
+                
+                // search current index
+                const currentRoster: any = databaseRoster.find(
+                    (item) =>
+                        item.roster.user_id === user.id &&
+                        item.roster.date === roster.iso
+                );
+                console.log('data = ',currentRoster)
+                setAdjustment(currentRoster?.roster_adjustment || [])
+                setIndex(currentRoster?.roster_adjustment.length || 0)
+
                 // assign 'date' and 'user_id'
                 setRoster(prev => ({
                     ...prev,
                     date: roster.iso,
-                    user_id: user.id
+                    user_id: user.id,
+                    roster_leave_id: currentRoster?.roster_leave?.id || 0,
+                    roster_shift_id: currentRoster?.roster_shift?.id || 0,
                 }))
 
+                // set temporary data
                 setTemp_roster(roster)
                 setTemp_user(user)
                 setForm_roster(true)
             }
+            const handleOpen_adjustment = () => {
+
+                // a) voucher
+                setAdjustment((prev) => {
+                    if (prev[index]) {
+                        return prev;
+                    }
+
+                    return [
+                        ...prev,
+                        {
+                            id: index,
+                            roster_id: 0,
+                            type: 'overTime',
+                            time_start: '',
+                            time_end: '',
+                            reason: '',
+                        }
+                    ];
+                });
+                
+                setForm_adjustment(true)
+            }
+            
+            const handleAdd_adjustment = () => {
+                // console.log('voucher = ',voucher)\
+                setIndex(prev => prev+1)
+                setForm_adjustment(false)
+            }
+
+            // CREATE roster
             const handleUpdate_roster = async () => {
 
                 // loading
                 setIsLoading(true)
+
                 try {
                     await api.post(`/roster`, {
                         date: roster.date,
                         user_id: roster.user_id,
-                        roster_shift_id: roster.roster_shift_id,
-                        roster_leave_id: roster.roster_leave_id,
+                        roster_shift_id: roster.roster_shift_id || null,
+                        roster_leave_id: roster.roster_leave_id || null,
+                        adjustment_list: adjustment,
 
                         switch: 'roster'
                     });
 
                     fetchData_roster(year, (monthIndex+1))
+                    setForm_roster(false)
                 }
+                
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
                     // console.error('Response status:', error.response?.data);
@@ -129,15 +184,15 @@ const Therapist: React.FC = () => {
                     setIsLoading(false)
                 }
 
-                setForm_roster(false)
             }
+
         //#endregion
 
 
         //#region 3) --> database
-            const [databaseRoster, setDatabase_roster] = useState<Roster_json[]>([])
 
             // a) fetch 'user'
+            const [databaseRoster, setDatabase_roster] = useState<Roster_json[]>([])
             const fetchData_roster = useCallback((currentYear: number, currentMonth: number) => {
 
                 // loading
@@ -162,6 +217,30 @@ const Therapist: React.FC = () => {
                     setSpinner(false)
                 })
             }, [])
+
+            
+            const tableTitle_adjustment: Column<Roster_adjustment_type>[] = [
+                {
+                    key: "type",
+                    header: "Type",
+                    render: (row) => row.type
+                },
+                {
+                    key: "start",
+                    header: "Time (start)",
+                    render: (row) => row.time_start
+                },
+                {
+                    key: "end",
+                    header: "Time (end)",
+                    render: (row) => row.time_end
+                },
+                {
+                    key: "reason",
+                    header: "Reason",
+                    render: (row) => row.reason
+                },
+            ];
         //#endregion
 
 
@@ -177,6 +256,8 @@ const Therapist: React.FC = () => {
                         roster_leave_id: 0,
                         roster_shift_id: 0
                     })
+                    setAdjustment([])
+                    setIndex(0)
                 }
             }, [form_roster])
         //#endregion
@@ -567,10 +648,10 @@ const Therapist: React.FC = () => {
                                         <span className="text-title">Email</span>
                                         <span className="font-medium text-title">{data.email}</span>
                                     </div>
-                                    <div className="flex items-center justify-between">
+                                    {/* <div className="flex items-center justify-between">
                                         <span className="text-title">Bookable</span>
                                         <span className="font-medium text-title">No</span>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         ))}
@@ -655,6 +736,7 @@ const Therapist: React.FC = () => {
                                                 {/* Therapists in this role */}
                                                 {roleTherapists.map((t) => (
                                                     <div key={t.id} className="grid items-center" style={{gridTemplateColumns: `50px 110px repeat(${rows.length}, minmax(52px, 1fr))`}}>
+                                                        
                                                         {/* Code */}
                                                         <div className="px-1 py-2.5 text-xs font-medium text-title whitespace-nowrap text-center border-r border-border">
                                                             {t.code}
@@ -671,7 +753,7 @@ const Therapist: React.FC = () => {
                                                                 <div key={row.iso} className="px-0.5 py-1 flex justify-center border-l border-border">
                                                                     {cell ? (
                                                                         <button
-                                                                            onClick={() => handleCreate_roster(row, t)}
+                                                                            onClick={() => handleOpen_roster(row, t, 'edit')}
                                                                             className={`w-full min-h-8 text-center text-xs font-bold px-1 py-1 rounded-md cursor-pointer hover:opacity-50 transition ${
                                                                                 cell.isOff
                                                                                     ? "bg-blue-200/70 text-blue-900"
@@ -682,7 +764,7 @@ const Therapist: React.FC = () => {
                                                                         </button>
                                                                     ) : (
                                                                         // <span className="text-xs text-title">—</span>
-                                                                        <button  onClick={() => handleCreate_roster(row, t)} className={`w-full min-h-8 text-center text-sm font-bold px-1 py-1 rounded-md cursor-pointer bg-[#e7e0d2] text-[#6b6355]" hover:opacity-50 transition`}>
+                                                                        <button  onClick={() => handleOpen_roster(row, t, 'create')} className={`w-full min-h-8 text-center text-sm font-bold px-1 py-1 rounded-md cursor-pointer bg-[#e7e0d2] text-[#6b6355]" hover:opacity-50 transition`}>
                                                                             -
                                                                         </button>
                                                                     )}
@@ -747,7 +829,7 @@ const Therapist: React.FC = () => {
 
                     </Grid>
 
-                    {/* Form */}
+                    {/* Form */} {/*Roster */}
                     <Form title="Edit Roster" isOpen={form_roster} onClose={() => setForm_roster(false)} width="max-w-sm"
                         
                         footer={
@@ -762,29 +844,53 @@ const Therapist: React.FC = () => {
                                     label="Save"
                                     className="w-24"
                                     onClick={handleUpdate_roster}
-                                    disabled={isLoading}
+                                    disabled={isLoading || (roster.roster_leave_id==0 && roster.roster_shift_id==0)}
                                 />
 
                             </>
                         }
                     >
                         <div className="flex flex-col gap-1">
-                            {/* biodata */}
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-primary font-semibold">{tempUser?.name}</span>
-                                {/* <span className="text-title font-bold">·</span> */}
-                                {/* <span className="text-title">{tempUser.code}</span> */}
+                            {/* profile */}
+                            <span className="text-title font-bold text-sm mt-3">PROFILE</span>
+                            <div className="bg-white p-3 rounded-xl border border-border flex flex-col gap-2">
+                                {/* biodata */}
+                                <span className="text-primary font-semibold">{tempUser?.name} ({tempUser?.specialty})</span> 
+                                {/* date iso */}
+                                <span className="text-title">
+                                    {new Date(tempRoster.iso + "T00:00:00").toLocaleDateString("en-GB", {
+                                        weekday: "long",
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </span>
                             </div>
 
-                            {/* date iso */}
-                            <span className="text-title">
-                                {new Date(tempRoster.iso + "T00:00:00").toLocaleDateString("en-GB", {
-                                    weekday: "long",
-                                    day: "numeric",
-                                    month: "long",
-                                    year: "numeric",
-                                })}
-                            </span>
+                            {/* add adjustment */}
+                            {crud == 'edit' && (
+                                <>
+                                    <div className="grid md:grid-cols-2 mt-2">
+                                        <div className="col-start-2">
+                                        <Field
+                                            label="Add adjustment time"
+                                            // label="ADD ADJUSTMENT TIME"
+                                            type="button"
+                                            value="+"
+                                            onClick={() => handleOpen_adjustment()}
+                                        />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Table  */}
+                                    {adjustment.length != 0 && (
+                                        <div className="mt-3">
+                                            <Table fieldName={tableTitle_adjustment} data={adjustment} loading={spinner} />
+                                        </div>
+                                    )}
+
+                                </>
+                            )}
 
                             {/* shift */}
                             <span className="text-title font-bold text-sm mt-3">SHIFT</span>
@@ -840,6 +946,91 @@ const Therapist: React.FC = () => {
                                 ))}
                             </div>
                         </div>
+                    </Form>
+
+                    {/* Form */} {/* Adjustment */}
+                    <Form title="Add Adjustment" isOpen={form_adjustment} onClose={() => setForm_adjustment(false)} width="max-w-xl"
+                        
+                        footer={
+                            <>
+                                <Button
+                                    label="Cancel"
+                                    className="w-24"
+                                    onClick={() => setForm_adjustment(false)}
+                                    disabled={isLoading}
+                                />
+                                <Button
+                                    label="Save"
+                                    className="w-24"
+                                    onClick={handleAdd_adjustment}
+                                    disabled={isLoading}
+                                />
+
+                            </>
+                        }
+                    >
+                        <Grid className="md:grid-cols-2">
+                            <Field
+                                label="Type"
+                                value={adjustment[index]?.type ?? ''}
+                                onChange={(e) => (
+                                    setAdjustment(
+                                        adjustment.map((item, i) =>
+                                            i === index
+                                                ? { ...item, type: e.target.value as 'overTime' | 'offTime' }
+                                                : item
+                                        )
+                                    )
+                                )}
+                                type="select"
+                                options = {[
+                                    { label: 'over time', value: 'overtime' },
+                                    { label: 'off time', value: 'offtime' },
+                                ]}
+                            />
+                            <Field
+                                label="Reason"
+                                placeholder="Place a reason for this adjustment"
+                                value={adjustment[index]?.reason ?? ''}
+                                onChange={(e) => (
+                                    setAdjustment(
+                                        adjustment.map((item, i) =>
+                                            i === index
+                                                ? { ...item, reason: e.target.value }
+                                                : item
+                                        )
+                                    )
+                                )}
+                            />
+                            <Field
+                                label="Time (start)"
+                                value={adjustment[index]?.time_start ?? ''}
+                                onChange={(e) => (
+                                    setAdjustment(
+                                        adjustment.map((item, i) =>
+                                            i === index
+                                                ? { ...item, time_start: e.target.value }
+                                                : item
+                                        )
+                                    )
+                                )}
+                                type="time"
+                            />
+                            <Field
+                                label="Time (end)"
+                                value={adjustment[index]?.time_end ?? ''}
+                                onChange={(e) => (
+                                    setAdjustment(
+                                        adjustment.map((item, i) =>
+                                            i === index
+                                                ? { ...item, time_end: e.target.value }
+                                                : item
+                                        )
+                                    )
+                                )}
+                                type="time"
+                            />
+                        </Grid>
                     </Form>
                 </>
             )}

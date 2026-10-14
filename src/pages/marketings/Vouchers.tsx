@@ -96,6 +96,7 @@ const Membership: React.FC = () => {
 
             // loading
             setIsLoading(true)
+            
             // UPDATE data
             try {
                 await api.put(`/voucher/${voucher.id}`, {

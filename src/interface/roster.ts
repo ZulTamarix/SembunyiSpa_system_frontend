@@ -19,6 +19,15 @@ export interface Roster_shift_type {
     time_end: string;
 }
 
+export interface Roster_adjustment_type {
+    id: number;
+    roster_id: number;
+    type: 'overTime' | 'offTime';
+    time_start: string;
+    time_end: string;
+    reason: string;
+}
+
 export interface Roster_json {
     roster: Roster_type,
     roster_leave: Roster_leave_type,
