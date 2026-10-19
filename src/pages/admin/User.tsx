@@ -22,6 +22,7 @@ const User: React.FC = () => {
             email: '',
             phoneNo: '',
             status: '',
+            username: '',
             password: '',
             date_joined: getCurrentDate(),
             specialty: '',
@@ -56,6 +57,7 @@ const User: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: '',
+                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',
@@ -87,6 +89,7 @@ const User: React.FC = () => {
                     name: user.name,
                     email: user.email,
                     phoneNo: user.phoneNo,
+                    username: user.username,
                     password: user.password,
                     date_joined: user.date_joined,
 
@@ -121,6 +124,7 @@ const User: React.FC = () => {
                     name: user.name,
                     email: user.email,
                     phoneNo: user.phoneNo,
+                    username: user.username,
                     password: user.password,
                     date_joined: user.date_joined,
 
@@ -199,12 +203,13 @@ const User: React.FC = () => {
                         row.role == 'therapist' ? (
                             <span className="py-1 px-2 rounded-full bg-purple-100 text-purple-600">Therapist</span>
                         ) : 
-                        row.role == 'customer' ? (
-                            <span className="py-1 px-2 rounded-full bg-cyan-100 text-cyan-500">Customer</span>
-                        ) : 
-                        row.role == 'walkin' ? (
-                            <span className="py-1 px-2 rounded-full bg-red-100 text-rose-400">Walkin</span>
-                        ) : (
+                        // row.role == 'customer' ? (
+                        //     <span className="py-1 px-2 rounded-full bg-cyan-100 text-cyan-500">Customer</span>
+                        // ) : 
+                        // row.role == 'walkin' ? (
+                        //     <span className="py-1 px-2 rounded-full bg-red-100 text-rose-400">Walkin</span>
+                        // ) : 
+                        (
                             <span>-</span>
                         )} 
                     </>
@@ -247,10 +252,15 @@ const User: React.FC = () => {
             // loading
             setSpinner(true)
 
-            api.get(`/user`)
+            api.get(`/user`, {
+                params: {
+                    role: 'therapist',
+                    extra_1: 'include_admin'
+                }
+            })
             .then((response) => {
-                const data = response.data ?? [];
-                setDatabase_user(data);
+                console.log('response  = ',response.data)
+                setDatabase_user(response.data);
             })
             .catch((error) => {
                 console.error('Error fetching:', error);
@@ -323,8 +333,8 @@ const User: React.FC = () => {
                         options={[
                             { label: 'Administrator', value: 'admin' },
                             { label: 'Therapist', value: 'therapist' },
-                            { label: 'Customer', value: 'customer' },
-                            { label: 'Walk in', value: 'walkin' },
+                            // { label: 'Customer', value: 'customer' },
+                            // { label: 'Walk in', value: 'walkin' },
                         ]}
                     />
                     {/* conditional role only */}
@@ -362,6 +372,12 @@ const User: React.FC = () => {
                         placeholder="Enter phone number"
                         value={user.phoneNo}
                         onChange={(e) => setUser({ ...user, phoneNo: e.target.value })}
+                    />
+                    <Field
+                        label="Username"
+                        placeholder="Enter username"
+                        value={user.username}
+                        onChange={(e) => setUser({ ...user, username: e.target.value })}
                     />
                     <Field
                         label="Password"

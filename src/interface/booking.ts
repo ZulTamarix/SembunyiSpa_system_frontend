@@ -8,7 +8,7 @@ export interface Booking_type {
     time_start: string;
     time_end: string;
     booking_type: 'prepaid' | 'walkin';
-    status: 'booked' | 'arrived' | 'in_treatment' | 'completed' | 'cancelled';
+    status: 'pending' | 'booked' | 'in_treatment' | 'completed' | 'cancelled';
     payment: 'pending' | 'paid' | 'cancel';
     remark: string
 }

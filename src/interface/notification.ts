@@ -2,8 +2,7 @@ import type { User_type } from "./user"
 
 export interface Notification_type {
     id: number
-    user_id: number
-    type: string
+    role: 'customer' | 'therapist'
     title: string
     description: string
 }

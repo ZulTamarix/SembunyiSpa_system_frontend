@@ -2,11 +2,10 @@ import { Plus } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import { useCallback, useEffect, useState } from "react";
-import type { Notification_json, Notification_type } from "../../interface/notification";
+import type { Notification_type } from "../../interface/notification";
 import Form from "../../components/ui/Form";
 import api from "../../api/axios";
 import Field from "../../components/ui/Field";
-import type { User_type } from "../../interface/user";
 import { Table, type Column } from "../../components/ui/Table";
 import Label from "../../components/ui/Label";
 import Alert from "../../components/ui/Alert";
@@ -14,10 +13,10 @@ import Alert from "../../components/ui/Alert";
 const Notifications: React.FC = () => {
     
     //#region 0) --> temporary
-        const iconStyle = "text-2xl";
-        const titleStyle = "font-semibold";
-        const dataStyle = "text-sm text-title";
-        const infoStyle = "font-semibold text-secondary";
+        // const iconStyle = "text-2xl";
+        // const titleStyle = "font-semibold";
+        // const dataStyle = "text-sm text-title";
+        // const infoStyle = "font-semibold text-secondary";
     //#endregion
 
 
@@ -36,8 +35,7 @@ const Notifications: React.FC = () => {
         // fieldname
         const [notification, setNotification] = useState<Notification_type> ({
             id: 0,
-            user_id: 0,
-            type: 'direct',
+            role: 'customer',
             title: '',
             description: ''
         })
@@ -54,8 +52,7 @@ const Notifications: React.FC = () => {
             if(!form_notification) {
                 setNotification ({
                     id: 0,
-                    user_id: databaseUser[0]?.id || 0,
-                    type: 'direct',
+                    role: 'customer',
                     title: '',
                     description: ''
                 })
@@ -83,10 +80,9 @@ const Notifications: React.FC = () => {
             // CREATE data
             try {
                 await api.post(`/notification`, {
-                    user_id: notification.user_id,
-                    type: notification.type,
+                    role: notification.role,
                     title: notification.title,
-                    description: notification.description
+                    description: notification.description,
                 });
 
                 fetchData_notification()
@@ -110,8 +106,7 @@ const Notifications: React.FC = () => {
             // UPDATE data
             try {
                 await api.put(`/notification/${notification.id}`, {
-                    user_id: notification.user_id,
-                    type: notification.type,
+                    role: notification.role,
                     title: notification.title,
                     description: notification.description
                 });
@@ -155,26 +150,19 @@ const Notifications: React.FC = () => {
     
     // #region 4) --> database
         // tableTitle
-        const tableTitle: Column<Notification_json>[] = [
+        const tableTitle: Column<Notification_type>[] = [
             {
-                key: "user_id",
-                header: "Customer",
+                key: "role",
+                header: "Role",
                 render: (row) => (
-                    <span>{row.user.name}</span>
-                ),
-            },
-            {
-                key: "type",
-                header: "Type",
-                render: (row) => (
-                    <span>{row.notification.type}</span>
+                    <span>{row.role}</span>
                 ),
             },
             {
                 key: "title",
                 header: "Title",
                 render: (row) => (
-                    <span>{row.notification.title}</span>
+                    <span>{row.title}</span>
                 ),
             },
             {
@@ -182,11 +170,11 @@ const Notifications: React.FC = () => {
                 header: "Action",
                 render: (row) => (
                     <div className="flex gap-3">
-                        <button onClick={() => handleEdit_notification(row.notification)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                        <button onClick={() => handleEdit_notification(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
                             Edit
                         </button>
                         
-                        <button onClick={() => {setIs_alert(true), setSelected_id(row?.notification.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                        <button onClick={() => {setIs_alert(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                             Delete
                         </button>
                     </div>
@@ -194,34 +182,12 @@ const Notifications: React.FC = () => {
             },
         ];
 
-        // a) user/customer
-        const [databaseUser, setDatabase_user] = useState<User_type[]>([])
-        const fetchData_user = useCallback(() => {
-
-            api.get(`/user`, {
-                params: {
-                    role: 'customer',
-                    extra_1: 'include walk in',
-                }
-            })
-            .then((response) => {
-                // console.log('data = ',response.data)
-                setDatabase_user(response.data)
-
-                // set data
-                setNotification((prev) => ({
-                    ...prev,
-                    user_id: response.data[0].id
-                }))
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            });
-        }, [])
-
         // b) notification
-        const [databaseNotification, setDatabase_notification] = useState<Notification_json[]>([])
+        const [databaseNotification, setDatabase_notification] = useState<Notification_type[]>([])
         const fetchData_notification = useCallback(() => {
+
+            // loading
+            setSpinner(true)
 
             api.get(`/notification`)
             .then((response) => {
@@ -230,11 +196,13 @@ const Notifications: React.FC = () => {
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
-            });
+            })
+            .finally(()=> {
+                setSpinner(false)
+            })
         }, [])
 
         useEffect(() => {
-            fetchData_user()
             fetchData_notification()
         }, [])
     //#endregion
@@ -316,43 +284,34 @@ const Notifications: React.FC = () => {
 
                         {/* 1) */}
                         <Field
-                            label="Choose customer"
-                            value={notification.user_id}
-                            onChange={(e) => setNotification({...notification, user_id: Number(e.target.value)})}
-                            type="select"
-                            options={
-                                databaseUser.map((item:any) => ({
-                                    label: `${item.name} --> ${item.role == 'walkin'? `walk in` : `registered customer`}`,
-                                    value: item.id
-                                }))
-                            }
-                        />
-                        {/* 2) */}
-                        <Field
-                            label="Notification type"
-                            value={notification.type}
-                            onChange={(e) => setNotification({...notification,type: e.target.value})}
+                            label="Choose group"
+                            value={notification.role}
+                            onChange={(e) => setNotification({...notification, role: e.target.value as 'therapist' | 'customer'})}
                             type="select"
                             options={[
-                                { label: 'Direct message', value: 'direct' },
-                                { label: 'Automatic message', value: 'automatic' }
+                                { label: 'Customer', value: 'customer' },
+                                { label: 'Therapist', value: 'therapist' },
                             ]}
+                            disabled={crud == 'edit'}
+                            
                         />
-                        {/* 3) */}
+                        {/* 2) */}
                         <Field
                             label="Title"
                             placeholder="Enter title for the description"
                             value={notification.title}
                             onChange={(e) => setNotification({...notification, title: e.target.value})}
                         />
-                        {/* 4) */}
-                        <Field
-                            label="Description"
-                            placeholder="Enter a description"
-                            value={notification.description}
-                            onChange={(e) => setNotification({...notification, description: e.target.value})}
-                            type="textarea"
-                        />
+                        {/* 3) */}
+                        <div className="col-span-2">
+                            <Field
+                                label="Description"
+                                placeholder="Enter a description"
+                                value={notification.description}
+                                onChange={(e) => setNotification({...notification, description: e.target.value})}
+                                type="textarea"
+                            />
+                        </div>
                     </Grid>
                 </div>
             </Form>

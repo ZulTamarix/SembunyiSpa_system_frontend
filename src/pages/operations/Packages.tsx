@@ -286,7 +286,7 @@ const Packages: React.FC = () => {
                 detail: '',
                 type: active=='package'? 'package' : 'service',
                 package_category_id: 0,
-                is_standalone: null
+                is_standalone: false
             })
             // preview poster
             const [posterPreview, setPosterPreview] = useState<string | null>(null);
@@ -317,7 +317,7 @@ const Packages: React.FC = () => {
                         detail: '',
                         type: active=='package'? 'package' : 'service',
                         package_category_id: databaseCategory[0]?.id,
-                        is_standalone: null
+                        is_standalone: false
                     })
                 }
                 setPosterPreview(null)
@@ -578,7 +578,7 @@ const Packages: React.FC = () => {
                         // set data (KIV)
                         setPackages(prev => ({
                             ...prev,
-                            package_category_id: response.data[0].id
+                            package_category_id: response.data[0]?.id || 0
                         }))
                     })
                     .catch((error) => {
@@ -816,255 +816,6 @@ const Packages: React.FC = () => {
                     />
                 </>  
             )}
-
-            {/* Form for both package + service */}
-            <Form title={crud=='create'? `Add  ${active=='package'? 'Package': 'Service'}`:`Edit ${active=='package'? 'Package': 'Service'}`} isOpen={form_package} onClose={() => setForm_package(false)} width="max-w-3xl"
-                
-                footer={
-                    <>
-                        <Button
-                            label="Cancel"
-                            className="w-24"
-                            onClick={() => setForm_package(false)}
-                            disabled={isLoading}
-                        />
-
-                        {crud == 'create' ? (
-                            <Button
-                                label="Save"
-                                className="w-24"
-                                onClick={handleCreate_package}
-                                disabled={isLoading}
-                            />
-                        ) : (
-                            <Button
-                                label="Update"
-                                className="w-24"
-                                onClick={handleCreate_package}
-                                // disabled={isLoading}
-                                disabled
-                            />
-                        )}
-
-                    </>
-                }
-            >
-                <div className="space-y-4">
-                    {/* (0+1+2+3+4+5+6+7) reusable form */}
-                   
-                    <Grid className="md:grid-cols-2">
-
-                        {/* 1) */}
-                        <div className="col-span-2">
-                            <Field
-                                label="Poster"
-                                placeholder="Set a poster"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = (e.target as HTMLInputElement).files?.[0];
-
-                                    if (file) {
-                                        setPackages({
-                                            ...packages,
-                                            poster: file,
-                                        });
-
-                                        setPosterPreview(URL.createObjectURL(file));
-                                    }
-                                }}
-                            />
-
-                            {posterPreview && (
-                                <div className="mt-3">
-                                    <img
-                                        src={posterPreview}
-                                        alt="Poster preview"
-                                        className="w-48 h-48 object-cover rounded-lg border"
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 2) */}
-                        <Field
-                            label="Title"
-                            placeholder="Enter a title"
-                            value={packages.title}
-                            onChange={(e) =>
-                                setPackages({
-                                    ...packages,
-                                    title: e.target.value,
-                                })
-                            }
-                        />
-                    
-                        {/* 3) */}
-                        <Field
-                            label="Category"
-                            value={packages.package_category_id}
-                            onChange={(e) => setPackages({ ...packages, package_category_id: Number(e.target.value)})}
-                            type="select"
-                            options={
-                                databaseCategory.map((category:any) => ({
-                                    label: category.name,
-                                    value: category.id
-                                }))
-                            }
-                        />
-
-                        {/* 4) */}
-                        <Field
-                            label="Duration (minutes)"
-                            placeholder="Set duration in minute"
-                            value={packages.duration}
-                            onChange={(e) =>
-                                setPackages({
-                                    ...packages,
-                                    duration: e.target.value === ""
-                                        ? ""
-                                        : Number(e.target.value),
-                                })
-                            }
-                            type="number"
-                            disabled
-                        />
-
-                        {/* 5)e */}
-                        <Field
-                            label="Price (RM)"
-                            placeholder="Enter price"
-                            value={packages.price}
-                            onChange={(e) =>
-                                setPackages({
-                                    ...packages,
-                                    price: e.target.value === ""
-                                        ? ""
-                                        : Number(e.target.value),
-                                })
-                            }
-                            type="number"
-                        />
-
-                        {/* 6) */}
-                        <Field
-                            label="Gender"
-                            placeholder="Select a gender"
-                            value={packages.gender}
-                            onChange={(e) =>
-                                setPackages({
-                                    ...packages,
-                                    gender: e.target.value,
-                                })
-                            }
-                            type="select"
-                            options={[
-                                { label: "Man", value: "man" },
-                                { label: "Woman", value: "woman" },
-                                { label: "Unisex", value: "unisex" },
-                                { label: "Couple", value: "couple" },
-                            ]}
-                        />
-
-                        {/* 7) */}
-                        <div className="cols-span-2">
-                            <Field
-                                label="Description"
-                                placeholder="Enter a description"
-                                value={packages.description}
-                                onChange={(e) =>
-                                    setPackages({
-                                        ...packages,
-                                        description: e.target.value,
-                                    })
-                                }
-                                type="textarea"
-                            />
-                        </div>
-
-                        
-                        {/* 8) / Optional */}
-                        {active == 'service' && (
-                            <div className="col-span-2">
-                                <Field
-                                    label="Available as Standalone Service?"
-                                    value={packages?.is_standalone || ''}
-                                    onChange={(e) => setPackages({ ...packages, is_standalone: e.target.value == 'true'})}
-                                    type="select"
-                                    options={[
-                                        { label:'Yes', value: 'true'},
-                                        { label:'No', value: 'false'},
-                                    ]}
-                                />
-                            </div>
-                        )}
-
-                        {/* 9) Details / What to expect */}
-                        <div className="col-span-2">
-                            <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
-                            <TextEditor
-                                value={packages.detail}
-                                onChange={(value) => setPackages({
-                                    ...packages,
-                                    detail: value
-                                })}
-                            />
-                        </div>
-
-                    </Grid>
-
-                    {/* Situational */}
-                    {active == 'package' ? (
-                        <Grid>
-                            
-                            {/* 10) Service */}
-                            <MultiSelect
-                                label="Service"
-                                options={databaseService.map((service) => ({
-                                    id: service.package?.id || 0,
-                                    name: service.package.title,
-                                    // description: service.package.description,
-                                    price: service.package.price, 
-                                    gender: service.package.gender,
-                                    type: service.package_category.name,
-                                    duration: service.package.duration,
-                                }))}
-                                selected={selectedService}
-                                onChange={setSelected_service}
-                            />
-                        </Grid>
-                    ) : 
-                    active == 'service' ? (
-                        <Grid className="md:grid-cols-2">
-                            {/* 11) Therapist */}
-                            <MultiSelect
-                                label="Therapist"
-                                options={databaseTherapist.map((therapist) => ({
-                                    id: therapist?.id || 0,
-                                    name: therapist.name,
-                                    description: therapist.specialty,
-                                }))}
-                                selected={selectedTherapist}
-                                onChange={setSelected_therapist}
-                            />
-                            {/* 12) Room */}
-                            <MultiSelect
-                                label="Room"
-                                options={databaseRoom.map((room) => ({
-                                    id: room.id,
-                                    name: room.name,
-                                    description: room.description
-                                }))}
-                                selected={selectedRoom}
-                                onChange={setSelected_room}
-                            />
-                        </Grid>
-                    ) : (
-                        <>
-                        </>
-                    )}
-                </div>
-            </Form>
     
             {/* #region 3 --> setting */}
             {active == 'setting' && (
@@ -1189,10 +940,267 @@ const Packages: React.FC = () => {
                                 />
                             </div>
                         </Form>
-                        
                     </>
                 </>
             )}
+
+            {/* Form for both package + service */}
+            <Form title={crud=='create'? `Add  ${active=='package'? 'Package': 'Service'}`:`Edit ${active=='package'? 'Package': 'Service'}`} isOpen={form_package} onClose={() => setForm_package(false)} width="max-w-3xl"
+                
+                footer={
+                    <>
+                        <Button
+                            label="Cancel"
+                            className="w-24"
+                            onClick={() => setForm_package(false)}
+                            disabled={isLoading}
+                        />
+
+                        {crud == 'create' ? (
+                            <Button
+                                label="Save"
+                                className="w-24"
+                                onClick={handleCreate_package}
+                                disabled={isLoading}
+                            />
+                        ) : (
+                            <Button
+                                label="Update"
+                                className="w-24"
+                                onClick={handleCreate_package}
+                                // disabled={isLoading}
+                                disabled
+                            />
+                        )}
+
+                    </>
+                }
+            >
+                <div className="space-y-4">
+                    {/* (0+1+2+3+4+5+6+7) reusable form */}
+                   
+                    <Grid className="md:grid-cols-2">
+
+                        {/* 1) */}
+                        <div className="col-span-2">
+                            <Field
+                                label="Poster"
+                                placeholder="Set a poster"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = (e.target as HTMLInputElement).files?.[0];
+
+                                    if (file) {
+                                        setPackages({
+                                            ...packages,
+                                            poster: file,
+                                        });
+
+                                        setPosterPreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                            />
+
+                            {posterPreview && (
+                                <div className="mt-3">
+                                    <img
+                                        src={posterPreview}
+                                        alt="Poster preview"
+                                        className="w-48 h-48 object-cover rounded-lg border"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 2) */}
+                        <Field
+                            label="Title"
+                            placeholder="Enter a title"
+                            value={packages.title}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    title: e.target.value,
+                                })
+                            }
+                        />
+                    
+                        {/* 3) */}
+                        <Field
+                            label="Category"
+                            value={packages.package_category_id}
+                            onChange={(e) => setPackages({ ...packages, package_category_id: Number(e.target.value)})}
+                            type="select"
+                            options={
+                                databaseCategory.map((category:any) => ({
+                                    label: category.name,
+                                    value: category.id
+                                }))
+                            }
+                        />
+
+                        {/* 4) */}
+                        <Field
+                            label="Duration (minutes)"
+                            placeholder="Set duration in minute"
+                            value={packages.duration}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    duration: e.target.value === ""
+                                        ? ""
+                                        : Number(e.target.value),
+                                })
+                            }
+                            type="number"
+                            disabled={active=='package'}
+                        />
+
+                        {/* 5)e */}
+                        <Field
+                            label="Price (RM)"
+                            placeholder="Enter price"
+                            value={packages.price}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    price: e.target.value === ""
+                                        ? ""
+                                        : Number(e.target.value),
+                                })
+                            }
+                            type="number"
+                        />
+
+                        {/* 6) */}
+                        <Field
+                            label="Gender"
+                            placeholder="Select a gender"
+                            value={packages.gender}
+                            onChange={(e) =>
+                                setPackages({
+                                    ...packages,
+                                    gender: e.target.value,
+                                })
+                            }
+                            type="select"
+                            options={[
+                                { label: "Man", value: "man" },
+                                { label: "Woman", value: "woman" },
+                                { label: "Unisex", value: "unisex" },
+                                { label: "Couple", value: "couple" },
+                            ]}
+                        />
+
+                        {/* 7) / Optional */}
+                        {active == 'service' && (
+                            <Field
+                                label="Available as Ala Carte Service?"
+                                value={packages?.is_standalone ? 'true' : 'false'}
+                                onChange={(e) => setPackages({ ...packages, is_standalone: e.target.value == 'true'})}
+                                type="select"
+                                options={[
+                                    { label:'Yes', value: 'true'},
+                                    { label:'No', value: 'false'},
+                                ]}
+                            />
+                        )}
+                        {/* 7) */}
+                        {/* <div className="cols-span-2">
+                            <Field
+                                label="Description"
+                                placeholder="Enter a description"
+                                value={packages.description}
+                                onChange={(e) =>
+                                    setPackages({
+                                        ...packages,
+                                        description: e.target.value,
+                                    })
+                                }
+                                type="textarea"
+                            />
+                        </div> */}
+                        
+                        <div className="col-span-2">
+                            <span className="text-sm text-title font-medium block mb-1.5">Enter a description</span>
+                            <TextEditor
+                                value={packages.description}
+                                onChange={(value) => setPackages({
+                                    ...packages,
+                                    description: value
+                                })}
+                            />
+                        </div>
+
+                        
+
+                        {/* 9) Details / What to expect */}
+                        <div className="col-span-2">
+                            <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
+                            <TextEditor
+                                value={packages.detail}
+                                onChange={(value) => setPackages({
+                                    ...packages,
+                                    detail: value
+                                })}
+                            />
+                        </div>
+
+                    </Grid>
+
+                    {/* Situational */}
+                    {active == 'package' ? (
+                        <Grid>
+                            
+                            {/* 10) Service */}
+                            <MultiSelect
+                                label="Service"
+                                options={databaseService.map((service) => ({
+                                    id: service.package?.id || 0,
+                                    name: service.package.title,
+                                    // description: service.package.description,
+                                    price: service.package.price, 
+                                    gender: service.package.gender,
+                                    type: service.package_category.name,
+                                    duration: service.package.duration,
+                                }))}
+                                selected={selectedService}
+                                onChange={setSelected_service}
+                            />
+                        </Grid>
+                    ) : 
+                    active == 'service' ? (
+                        <Grid className="md:grid-cols-2">
+                            {/* 11) Therapist */}
+                            <MultiSelect
+                                label="Therapist"
+                                options={databaseTherapist.map((therapist) => ({
+                                    id: therapist?.id || 0,
+                                    name: therapist.name,
+                                    description: therapist.specialty,
+                                }))}
+                                selected={selectedTherapist}
+                                onChange={setSelected_therapist}
+                            />
+                            {/* 12) Room */}
+                            <MultiSelect
+                                label="Room"
+                                options={databaseRoom.map((room) => ({
+                                    id: room.id,
+                                    name: room.name,
+                                    description: room.description
+                                }))}
+                                selected={selectedRoom}
+                                onChange={setSelected_room}
+                            />
+                        </Grid>
+                    ) : (
+                        <>
+                        </>
+                    )}
+                </div>
+            </Form>
         </>
     )
 }

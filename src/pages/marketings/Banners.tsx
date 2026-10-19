@@ -5,7 +5,7 @@ import Form from "../../components/ui/Form";
 import Grid from "../../components/ui/Grid";
 import Label from "../../components/ui/Label";
 import type { Banner_type } from "../../interface/banner";
-import { getCurrentDate } from "../../utils/date";
+import { getCurrentDate_Add_OneYear } from "../../utils/date";
 import Field from "../../components/ui/Field";
 import api from "../../api/axios";
 import Alert from "../../components/ui/Alert";
@@ -29,7 +29,7 @@ const Banners: React.FC = () => {
             title: '',
             description: '',
             status: 'active',
-            date_expired: getCurrentDate()
+            date_expired: getCurrentDate_Add_OneYear()
         })
         const [posterPreview_banner, setPosterPreview_banner] = useState<string | null>(null);
 

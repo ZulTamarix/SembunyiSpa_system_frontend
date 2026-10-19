@@ -1,4 +1,5 @@
 import type { Booking_type } from "./booking";
+import type { Membership_type } from "./membership";
 import type { Voucher_type } from "./vouchers";
 
 export interface User_type {
@@ -8,7 +9,10 @@ export interface User_type {
   email: string;
   phoneNo: string;
   status: string;
+  
+  username: string;
   password: string;
+
   date_joined: string;
   membership_id?: number | "";
   membership_date_expired?: string;
@@ -16,14 +20,11 @@ export interface User_type {
   code: string;
 
   voucher_customers?: Voucher_type[]
+  membership?: Membership_type
   booking?: Booking_type[]
 }
 
 // JSON
-// export interface Schedule_therapist_json {
-//   user: User_type,
-//   booking_selected: Booking_type[]
-// }
 export interface Schedule_therapist_json {
   user: User_type;
   booking_selected: Booking_selected_type[];

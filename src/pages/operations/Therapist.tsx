@@ -523,7 +523,7 @@ const Therapist: React.FC = () => {
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
-                    console.error('Response status:', error.response?.data);
+                    // console.error('Response status:', error.response?.data);
                 }
                 finally {
                     setIsLoading(false)

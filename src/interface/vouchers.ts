@@ -11,7 +11,11 @@ export interface Voucher_type {
     discount_value: number | '';
     quantity: number | ''
 }
-export interface Voucher_user_type {
+export interface Voucher_customer_type {
     id: number,
+    voucher_id: number,
+    date_expired: string,
+
     user: User_type
+    voucher: Voucher_type
 }

@@ -336,7 +336,9 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
 
                                                                 <span className="text-[13px] font-bold">
                                                                     - {booking.package?.title}
-                                                                    <br />
+                                                                </span>
+                                                                <div></div>
+                                                                <span className="text-[12px] font-semibold">
                                                                     - {booking.booking?.user?.name}
                                                                 </span>
                                                             </button>

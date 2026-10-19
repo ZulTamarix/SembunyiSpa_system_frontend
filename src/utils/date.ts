@@ -36,6 +36,17 @@ export const getCurrentDate = (): string => {
 
     return `${year}-${month}-${day}`;
 };
+export const getCurrentDate_Add_OneYear = (): string => {
+    const date = new Date();
+
+    date.setFullYear(date.getFullYear() + 1);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+};
 export const getCurrentTime = (): string => {
     const date = new Date();
 

@@ -11,8 +11,6 @@ import api from "../../api/axios";
 import Card from "../../components/ui/Card";
 import { getCurrentDate } from "../../utils/date";
 import Table, { type Column } from "../../components/ui/Table";
-// import { getCurrentDate, getCurrentTime } from "../../utils/date";
-
 
 const Bookings: React.FC = () => {
 
@@ -23,6 +21,8 @@ const Bookings: React.FC = () => {
         const [isLoading, setIsLoading] = useState(false);
         // switch option
         const [type, setType] = useState<"Package" | "Service">("Package");
+        // loading state
+        const [spinner, setSpinner] = useState(false)
         // form
         const [form_booking, setForm_booking] = useState(false);
         // fieldname
@@ -33,8 +33,8 @@ const Bookings: React.FC = () => {
             date_start: '',
             time_start: '',
             time_end: '',
-            booking_type: 'prepaid',
-            status: 'booked',
+            booking_type: 'walkin',
+            status: 'pending',
             payment: 'pending',
             remark: ''
         })
@@ -54,6 +54,7 @@ const Bookings: React.FC = () => {
             email: '',
             phoneNo: '',
             status: 'active',
+            username: '',
             password: '',
             date_joined: getCurrentDate(),
             specialty: '',
@@ -63,8 +64,7 @@ const Bookings: React.FC = () => {
         const [temp_package, setTemp_package] = useState<any | null>(null)
         // const [new_therapist, ] = useState<any | null>(null)
         const [new_therapist, setNew_therapist] = useState<any | null>(null)
-        // loading state
-        const [spinner, setSpinner] = useState(false)
+        const [new_room, setNew_room] = useState<any | null>(null)
 
     //#endregion
    
@@ -82,7 +82,7 @@ const Bookings: React.FC = () => {
                     time_start: '',
                     time_end: '',
                     booking_type: 'prepaid',
-                    status: 'booked',
+                    status: 'pending',
                     payment: 'pending',
                     remark: ''
                 })
@@ -100,6 +100,7 @@ const Bookings: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: 'active',
+                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',
@@ -141,13 +142,15 @@ const Bookings: React.FC = () => {
                 // 0) check time
                     if (booking.time_start) {
                         const minute = parseInt(booking.time_start.split(":")[1]);
-
                         if (![0, 15, 30, 45].includes(minute)) {
                             alert("Please select a time at 00, 15, 30, or 45 minutes. ❌");
                             return;
                         }
 
                     }
+
+                // 0) loading state
+                    setSpinner(true)
 
                 // 1) calculate 'time_end'
                     const [hours, minutes] = booking.time_start.split(":").map(Number);
@@ -158,10 +161,14 @@ const Bookings: React.FC = () => {
                         time_end: time_end
                     }))
 
-                // 2) fetch all 'therapist_id'
+                // 2) fetch all 'therapist_id' and 'room_id
                     const therapist_list = temp_package.package_therapist.map(
                         (item: any) => item.user_id
                     );
+                    const room_list = temp_package.package_room.map(
+                        (item: any) => item.id
+                    );
+                    console.log('id = ',room_list)
 
                 // 3) check availability
                     api.get(`/available/therapist`, {
@@ -169,24 +176,30 @@ const Bookings: React.FC = () => {
                             date: booking.date_start,
                             time_start: booking.time_start,
                             time_end: time_end,
-                            therapist_list: therapist_list
+
+                            therapist_list: therapist_list,
+                            room_list: room_list
                         }
                     })
                     .then((response) => {
-                        console.log('therapist = ',response.data)
-                        console.log('room = ',temp_package.package_room)
+                        console.log('availability = ',response.data)
 
                         // store data
-                        setNew_therapist(response.data)
+                        setNew_therapist(response.data.therapist)
+                        setNew_room(response.data.room)
+
                         setBooking_selected((prev) => ({
                             ...prev,
-                            user_id: response?.data[0]?.id || 0,
-                            room_id: temp_package.package_room[0].room_id //KIV
+                            user_id: response?.data?.user?.[0]?.id || 0,
+                            room_id: response.data?.room?.[0]?.id || 0 //KIV
                         }))
                     })
                     .catch((error) => {
                         console.error('Error fetching data:', error.data);
-                    });
+                    })
+                    .finally(() => {
+                        setSpinner(false)
+                    })
             }
         }, [booking.date_start, booking.time_start])
    
@@ -308,14 +321,43 @@ const Bookings: React.FC = () => {
                 key: "status",
                 header: "Status",
                 render: (row) => (
-                    <span>{row.booking.status}</span>
+                    <>
+                        {row.booking.status == 'booked'? (
+                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Booked</span>
+                        ) : 
+                        row.booking.status == 'in_treatment' ? (
+                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">In treatment</span>
+                        ) : 
+                        row.booking.status == 'completed' ? (
+                            <span className="py-1 px-2 rounded-full bg-green-100 text-green-600">Completed</span>
+                        ): 
+                        row.booking.status == 'cancel' ? (
+                            <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Cancel</span>
+                        ) : (
+                            <>
+                            </>
+                        )}
+                    </>
                 ),
             },
             {
                 key: "payment",
                 header: "Payment",
                 render: (row) => (
-                    <span>{row.booking.payment}</span>
+                    <>
+                        {row.booking.payment == 'paid' ? (
+                            <span className="py-1 px-2 rounded-full bg-green-100 text-green-600">Paid</span>
+                        ) : 
+                        row.booking.payment == 'pending' ? (
+                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Pending</span>
+                        ): 
+                        row.booking.payment == 'cancel' ? (
+                            <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Cancel</span>
+                        ) : (
+                            <>
+                            </>
+                        )}
+                    </>
                 ),
             },
         ];
@@ -327,7 +369,6 @@ const Bookings: React.FC = () => {
             api.get(`/user`, {
                 params: {
                     role: 'customer',
-                    extra_1: 'include walk in',
                 }
             })
             .then((response) => {
@@ -409,6 +450,7 @@ const Bookings: React.FC = () => {
 
     return (
         <>
+
             {/* filter */}
             <Grid className="md:grid-cols-5 items-center">
                 <div className="md:col-span-5 bg-white p-3 rounded-xl grid md:grid-cols-5 items-center gap-4 border border-border overflow-hidden">
@@ -498,7 +540,7 @@ const Bookings: React.FC = () => {
                             {/* switch */}
                             <div className="col-start-4">
                                 <Field
-                                    label={`${isWalkin? 'Walk in' : 'Registered customer'}`}
+                                    label={`${isWalkin? 'Non-registered customer' : 'Registered customer'}`}
                                     value={isWalkin}
                                     onChange={(e) => setIs_walkin((e.target as HTMLInputElement).checked)}
                                     type="switch"
@@ -533,7 +575,7 @@ const Bookings: React.FC = () => {
 
 
                             {/* remark */}
-                            <div className="col-span-2">
+                            <div className="col-span-5">
                                 <Field
                                     label="Remark"
                                     placeholder="Make remark for therapist"
@@ -544,7 +586,7 @@ const Bookings: React.FC = () => {
                             </div>
 
                             {/* type */}
-                            <div className="col-span-2">
+                            {/* <div className="col-span-2">
                                 <Field
                                     label="Booking Type"
                                     value={booking.booking_type}
@@ -555,7 +597,7 @@ const Bookings: React.FC = () => {
                                         { label: 'Walk in', value: 'walkin' },
                                     ]}
                                 />
-                            </div>
+                            </div> */}
                         </div>
                     </Card>
 
@@ -685,7 +727,6 @@ const Bookings: React.FC = () => {
                                     }
                                     type="date"
                                 />
-                                
                                 <Field
                                     label="Time (15, 30, 45, 00 minute only)"
                                     value={booking.time_start}
@@ -700,83 +741,93 @@ const Bookings: React.FC = () => {
 
                                 {(booking.time_start && booking.date_start) && (
                                     <>
-                                        {type == 'Package' ? (
-                                            <>
-                                                <Field
-                                                    label="Available therapist"
-                                                    value={booking_selected.user_id}
-                                                    onChange={(e) =>
-                                                        setBooking({
-                                                            ...booking,
-                                                            time_start: e.target.value,
-                                                        })
-                                                    }  
-                                                    type="select"
-                                                    options={
-                                                        new_therapist.map((item:any) => ({
-                                                            label: `${item.name} --> ${item.specialty}`,
-                                                            value: item.id
-                                                        }))
-                                                    }
-                                                />
-                                                <Field
-                                                    label="Available room"
-                                                    value={booking_selected.room_id}
-                                                    onChange={(e) =>
-                                                        setBooking({
-                                                            ...booking,
-                                                            time_end: e.target.value,
-                                                        })
-                                                    }  
-                                                    type="select"
-                                                    options={
-                                                        temp_package.package_room.map((item:any) => ({
-                                                            label: `${item.room.name} --> ${item.room.description}`,
-                                                            value: item.room.id
-                                                        }))
-                                                    }
-                                                />
-                                            </>
-                                        ) : 
-                                        type == 'Service' ? (
-                                            <>
-                                                <Field
-                                                    label={`Available therapist ${new_therapist?.length==0 ? '(no therapist available ❌)': ''}`}
-                                                    value={booking_selected.user_id}
-                                                    onChange={(e) =>
-                                                        setBooking_selected({
-                                                            ...booking_selected,
-                                                            user_id: Number(e.target.value),
-                                                        })
-                                                    }  
-                                                    type="select"
-                                                    options={
-                                                        new_therapist?.map((item:any) => ({
-                                                            label: `${item.name} --> ${item.specialty}`,
-                                                            value: item.id
-                                                        }))
-                                                    }
-                                                />
-                                                <Field
-                                                    label="Available room"
-                                                    value={booking_selected.room_id}
-                                                    onChange={(e) =>
-                                                        setBooking_selected({
-                                                            ...booking_selected,
-                                                            room_id: Number(e.target.value),
-                                                        })
-                                                    }  
-                                                    type="select"
-                                                    options={
-                                                        temp_package.package_room.map((item:any) => ({
-                                                            label: `${item.room.name} --> ${item.room.description}`,
-                                                            value: item.room.id
-                                                        }))
-                                                    }
-                                                />
-                                            </>
+                                        {spinner ? (
+                                            <div className="col-span-2 flex items-center justify-center gap-2 py-6 bg-tertiary border-2 border-border rounded-2xl">
+                                                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                                <span className="text-title">Checking availability...</span>
+                                            </div>
                                         ) : (
                                             <>
+                                                {type == 'Package' ? (
+                                                    <>
+                                                        <Field
+                                                            label="Available therapist"
+                                                            value={booking_selected.user_id}
+                                                            onChange={(e) =>
+                                                                setBooking({
+                                                                    ...booking,
+                                                                    time_start: e.target.value,
+                                                                })
+                                                            }  
+                                                            type="select"
+                                                            options={
+                                                                new_therapist.map((item:any) => ({
+                                                                    label: `${item.name} --> ${item.specialty}`,
+                                                                    value: item.id
+                                                                }))
+                                                            }
+                                                        />
+                                                        <Field
+                                                            label="Available room"
+                                                            value={booking_selected.room_id}
+                                                            onChange={(e) =>
+                                                                setBooking({
+                                                                    ...booking,
+                                                                    time_end: e.target.value,
+                                                                })
+                                                            }  
+                                                            type="select"
+                                                            options={
+                                                                temp_package.package_room.map((item:any) => ({
+                                                                    label: `${item.room.name} --> ${item.room.description}`,
+                                                                    value: item.room.id
+                                                                }))
+                                                            }
+                                                        />
+                                                    </>
+                                                ) : 
+                                                type == 'Service' ? (
+                                                    <>
+                                                        <Field
+                                                            label={`Available therapist ${new_therapist?.length == 0 ? '(no therapist available ❌)' : ''}`}
+                                                            value={booking_selected.user_id}
+                                                            onChange={(e) =>
+                                                                setBooking_selected({
+                                                                    ...booking_selected,
+                                                                    user_id: Number(e.target.value),
+                                                                })
+                                                            }
+                                                            type="select"
+                                                            options={
+                                                                new_therapist?.map((item: any) => ({
+                                                                    label: `${item.name} --> ${item.specialty}`,
+                                                                    value: item.id
+                                                                }))
+                                                            }
+                                                        />
+
+                                                        <Field
+                                                            label={`Available room ${new_room?.length == 0 ? '(no room available ❌)' : ''}`}
+                                                            value={booking_selected.room_id}
+                                                            onChange={(e) =>
+                                                                setBooking_selected({
+                                                                    ...booking_selected,
+                                                                    room_id: Number(e.target.value),
+                                                                })
+                                                            }
+                                                            type="select"
+                                                            options={
+                                                                new_room?.map((item: any) => ({
+                                                                    label: `${item.name} --> ${item.description}`,
+                                                                    value: item.id
+                                                                }))
+                                                            }
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                    </>
+                                                )}
                                             </>
                                         )}
                                     </>

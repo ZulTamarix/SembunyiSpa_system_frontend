@@ -78,7 +78,7 @@ export function Table<T>({
             <tr>
               <td
                 colSpan={fieldName.length}
-                className="px-6 py-12 text-center text-sm text-gray-400"
+                className="py-4 text-center text-sm text-gray-400"
               >
                 {emptyText}
               </td>
