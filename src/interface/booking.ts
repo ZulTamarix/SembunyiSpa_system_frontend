@@ -1,3 +1,5 @@
+import type { Package_type } from "./package";
+import type { Room_type } from "./room";
 import type { User_type } from "./user";
 
 export interface Booking_type {
@@ -11,6 +13,8 @@ export interface Booking_type {
     status: 'pending' | 'booked' | 'in_treatment' | 'completed' | 'cancelled';
     payment: 'pending' | 'paid' | 'cancel';
     remark: string
+
+    booking_selected?: Booking_selected_type
 }
 export interface Booking_selected_type {
     id: number;
@@ -18,6 +22,10 @@ export interface Booking_selected_type {
     service_id: number;
     room_id: number;
     user_id: number;
+
+    user: User_type
+    room: Room_type
+    package?: Package_type
 }
 
 export interface Booking_json {

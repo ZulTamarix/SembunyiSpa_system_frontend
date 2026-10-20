@@ -364,6 +364,7 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
 
 const Schedule: React.FC = () => {
 
+
     //#region 1) --> navbar
     
         // set CRUD's State
@@ -417,7 +418,7 @@ const Schedule: React.FC = () => {
                 fetchData_therapist();
             }, [fetchData_therapist]);
 
-        // b) fetch 'throom'
+        // b) fetch 'troom'
             const [databaseRoom, setDatabase_room] = useState<any []>([])
             const fetchData_room = useCallback(() => {
             

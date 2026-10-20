@@ -831,7 +831,7 @@ const Packages: React.FC = () => {
 
                         {/* table */}
                         <Grid>
-                            <Table fieldName={tableTitle_category} data={databaseCategory} loading={spinner} />
+                            <Table title="Category" fieldName={tableTitle_category} data={databaseCategory} loading={spinner} />
                         </Grid>
 
                         {/* create category */}
@@ -887,7 +887,7 @@ const Packages: React.FC = () => {
 
                         {/* table */}
                         <Grid>
-                            <Table fieldName={tableTitle_room} data={databaseRoom} loading={spinner} />
+                            <Table title="Room" fieldName={tableTitle_room} data={databaseRoom} loading={spinner} />
                         </Grid>
 
                         {/* create room */}

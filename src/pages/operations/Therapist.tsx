@@ -1177,7 +1177,7 @@ const Therapist: React.FC = () => {
 
                         {/* table */}
                         <Grid >
-                            <Table fieldName={tableTitle_shift} data={databaseShift} loading={spinner} />
+                            <Table title="Shift" fieldName={tableTitle_shift} data={databaseShift} loading={spinner} />
                         </Grid>
 
                         {/* form */}
@@ -1268,7 +1268,7 @@ const Therapist: React.FC = () => {
 
                         {/* table */}
                         <Grid>
-                            <Table fieldName={tableTitle_leave} data={databaseLeave} loading={spinner} />
+                            <Table title="Leave" fieldName={tableTitle_leave} data={databaseLeave} loading={spinner} />
                         </Grid>
 
                         {/* form */}

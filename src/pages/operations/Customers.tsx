@@ -260,7 +260,7 @@ const Customers: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <span className="font-bold">-</span>
+                            <span className="font-bold">Non-registered user</span>
                         )}
                     </>
                 )

@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         <Menu size={20} strokeWidth={2} />
       </button>
 
-      <h1 className="text-lg text-neutral-950 font-medium font-serif">{title}</h1>
+      <h1 className="text-lg text-neutral-950 font-extrabold font-serif">{title}</h1>
 
 
       <div className="ml-auto flex items-center gap-3 whitespace-nowrap">

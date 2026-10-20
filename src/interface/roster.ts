@@ -1,9 +1,12 @@
+import type { User_type } from "./user";
+
 export interface Roster_type {
     id: number;
     date: string;
     user_id: number;
     roster_leave_id: number;
     roster_shift_id: number;
+    user?: User_type
 }
 
 export interface Roster_leave_type {
