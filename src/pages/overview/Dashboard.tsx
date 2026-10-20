@@ -5,7 +5,6 @@ import { getCurrentDate } from "../../utils/date";
 import type { Roster_json } from "../../interface/roster";
 import api from "../../api/axios";
 import { Table, type Column } from "../../components/ui/Table";
-import type { Schedule_therapist_json } from "../../interface/user";
 import type { Booking_type } from "../../interface/booking";
 
 const Dashboard: React.FC = () => {

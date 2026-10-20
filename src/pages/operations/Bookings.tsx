@@ -1,4 +1,4 @@
-import type { Booking_json, Booking_selected_type, Booking_type } from "../../interface/booking";
+import type { Booking_selected_type, Booking_type } from "../../interface/booking";
 import Grid from "../../components/ui/Grid";
 import Button from "../../components/ui/Button";
 import { Plus } from "lucide-react";
@@ -126,6 +126,7 @@ const Bookings: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: 'active',
+                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',

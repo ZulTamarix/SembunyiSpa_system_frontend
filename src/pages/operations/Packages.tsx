@@ -293,7 +293,8 @@ const Packages: React.FC = () => {
             // form
             const [form_package, setForm_package] = useState(false);
             // selected id
-            const [selectedId, setSelected_id] = useState(0);
+            // const [selectedId, setSelected_id] = useState(0);
+            const [, setSelected_id] = useState(0);
             const [isAlert, setIs_alert] = useState(false);
 
             const [selectedTherapist, setSelected_therapist] = useState<number[]>([]);

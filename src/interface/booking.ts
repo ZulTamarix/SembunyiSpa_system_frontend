@@ -23,8 +23,8 @@ export interface Booking_selected_type {
     room_id: number;
     user_id: number;
 
-    user: User_type
-    room: Room_type
+    user?: User_type
+    room?: Room_type
     package?: Package_type
 }
 

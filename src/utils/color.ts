@@ -37,7 +37,7 @@ export const DEFAULT_COLOR = "bg-slate-200 text-slate-800";
  * category keeps the same colour on every date. Colours repeat once the
  * palette runs out.
  */
-export const buildColorMap = (categories) => {
+export const buildColorMap = (categories:any) => {
   const unique = [...new Set(categories.filter(Boolean))].sort();
   return Object.fromEntries(
     unique.map((name, i) => [name, randomColors[i % randomColors.length]])

@@ -142,9 +142,9 @@ const Membership: React.FC = () => {
             }
         }
         // UPDATE membership
-        const handleUpdate_membership = () => {
+        // const handleUpdate_membership = () => {
 
-        }
+        // }
         // DELETE membership
         const handleDelete_membership = async () => {
 

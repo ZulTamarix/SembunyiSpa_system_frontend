@@ -496,9 +496,9 @@ const Schedule: React.FC = () => {
             const { weekday, full } = prettyDate(date);
             // const todayISO = toISO(now);
 
-            const handleClick = (a:any) => {
-                console.log('a = ',a)        
-            };
+            // const handleClick = (a:any) => {
+            //     console.log('a = ',a)        
+            // };
         //#endregion
 
 
