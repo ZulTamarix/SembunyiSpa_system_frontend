@@ -66,7 +66,15 @@ const Dashboard: React.FC = () => {
             })
             .then((response) => {
                 // console.log('data = ',response.data)
+                response.data.sort((a:any, b:any) => {
+                    const [aHour, aMinute] = a.time_start.split(":").map(Number);
+                    const [bHour, bMinute] = b.time_start.split(":").map(Number);
+
+                    return (aHour * 60 + aMinute) - (bHour * 60 + bMinute);
+                });
+
                 setDatabase_schedule(response.data)
+                // setDatabase_schedule(sortedData)
             })
             .catch((error) => {
                 console.error('Error fetching data:', error.data);

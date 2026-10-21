@@ -3,7 +3,7 @@ import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
-import api from "../../api/axios";
+import api, { api_image } from "../../api/axios";
 import Field from "../../components/ui/Field";
 import { type Package_category_type, type Package_json, type Package_type } from "../../interface/package";
 import type { Room_type } from "../../interface/room";
@@ -67,19 +67,31 @@ import Alert from "../../components/ui/Alert";
                     <div className="max-h-60 overflow-y-auto bg-white">
                         {options.map((option) => {
                             const isSelected = selected.includes(option.id);
+                            const selectedNumber = selected.indexOf(option.id) + 1;
 
                             return (
                                 <label
                                     key={option.id}
                                     className="flex items-center gap-3 px-3 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 transition hover:bg-gray-100"
                                 >
-                                    {/* Checkbox */}
+                                    {/* Hidden Checkbox */}
                                     <input
                                         type="checkbox"
                                         checked={isSelected}
                                         onChange={() => toggleOption(option.id)}
-                                        className="h-4 w-4 rounded border-gray-300 text-border focus:ring-border"
+                                        className="hidden"
                                     />
+
+                                    {/* Selection Number */}
+                                    <div
+                                        className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium shrink-0 ${
+                                            isSelected
+                                                ? "bg-secondary text-white"
+                                                : "border border-gray-300 text-gray-400"
+                                        }`}
+                                    >
+                                        {isSelected ? selectedNumber : ""}
+                                    </div>
 
                                     {/* Details */}
                                     <div className="flex-1 min-w-0">
@@ -95,9 +107,9 @@ import Alert from "../../components/ui/Alert";
 
                                         {(option.price !== undefined ||
                                             option.gender ||
-                                            option.type) && (
+                                            option.type ||
+                                            option.duration !== undefined) && (
                                             <ul className="mt-1 text-xs text-title list-disc list-inside">
-
                                                 {option.type && (
                                                     <li>{option.type}</li>
                                                 )}
@@ -106,7 +118,7 @@ import Alert from "../../components/ui/Alert";
                                                     <li>RM {option.price}</li>
                                                 )}
 
-                                                {option.duration && (
+                                                {option.duration !== undefined && (
                                                     <li>{option.duration} minutes</li>
                                                 )}
 
@@ -146,7 +158,7 @@ import Alert from "../../components/ui/Alert";
                 {/* Poster */}
                 <div className="mb-5 h-48 w-full overflow-hidden rounded-2xl">
                     <img
-                        src={`http://localhost:8000/${poster}`}
+                        src={`${api_image}/${poster}`}
                         alt={title}
                         className="h-full w-full"
                     />
@@ -506,6 +518,7 @@ const Packages: React.FC = () => {
                 })
                 .then((response) => {
                     // 1) normal
+                    console.log('dara = ',response.data)
                     setDatabase_service(response.data)
                 })
                 .catch((error) => {

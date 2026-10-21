@@ -22,7 +22,6 @@ const User: React.FC = () => {
             email: '',
             phoneNo: '',
             status: '',
-            username: '',
             password: '',
             date_joined: getCurrentDate(),
             specialty: '',
@@ -57,7 +56,6 @@ const User: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: '',
-                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',
@@ -89,7 +87,6 @@ const User: React.FC = () => {
                     name: user.name,
                     email: user.email,
                     phoneNo: user.phoneNo,
-                    username: user.username,
                     password: user.password,
                     date_joined: user.date_joined,
 
@@ -124,7 +121,6 @@ const User: React.FC = () => {
                     name: user.name,
                     email: user.email,
                     phoneNo: user.phoneNo,
-                    username: user.username,
                     password: user.password,
                     date_joined: user.date_joined,
 
@@ -373,12 +369,12 @@ const User: React.FC = () => {
                         value={user.phoneNo}
                         onChange={(e) => setUser({ ...user, phoneNo: e.target.value })}
                     />
-                    <Field
+                    {/* <Field
                         label="Username"
                         placeholder="Enter username"
                         value={user.username}
                         onChange={(e) => setUser({ ...user, username: e.target.value })}
-                    />
+                    /> */}
                     <Field
                         label="Password"
                         placeholder="Enter password"

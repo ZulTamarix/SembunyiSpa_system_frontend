@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
 import type { User_type } from "../../interface/user";
-import api from "../../api/axios";
+import api, { api_image } from "../../api/axios";
 import Card from "../../components/ui/Card";
 import { getCurrentDate } from "../../utils/date";
 import Table, { type Column } from "../../components/ui/Table";
@@ -54,7 +54,6 @@ const Bookings: React.FC = () => {
             email: '',
             phoneNo: '',
             status: 'active',
-            username: '',
             password: '',
             date_joined: getCurrentDate(),
             specialty: '',
@@ -100,7 +99,6 @@ const Bookings: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: 'active',
-                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',
@@ -126,7 +124,6 @@ const Bookings: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: 'active',
-                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',
@@ -191,7 +188,7 @@ const Bookings: React.FC = () => {
 
                         setBooking_selected((prev) => ({
                             ...prev,
-                            user_id: response?.data?.user?.[0]?.id || 0,
+                            user_id: response?.data?.therapist?.[0]?.id || 0,
                             room_id: response.data?.room?.[0]?.id || 0 //KIV
                         }))
                     })
@@ -202,6 +199,7 @@ const Bookings: React.FC = () => {
                         setSpinner(false)
                     })
             }
+
         }, [booking.date_start, booking.time_start])
    
     //#endregion
@@ -211,49 +209,49 @@ const Bookings: React.FC = () => {
 
         const handleCreate_booking = async () => {
 
-            // setIsLoading(true)
-            console.log('book = ',booking)
-            console.log('book select = ',booking_selected)
+            setIsLoading(true)
+            // console.log('book = ',booking)
+            // console.log('book select = ',booking_selected)
             try {
 
-                // if (isWalkin) {
+                if (isWalkin) {
 
-                //     // 1. Create user first
-                //     const response = await api.post(`/user`, {
-                //         role: userWalkin.role,
-                //         name: userWalkin.name,
-                //         email: userWalkin.email,
-                //         phoneNo: userWalkin.phoneNo,
-                //         password: userWalkin.password,
-                //         date_joined: userWalkin.date_joined,
-                //     })
+                    // 1. Create user first
+                    const response = await api.post(`/user`, {
+                        role: userWalkin.role,
+                        name: userWalkin.name,
+                        email: userWalkin.email,
+                        phoneNo: userWalkin.phoneNo,
+                        password: userWalkin.password,
+                        date_joined: userWalkin.date_joined,
+                    })
 
-                //     const userId = response.data.id
+                    const userId = response.data.id
 
-                //     console.log('Created user id = ', userId)
+                    console.log('Created user id = ', userId)
 
-                //     // 2. Create booking only if user creation succeeds
-                //     await api.post(`/booking`, {
-                //         booking: {
-                //             ...booking,
-                //             user_id: userId
-                //         },
-                //         booking_selected: booking_selected
-                //     })
+                    // 2. Create booking only if user creation succeeds
+                    await api.post(`/booking`, {
+                        booking: {
+                            ...booking,
+                            user_id: userId
+                        },
+                        booking_selected: booking_selected
+                    })
 
-                // }
-                // else {
+                }
+                else {
 
-                //     // Existing user - create booking directly
-                //     await api.post(`/booking`, {
-                //         booking: booking,
-                //         booking_selected: booking_selected
-                //     })
+                    // Existing user - create booking directly
+                    await api.post(`/booking`, {
+                        booking: booking,
+                        booking_selected: booking_selected
+                    })
 
-                // }
+                }
 
-                // setForm_booking(false)
-                // fetchData_booking()
+                setForm_booking(false)
+                fetchData_booking()
             }
             catch (error) {
                 console.error('Error:', error)
@@ -308,7 +306,7 @@ const Bookings: React.FC = () => {
                 key: "therapist",
                 header: "Therapist",
                 render: (row) => (
-                    <span>{row.booking_selected.user.name}</span>
+                    <span>{row.booking_selected?.user?.name || '-'}</span>
                 ),
             },
             {
@@ -325,6 +323,9 @@ const Bookings: React.FC = () => {
                     <>
                         {row.booking.status == 'booked'? (
                             <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Booked</span>
+                        ) : 
+                        row.booking.status == 'pending'? (
+                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Pending</span>
                         ) : 
                         row.booking.status == 'in_treatment' ? (
                             <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">In treatment</span>
@@ -646,7 +647,7 @@ const Bookings: React.FC = () => {
                                                 `}>
                                                 {/* poster */}
                                                 <img
-                                                    src={`http://localhost:8000/${pkg.package.poster}`}
+                                                    src={`${api_image}/${pkg.package.poster}`}
                                                     alt={pkg.package.title}
                                                     className="w-18 h-18 rounded-2xl object-cover"
                                                 />
@@ -683,7 +684,7 @@ const Bookings: React.FC = () => {
                                                 `}>
                                                 {/* poster */}
                                                 <img
-                                                    src={`http://localhost:8000/${pkg.package.poster}`}
+                                                    src={`${api_image}/${pkg.package.poster}`}
                                                     alt={pkg.package.title}
                                                     className="w-18 h-18 rounded-2xl object-cover"
                                                 />

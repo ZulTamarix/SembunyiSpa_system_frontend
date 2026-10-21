@@ -50,7 +50,6 @@ const Customers: React.FC = () => {
             email: '',
             phoneNo: '',
             status: '',
-            username: '',
             password: '',
             date_joined: getCurrentDate(),
             specialty: '',
@@ -63,7 +62,6 @@ const Customers: React.FC = () => {
             email: '',
             phoneNo: '',
             status: '',
-            username: '',
             password: '',
             date_joined: '',
             membership_id: 0,
@@ -87,7 +85,6 @@ const Customers: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: '',
-                    username: '',
                     password: '',
                     date_joined: getCurrentDate(),
                     specialty: '',
@@ -102,7 +99,6 @@ const Customers: React.FC = () => {
                     email: '',
                     phoneNo: '',
                     status: '',
-                    username: '',
                     password: '',
                     date_joined: '',
                     membership_id: 0,
@@ -235,33 +231,29 @@ const Customers: React.FC = () => {
                 align: "center",
                 render: (row) => (
                     <>
-                        {row.password ? (
-                            <div className="flex justify-center">
-                                <div className="flex items-center border border-border rounded-md overflow-hidden bg-white">
-                                    {row.membership_id ? (
-                                        <>
-                                            <span className="px-4 py-1 text-sm font-medium">
-                                                {row.membership?.tier}
-                                            </span>
-                                            <button onClick={() => handleSelect_customer(row, 'membership', 'edit')} className="px-3 py-1 bg-tertiary text-black font-semibold cursor-pointer">
-                                                <Eye size={18} />
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="px-4 py-1 text-sm font-medium">
-                                                -
-                                            </span>
-                                            <button onClick={() => handleSelect_customer(row, 'membership', 'create')}  className="px-3 py-1 bg-secondary text-black font-bold cursor-pointer">
-                                                +
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
+                        <div className="flex justify-center">
+                            <div className="flex items-center border border-border rounded-md overflow-hidden bg-white">
+                                {row.membership_id ? (
+                                    <>
+                                        <span className="px-4 py-1 text-sm font-medium">
+                                            {row.membership?.tier}
+                                        </span>
+                                        <button onClick={() => handleSelect_customer(row, 'membership', 'edit')} className="px-3 py-1 bg-tertiary text-black font-semibold cursor-pointer">
+                                            <Eye size={18} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="px-4 py-1 text-sm font-medium">
+                                            -
+                                        </span>
+                                        <button onClick={() => handleSelect_customer(row, 'membership', 'create')}  className="px-3 py-1 bg-secondary text-black font-bold cursor-pointer">
+                                            +
+                                        </button>
+                                    </>
+                                )}
                             </div>
-                        ) : (
-                            <span className="font-bold">Non-registered user</span>
-                        )}
+                        </div>
                     </>
                 )
             },
@@ -349,7 +341,6 @@ const Customers: React.FC = () => {
                         name: user.name,
                         email: user.email,
                         phoneNo: user.phoneNo,
-                        username: user.username,
                         password: user.password,
                         date_joined: user.date_joined,
                     });
@@ -379,7 +370,6 @@ const Customers: React.FC = () => {
                         name: user.name,
                         email: user.email,
                         phoneNo: user.phoneNo,
-                        username: user.username,
                         password: user.password,
                         date_joined: user.date_joined,
 
@@ -577,12 +567,12 @@ const Customers: React.FC = () => {
                         value={user.phoneNo}
                         onChange={(e) => setUser({ ...user, phoneNo: e.target.value })}
                     />
-                    <Field
+                    {/* <Field
                         label="Username"
                         placeholder="Enter username"
                         value={user.username}
                         onChange={(e) => setUser({ ...user, username: e.target.value })}
-                    />
+                    /> */}
                     <Field
                         label="Password"
                         placeholder="Enter password"
@@ -733,7 +723,7 @@ const Customers: React.FC = () => {
             </Form>
 
             
-            {/* Delete*/} {/* Uuser */}
+            {/* Delete*/} {/* User */}
             <Alert
                 open={isAlert}
                 title="Delete this user?"

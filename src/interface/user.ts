@@ -10,7 +10,6 @@ export interface User_type {
   phoneNo: string;
   status: string;
   
-  username: string;
   password: string;
 
   date_joined: string;

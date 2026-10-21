@@ -1,8 +1,9 @@
 // sidebar.tsx
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutGrid, CalendarDays, User, Disc, Ticket, Image as ImageIcon, Bell, BarChart3, Astroid, Diamond, Wrench, CornerDownLeft, CalendarCheck2, Users } from "lucide-react";
+import { LayoutGrid, CalendarDays, User, Disc, Ticket, Image as ImageIcon, Bell, BarChart3, Astroid, Diamond, CornerDownLeft, CalendarCheck2, Users } from "lucide-react";
 import logo from '../assets/logo_rectangle.png'; 
+import api from "../api/axios";
 
 interface NavItem {
   label: string;
@@ -54,7 +55,7 @@ const sections: NavSection[] = [
     title: "ADMIN",
     items: [
       { label: "User Management", path: "/user",    icon: <Users size={18} />, icon_selected: <Users size={18} className="text-violet-400" /> },
-      { label: "System Settings", path: "/settings", icon: <Wrench size={18} />, icon_selected: <Wrench size={18} className="text-slate-500" /> },
+      // { label: "System Settings", path: "/settings", icon: <Wrench size={18} />, icon_selected: <Wrench size={18} className="text-slate-500" /> },
     ],
   },
 ];
@@ -70,6 +71,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
   // for logout only
   const logoutItem: NavItem = { label: "Sign Out", path: "/logout", icon: <CornerDownLeft size={18} />, icon_selected: <CornerDownLeft size={18} /> };
   const logoutActive = location.pathname === logoutItem.path;
+  
+  const handleLogout = async () => {
+    try {
+        await api.post('/logout');
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        window.location.href = '/login';
+    }
+};
 
   return (
     <aside
@@ -155,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
         <button
           type="button"
           title={!isOpen ? logoutItem.label : undefined}
-          onClick={() => navigate(logoutItem.path)}
+          onClick={() => handleLogout()}
           className={`w-full flex items-center gap-3 py-2.5 text-sm transition-colors relative ${
             isOpen ? "justify-start pl-4 pr-3" : "justify-center px-1"
           } ${

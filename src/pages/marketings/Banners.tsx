@@ -7,7 +7,7 @@ import Label from "../../components/ui/Label";
 import type { Banner_type } from "../../interface/banner";
 import { getCurrentDate_Add_OneYear } from "../../utils/date";
 import Field from "../../components/ui/Field";
-import api from "../../api/axios";
+import api, { api_image } from "../../api/axios";
 import Alert from "../../components/ui/Alert";
 
 const Banners: React.FC = () => {
@@ -181,7 +181,7 @@ const Banners: React.FC = () => {
                         <div className="relative mb-2 h-48 w-full overflow-hidden rounded-t-2xl">
                             {/* Poster */}
                             <img
-                                src={`http://localhost:8000/${data.poster}`}
+                                src={`${api_image}/${data.poster}`}
                                 alt={data.title}
                                 className="h-full w-full"
                             />
