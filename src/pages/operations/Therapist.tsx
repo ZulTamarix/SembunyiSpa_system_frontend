@@ -1,6 +1,6 @@
 import Grid from "../../components/ui/Grid";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Sparkles, ClipboardList, Component, Plus } from "lucide-react";
+import { ClipboardList, Component, Plus } from "lucide-react";
 import api from "../../api/axios";
 import Tabs from "../../components/ui/Tab";
 import { DAY_NAMES,  MONTH_NAMES, formatTime, getToday, toISODate, daysInMonth } from "../../utils/date";
@@ -28,9 +28,9 @@ const Therapist: React.FC = () => {
         const [spinner, setSpinner] = useState(false)
 
         // swap section
-        const [active, setActive] = useState("therapist");
+        const [active, setActive] = useState("roster");
         const tabs = [
-            { id: "therapist", label: "Staff Directory", icon: Sparkles },
+            // { id: "therapist", label: "Staff Directory", icon: Sparkles },
             { id: "roster", label: "Duty Roster", icon: ClipboardList },
             { id: "legend", label: "Legend", icon: Component },
         ];
@@ -732,23 +732,20 @@ const Therapist: React.FC = () => {
             {/* #region 0) --> main */}
             <>
                 <Grid className="md:grid-cols-5">
-                    <Tabs className="col-span-3 grid grid-cols-3" tabs={tabs} active={active} setActive={setActive} />
+                    <Tabs className="col-span-2 grid grid-cols-2" tabs={tabs} active={active} setActive={setActive} />
                 </Grid>
             </>
 
             {/* #region 1) --> therapist */}
-            {active == 'therapist' && (
+            {/* {active == 'therapist' && (
                 <>
-                    {/* Create */}
                     <Grid className="md:grid-cols-5 items-center">
                         <Label>{databaseUser.length} Therapist</Label>
                     </Grid>
                     
-                    {/* table */}
                     <Grid className="lg:grid-cols-3">
                         {databaseUser.map((data) => (
                             <div key={data.id} className="w-full rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
-                                {/* Header */}
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-tertiary">
@@ -767,7 +764,6 @@ const Therapist: React.FC = () => {
                                     </span>
                                 </div>
 
-                                {/* Details */}
                                 <div className="mt-5 space-y-2 text-[15px] ">
                                     <div className="flex items-center justify-between">
                                         <span className="text-title">Phone</span>
@@ -777,16 +773,12 @@ const Therapist: React.FC = () => {
                                         <span className="text-title">Email</span>
                                         <span className="font-medium text-title">{data.email}</span>
                                     </div>
-                                    {/* <div className="flex items-center justify-between">
-                                        <span className="text-title">Bookable</span>
-                                        <span className="font-medium text-title">No</span>
-                                    </div> */}
                                 </div>
                             </div>
                         ))}
                     </Grid>
                 </>
-            )}
+            )} */}
 
             {/* #region 2) --> roster */}
             {active == 'roster' && (

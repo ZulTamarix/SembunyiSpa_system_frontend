@@ -57,7 +57,6 @@ const AppRoutes: React.FC = () => {
                 <Route path="/settings" element={<Settings />} />
 
             </Route>
-
         </Routes>
     );
 };

@@ -268,7 +268,7 @@ const Membership: React.FC = () => {
                 render: (row) => (
                     <>
                         {row.type == 'gift' ? (
-                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Gift</span>
+                            <span className="py-1 px-2 rounded-full bg-amber-100 text-amber-600">Spa Voucher</span>
                         ) : (
                             <span className="py-1 px-2 rounded-full bg-purple-100 text-purple-600">Promotional</span>
                         )} 
@@ -388,8 +388,8 @@ const Membership: React.FC = () => {
                             onChange={(e) => setSelected_customer(e.target.value)}
                             type="select"
                             options={[
-                                { label:'-- All customer --', value: 'all'},
-                                { label:'-- Blank voucher --', value: 'blank'},
+                                // { label:'-- All customer --', value: 'all'},
+                                // { label:'-- Blank voucher --', value: 'blank'},
                                 ...databaseUser.map((user) => ({
                                     label: user.name,
                                     value: user.id
@@ -405,7 +405,7 @@ const Membership: React.FC = () => {
                             onChange={(e) => setVoucher({...voucher, type: e.target.value as 'gift' | 'promo'})}
                             type="select"
                             options={[
-                                { label: 'Gift', value: 'gift' },
+                                { label: 'Spa Voucher', value: 'gift' },
                                 { label: 'Promotional', value: 'promo' },
                             ]}
                         />

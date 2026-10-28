@@ -152,7 +152,7 @@ const Banners: React.FC = () => {
 
             api.get(`/banner`)
             .then((response) => {
-                // 1) normal
+                console.log('data = ',response.data)
                 setDatabase_banner(response.data)
             })
             .catch((error) => {

@@ -27,6 +27,8 @@ const Membership: React.FC = () => {
         const [membership, setMembership] = useState<Membership_type> ({
             id: 0,
             tier: '',
+            serial_code: '',
+            duration: 0
         })
         // privilege
         const [privilege, setPrivilege] = useState<string[]>([""]);
@@ -44,6 +46,7 @@ const Membership: React.FC = () => {
         const [unlimited, setUnlimited] = useState<boolean[]>([])
 
     //#endregion
+
 
     //#region 2) --> method
     
@@ -121,12 +124,12 @@ const Membership: React.FC = () => {
         const handleCreate_membership = async() => {
             // loading
             setIsLoading(true)
-            // console.log('membership = ',membership)
-            // console.log('voucher = ',voucher)
 
             try {
                 await api.post(`/membership`, {
                     tier: membership.tier,
+                    serial_code: membership.serial_code,
+                    duration: membership.duration,
                     voucher_list: voucher
                 });
 
@@ -169,6 +172,7 @@ const Membership: React.FC = () => {
 
     //#endregion
 
+
     //#region 3) --> useEffect
     
         // remove fieldname everytime form closed
@@ -176,7 +180,9 @@ const Membership: React.FC = () => {
             if(!form_membership) {
                 setMembership({
                     id: 0,
-                    tier: ''
+                    tier: '',
+                    serial_code: '',
+                    duration: 0
                 })
                 setPrivilege([''])
                 setVoucher([])
@@ -184,6 +190,7 @@ const Membership: React.FC = () => {
         }, [form_membership])
     //#endregion
     
+
     //#region 4) --> database
             const [databaseMembership, setDatabase_membership] = useState<Membership_json[]>([])
             const fetchData_membership = useCallback(() => {
@@ -218,6 +225,11 @@ const Membership: React.FC = () => {
                     key: "privilege",
                     header: "Privilege",
                     render: (row) => row.voucher?.length
+                },
+                {
+                    key: "duration",
+                    header: "Duration",
+                    render: (row) => `${row.membership.duration} months`
                 },
                 {
                     key: "",
@@ -331,16 +343,33 @@ const Membership: React.FC = () => {
                         value={membership.tier}
                         onChange={(e) => setMembership({ ...membership, tier : e.target.value })}
                     />
-                    {/* 2) */}
-                    <div className="grid md:grid-cols-4">
-                        <div className="col-start-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {/* 2) */}
                         <Field
-                            key={index}
-                            label="Add voucher"
-                            type="button"
-                            value="+"
-                            onClick={() => handleOpen_voucher(index)}
+                            label="Serial code"
+                            placeholder="GL, SL, ..."
+                            value={membership.serial_code}
+                            onChange={(e) => setMembership({ ...membership, serial_code : e.target.value })}
                         />
+                        {/* 3) */}
+                        <Field
+                            label="Duration before expired (month)"
+                            value={membership?.duration || 0}
+                            onChange={(e) => setMembership({ ...membership, duration : Number(e.target.value) })}
+                            type="number"
+                        />
+                    </div>
+
+                    {/* 3) */}
+                    <div className="grid grid-cols-1 md:grid-cols-4">
+                        <div className="col-start-4">
+                            <Field
+                                key={index}
+                                label="Add voucher"
+                                type="button"
+                                value="+"
+                                onClick={() => handleOpen_voucher(index)}
+                            />
                         </div>
                     </div>
                     {/* Table */}

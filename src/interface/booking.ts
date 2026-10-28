@@ -5,6 +5,7 @@ import type { User_type } from "./user";
 export interface Booking_type {
     id: number;
     user_id: number;
+    user_shared_id: number | null;
     package_id?: number | null;
     date_start: string;
     time_start: string;
@@ -12,7 +13,14 @@ export interface Booking_type {
     booking_type: 'prepaid' | 'walkin';
     status: 'pending' | 'booked' | 'in_treatment' | 'completed' | 'cancelled';
     payment: 'pending' | 'paid' | 'cancel';
-    remark: string
+    remark: string;
+
+    price_original: number | "";
+    price_discount: number | "";
+    price_final: number | "";
+
+    recorded_time_start?: string;
+    recorded_time_end?: string;
 
     booking_selected?: Booking_selected_type
 }

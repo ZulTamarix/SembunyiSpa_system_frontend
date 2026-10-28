@@ -9,10 +9,11 @@ import type { Voucher_customer_type, Voucher_type } from "../../interface/vouche
 import Form from "../../components/ui/Form";
 import Button from "../../components/ui/Button";
 import Field from "../../components/ui/Field";
-import { Eye, Plus } from "lucide-react";
+import { Eye, Plus, Timeline } from "lucide-react";
 import { getCurrentDate, getCurrentDate_Add_OneYear } from "../../utils/date";
 import type { Membership_json } from "../../interface/membership";
 import Alert from "../../components/ui/Alert";
+import type { Log_voucher_type } from "../../interface/log_voucher";
 
 const Customers: React.FC = () => {
 
@@ -31,9 +32,11 @@ const Customers: React.FC = () => {
         const [form_voucher, setForm_voucher] = useState(false);
         const [form_membership, setForm_membership] = useState(false);
         const [form_voucherList, setForm_voucherList] = useState(false);
+        const [form_log, setForm_log] = useState(false);
         // loading
         const [isLoading, setIsLoading] = useState(false);
         // fieldname
+        const [log, setLog] = useState<Log_voucher_type[]> ([])
         const [selectedCustomer, setSelected_customer] = useState ({
             id: 0,
             name: ''
@@ -51,7 +54,6 @@ const Customers: React.FC = () => {
             phoneNo: '',
             status: '',
             password: '',
-            date_joined: getCurrentDate(),
             specialty: '',
             code: ''
         })
@@ -63,7 +65,6 @@ const Customers: React.FC = () => {
             phoneNo: '',
             status: '',
             password: '',
-            date_joined: '',
             membership_id: 0,
             membership_date_expired: getCurrentDate_Add_OneYear(),
             specialty: '',
@@ -86,7 +87,6 @@ const Customers: React.FC = () => {
                     phoneNo: '',
                     status: '',
                     password: '',
-                    date_joined: getCurrentDate(),
                     specialty: '',
                     code: ''
                 })
@@ -100,7 +100,6 @@ const Customers: React.FC = () => {
                     phoneNo: '',
                     status: '',
                     password: '',
-                    date_joined: '',
                     membership_id: 0,
                     membership_date_expired: getCurrentDate_Add_OneYear(),
                     specialty: '',
@@ -115,10 +114,205 @@ const Customers: React.FC = () => {
             // }
         }, [form_user, form_membership])
 
+        // change 'code' and 'expiry date'
+        useEffect(() => {
+            const selectedMembership = databaseMembership.find((item) => item.membership.id === membership?.membership_id);
+            // a) code
+        
+
+            // b) expiry date
+                const expiredDate = new Date();
+                expiredDate.setMonth(expiredDate.getMonth() + (selectedMembership?.membership.duration ?? 0));
+                const formattedDate = expiredDate.toISOString().split('T')[0];
+
+            // c) assign data    
+            setMembership((prev) => ({
+                ...prev,
+                membership_date_expired: formattedDate
+            }))
+        }, [membership.membership_id, form_membership])
+
     //#endregion
 
+    
+    //#region 3) --> method
 
-    //#region 3) --> database
+        // #region a) --> user
+            // edit user
+            const handleEdit_user = (data: User_type) => {
+                setUser(data)
+                setForm_user(true)
+                setCrud('edit')
+            }
+
+            // CREATE user
+            const handleCreate_user = async () => {
+
+                // loading
+                setIsLoading(true)
+
+                // CREATE data
+                try {
+                    await api.post(`/user`, {
+                        role: user.role,
+                        name: user.name,
+                        email: user.email,
+                        phoneNo: user.phoneNo,
+                        password: user.password,
+                    });
+
+                    fetchData_user()
+                    setForm_user(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+
+            // UPDATE user
+            const handleUpdate_user = async () => {
+
+                // loading
+                setIsLoading(true)
+
+                // UPDATE data
+                try {
+                    await api.put(`/user/${user.id}`, {
+                        role: user.role,
+                        name: user.name,
+                        email: user.email,
+                        phoneNo: user.phoneNo,
+                        password: user.password,
+
+                        switch: 'user'
+                    });
+
+                    fetchData_user()
+                    setForm_user(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+
+            // DELETE user
+            const handleDelete_user = async () => {
+                
+                setIsLoading(true)
+
+                // DELETE data
+                try {
+                    await  api.delete(`/user/${selectedId}`)
+
+                    fetchData_user()
+                    setForm_user(false)
+                    setIs_alert(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+        //#endregion
+       
+        // #region b) --> other
+            const handleSelect_customer = (data: any, type: 'voucher' | 'membership' | 'privilege', crud: 'edit' | 'create' | 'view' ) => {
+                setSelected_customer({
+                    id: data.id,
+                    name: data.name
+                }) 
+
+                // console.log('data = ',data.voucher_customers)
+                setVoucher(data.voucher_customers)
+
+                if(type == 'membership') {
+                    if(crud == 'create') {
+                        setForm_membership(true)
+                    }
+                }
+                else if(type == 'voucher') {
+                    
+                    if(crud == 'create')
+                        setForm_voucher(true)
+                    else if(crud == 'view')
+                        setForm_voucherList(true)
+                }
+            }
+
+            // UPDATE voucher
+            const handleUpdate_voucher = async () => {
+
+                // find index
+                const selectedIndex = databaseVoucher.findIndex(
+                    (voucher) => voucher.id === selectedVoucher.id
+                );
+                // loading
+                setIsLoading(true)
+                try {
+                    await api.post(`/voucher`, {
+                        user_id: selectedCustomer.id,
+                        voucher_id: selectedVoucher.id,
+                        quantity: databaseVoucher[selectedIndex].quantity,
+                        date_expired: databaseVoucher[selectedIndex].date_expired,
+                        serial_no: 'test',
+
+                        switch: 'voucher_customer'
+                    });
+
+                    fetchData_user()
+                    setForm_voucher(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+
+            // UPDATE membership
+            const handleUpdate_membership = async() => {
+                // loading
+                setIsLoading(true)
+                
+                try {
+                    
+                    await api.put(`/user/${selectedCustomer.id}`, {
+                        membership_id: membership.membership_id,
+                        membership_date_expired: membership.membership_date_expired,
+
+                        switch: 'membership'
+                    });
+
+                    fetchData_user()
+                    setForm_membership(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+        //#endregion
+
+    //#endregion
+    
+
+    //#region 4) --> database
     
         const [databaseUser, setDatabase_user] = useState<User_type[]>([])
         const [databaseVoucher, setDatabase_voucher] = useState<Voucher_type[]>([])
@@ -133,7 +327,7 @@ const Customers: React.FC = () => {
             api.get(`/user`, {
                 params: {
                     role: 'customer',
-                    extra_1: 'full_customer'
+                    extra: 'full_customer'
                 }
             })
             .then((response) => {
@@ -200,7 +394,7 @@ const Customers: React.FC = () => {
             fetchData_membership()
         }, [])
 
-        // tableTitle_user
+        // tableTitle
         const tableTitle_user: Column<User_type>[] = [
             {
                 key: "customer",
@@ -238,7 +432,7 @@ const Customers: React.FC = () => {
                                         <span className="px-4 py-1 text-sm font-medium">
                                             {row.membership?.tier}
                                         </span>
-                                        <button onClick={() => handleSelect_customer(row, 'membership', 'edit')} className="px-3 py-1 bg-tertiary text-black font-semibold cursor-pointer">
+                                        <button onClick={() => handleSelect_customer(row, 'membership', 'edit')} className="px-3 py-1 bg-tertiary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
                                             <Eye size={18} />
                                         </button>
                                     </>
@@ -247,7 +441,7 @@ const Customers: React.FC = () => {
                                         <span className="px-4 py-1 text-sm font-medium">
                                             -
                                         </span>
-                                        <button onClick={() => handleSelect_customer(row, 'membership', 'create')}  className="px-3 py-1 bg-secondary text-black font-bold cursor-pointer">
+                                        <button onClick={() => handleSelect_customer(row, 'membership', 'create')}  className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-bold cursor-pointer">
                                             +
                                         </button>
                                     </>
@@ -268,10 +462,10 @@ const Customers: React.FC = () => {
                                 {row.voucher_customers?.length ?? 0} 
                             </span>
 
-                            <button onClick={() => handleSelect_customer(row, 'voucher', 'view')} className="px-3 py-1 bg-tertiary text-black font-bold cursor-pointer">
+                            <button onClick={() => handleSelect_customer(row, 'voucher', 'view')} className="px-3 py-1 bg-tertiary hover:opacity-70 transition-opacity text-black font-bold cursor-pointer">
                                 <Eye size={18} />
                             </button>
-                            <button onClick={() => handleSelect_customer(row, 'voucher', 'create')} className="px-3 py-1 bg-secondary text-black font-bold cursor-pointer">
+                            <button onClick={() => handleSelect_customer(row, 'voucher', 'create')} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-bold cursor-pointer">
                                 +
                             </button>
                         </div>
@@ -295,207 +489,108 @@ const Customers: React.FC = () => {
                 )
             },
         ];
-
-        // tableTitle
         const tableTitle_voucher: Column<Voucher_customer_type>[] = [
+            {
+                key: "serial_np",
+                header: "Serial no",
+                render: (row) => (
+                    <>
+                        {row.serial_no ? (
+                            <span>{row.serial_no}</span>
+                        ) : (
+                            <span>-</span>
+                        )}
+                    </>
+                )
+            },
             {
                 key: "code",
                 header: "Code",
                 render: (row) => row.voucher.code
             },
             {
-                key: "description",
-                header: "Description",
-                render: (row) => row.voucher.description
+                key: "quantity",
+                header: "Quantity",
+                render: (row) => row?.quantity || 0
             },
             {
                 key: "validTill",
                 header: "Valid Till",
                 render: (row) => row?.date_expired || '-'
             },
+            {
+                key: "status",
+                header: "Status",
+                render: (row) => (
+                    <>
+                        {Number(row.quantity) == 0 ? (
+                            <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Redeemed</span>
+                        ) : 
+                        row.date_expired < getCurrentDate() ?(
+                            <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Expired</span>
+                        ):(
+                            <span className="py-1 px-2 rounded-full bg-green-100 text-green-600">Active</span>
+                        )}
+
+                    </>
+
+                )
+            },
+            {
+                key: "log",
+                header: "History",
+                align: "center",
+                render: (row) => (
+                    <>
+                        {/* {row.log?.length > 0 ? ( */}
+                        {(row.log ?? []).length > 0 ? (
+                            <button onClick={() => {setLog(row.log ?? []); setForm_log(true)}} className="px-5 py-2 bg-secondary hover:opacity-80 active:scale-95 transition-all text-black text-sm font-semibold rounded-lg shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            {/* <button className="px-5 py-2 bg-secondary hover:opacity-80 active:scale-95 transition-all text-black text-sm font-semibold rounded-lg shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"> */}
+                                <Timeline size={20}/>
+                            </button>
+                        ) : (
+                            <>
+                                <div className="font-bold">-</div>
+                            </>
+                        )}
+                    </>
+                ),
+            },
         ];
+        const tableTitle_log: Column<Log_voucher_type>[] = [
+            {
+                key: "1",
+                header: "Date",
+                render: (row) => (
+                    <span className="text-sm text-title font-mono">
+                        {new Date(row.created_at).toLocaleDateString('en-CA')}
+                    </span>
+                ),
+            },
+            {
+                key: "2",
+                header: "Time",
+                render: (row) => (
+                    <span className="text-sm text-title font-mono">
+                        {new Date(row.created_at).toLocaleTimeString('en-GB', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                        })}
+                    </span>
+                ),
+            },
+            {
+                key: "3",
+                header: "Action",
+                render: (row) => (
+                    <span className="text-sm text-title font-mono" dangerouslySetInnerHTML={{ __html: row.action }}></span>
+                ),
+            },
+        ]
 
     //#endregion
     
-    
-    //#region 4) --> method
-
-        // #region a) --> user
-            // edit user
-            const handleEdit_user = (data: User_type) => {
-                setUser(data)
-                setForm_user(true)
-                setCrud('edit')
-            }
-
-            // CREATE user
-            const handleCreate_user = async () => {
-
-                // loading
-                setIsLoading(true)
-
-                // CREATE data
-                try {
-                    await api.post(`/user`, {
-                        role: user.role,
-                        name: user.name,
-                        email: user.email,
-                        phoneNo: user.phoneNo,
-                        password: user.password,
-                        date_joined: user.date_joined,
-                    });
-
-                    fetchData_user()
-                    setForm_user(false)
-                }
-                catch(error) {
-                    console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.data);
-                }
-                finally {
-                    setIsLoading(false)
-                }
-            }
-
-            // UPDATE user
-            const handleUpdate_user = async () => {
-
-                // loading
-                setIsLoading(true)
-
-                // UPDATE data
-                try {
-                    await api.put(`/user/${user.id}`, {
-                        role: user.role,
-                        name: user.name,
-                        email: user.email,
-                        phoneNo: user.phoneNo,
-                        password: user.password,
-                        date_joined: user.date_joined,
-
-                        switch: 'user'
-                    });
-
-                    fetchData_user()
-                    setForm_user(false)
-                }
-                catch(error) {
-                    console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.data);
-                }
-                finally {
-                    setIsLoading(false)
-                }
-            }
-
-            // DELETE user
-            const handleDelete_user = async () => {
-                
-                setIsLoading(true)
-
-                // DELETE data
-                try {
-                    await  api.delete(`/user/${selectedId}`)
-
-                    fetchData_user()
-                    setForm_user(false)
-                    setIs_alert(false)
-                }
-                catch(error) {
-                    console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.data);
-                }
-                finally {
-                    setIsLoading(false)
-                }
-            }
-        //#endregion
-       
-        // #region b) --> other
-            const handleSelect_customer = (data: any, type: 'voucher' | 'membership' | 'privilege', crud: 'edit' | 'create' | 'view' ) => {
-                setSelected_customer({
-                    id: data.id,
-                    name: data.name
-                }) 
-
-                console.log('data = ',data.voucher_customers)
-                setVoucher(data.voucher_customers)
-
-                if(type == 'membership') {
-                    if(crud == 'create')
-                        setForm_membership(true)
-                }
-                else if(type == 'voucher') {
-                    
-                    if(crud == 'create')
-                        setForm_voucher(true)
-                    else if(crud == 'view')
-                        setForm_voucherList(true)
-                }
-            }
-
-            // UPDATE voucher
-            const handleUpdate_voucher = async () => {
-
-                // find index
-                const selectedIndex = databaseVoucher.findIndex(
-                    (voucher) => voucher.id === selectedVoucher.id
-                );
-                // loading
-                setIsLoading(true)
-                try {
-                    await api.post(`/voucher`, {
-                        user_id: selectedCustomer.id,
-                        voucher_id: selectedVoucher.id,
-                        quantity: databaseVoucher[selectedIndex].quantity,
-                        date_expired: databaseVoucher[selectedIndex].date_expired,
-
-                        switch: 'voucher_customer'
-                    });
-
-                    fetchData_user()
-                    setForm_voucher(false)
-                }
-                catch(error) {
-                    console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.data);
-                }
-                finally {
-                    setIsLoading(false)
-                }
-            }
-
-            // UPDATE membership
-            const handleUpdate_membership = async() => {
-                // loading
-                setIsLoading(true)
-                
-                try {
-                    
-                    await api.put(`/user/${selectedCustomer.id}`, {
-                        membership_id: membership.membership_id,
-                        membership_date_expired: membership.membership_date_expired,
-                        code: membership.code,
-
-                        switch: 'membership'
-                    });
-
-                    fetchData_user()
-                    setForm_membership(false)
-                }
-                catch(error) {
-                    console.error('Error:', error); // use only to remove warning on vscode
-                    // console.error('Response status:', error.response?.data);
-                }
-                finally {
-                    setIsLoading(false)
-                }
-            }
-        //#endregion
-
-    //#endregion
-    
-
     return (
         <>
             {/* Filter */}
@@ -579,13 +674,6 @@ const Customers: React.FC = () => {
                         value={user.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
                         type="password"
-                    />
-                    <Field
-                        label="Date joined"
-                        // placeholder="2026-03-12"
-                        value={user.date_joined}
-                        onChange={(e) => setUser({ ...user, date_joined: e.target.value })}
-                        type="date"
                     />
                 </div>
             </Form>
@@ -706,23 +794,27 @@ const Customers: React.FC = () => {
                         }))}
                     />
                     {/* 2) */}
-                    <Field
+                    {/* <Field
                         label="Code"
                         placeholder="SPA-2026-000"
                         value={membership.code || ''}
                         onChange={(e) => setMembership({...membership, code: e.target.value})}
-                    />
+                    /> */}
                     {/* 3)  */}
                     <Field
-                        label="Expired Date (1 year after subscription date)"
+                        label="Expiry Date"
                         value={membership.membership_date_expired}
                         onChange={(e) => setMembership({...membership, membership_date_expired: e.target.value})}
                         type="date"
                     /> 
                 </div>
             </Form>
-
             
+            {/* Form */} {/*Log*/}
+            <Form title='Booking history' isOpen={form_log} onClose={() => setForm_log(false)} width="max-w-4xl">
+                <Table fieldName={tableTitle_log} data={log} loading={spinner} />
+            </Form>
+
             {/* Delete*/} {/* User */}
             <Alert
                 open={isAlert}

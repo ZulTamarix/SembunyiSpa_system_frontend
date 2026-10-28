@@ -61,7 +61,7 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     value={value as string}
                     onClick={onClick}
                     disabled={disabled}
-                    className="w-full rounded-lg border border-gray-300 bg-secondary px-3 py-2.5 text-sm text-black font-bold cursor-pointer transition-all hover:-translate-x-3 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full rounded-lg border-2 border-gray-300 bg-secondary px-3 py-2.5 text-sm text-black font-bold cursor-pointer transition-all hover:-translate-x-3 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
             ) :
             // 2) select option (normal)
@@ -70,10 +70,10 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     value={value as string | number}
                     onChange={onChange}
                     disabled={disabled}
-                    className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    className={`bg-white w-full rounded-lg border-2 px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
                         error
                             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-                            : "border-gray-300 focus:border-border focus:ring-2 focus:ring-border"
+                            : "border-gray-300 focus:border-border-2 focus:ring-2 focus:ring-border"
                     }`}
                 >
                     {placeholder && (
@@ -110,15 +110,15 @@ export default function Field({ label, type = "text", placeholder, value, accept
                             setOpen(true);
                         }}
                         disabled={disabled}
-                        className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                        className={`bg-white w-full rounded-lg border-2 px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
                             error
                                 ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-                                : "border-gray-300 focus:border-border focus:ring-2 focus:ring-border"
+                                : "border-gray-300 focus:border-border-2 focus:ring-2 focus:ring-border"
                         }`}
                     />
 
                     {open && (
-                        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
+                        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border-2 border-gray-300 bg-white shadow-lg">
                             {filteredOptions.length > 0 ? (
                                 filteredOptions.map((option) => (
                                     <div
@@ -180,10 +180,10 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     accept={accept}
                     onChange={onChange}
                     disabled={disabled}
-                    className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    className={`bg-white w-full rounded-lg border-2 px-3 py-2.5 text-sm outline-none transition text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
                         error
                             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-                            : "border-gray-300 focus:border-border focus:ring-2 focus:ring-border"
+                            : "border-gray-300 focus:border-border-2 focus:ring-2 focus:ring-border"
                     }`}
                 />
 
@@ -196,10 +196,10 @@ export default function Field({ label, type = "text", placeholder, value, accept
                     onChange={onChange}
                     disabled={disabled}
                     rows={4}
-                    className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title resize-y disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    className={`bg-white w-full rounded-lg border-2 px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title resize-y disabled:bg-gray-100 disabled:cursor-not-allowed ${
                         error
                             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-                            : "border-gray-300 focus:border-border focus:ring-2 focus:ring-border"
+                            : "border-gray-300 focus:border-border-2 focus:ring-2 focus:ring-border"
                     }`}
                 />
 
@@ -214,12 +214,12 @@ export default function Field({ label, type = "text", placeholder, value, accept
                         onChange={onChange}
                         disabled={disabled}
                         step={type === "time" ? 900 : undefined}
-                        className={`bg-white w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                        className={`bg-white w-full rounded-lg border-2 px-3 py-2.5 text-sm outline-none transition placeholder:text-title/40 text-title disabled:bg-gray-100 disabled:cursor-not-allowed ${
                             type === "password" ? "pr-16" : ""
                         } ${
                             error
                                 ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-                                : "border-gray-300 focus:border-border focus:ring-2 focus:ring-border"
+                                : "border-gray-300 focus:border-border-2 focus:ring-2 focus:ring-border"
                         }`}
                     />
 

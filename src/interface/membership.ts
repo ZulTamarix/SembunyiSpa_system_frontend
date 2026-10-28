@@ -4,6 +4,8 @@ import type { Voucher_type } from "./vouchers";
 export interface Membership_type {
     id: number;
     tier: string;
+    serial_code: string;
+    duration: number | null;
     voucher?: Voucher_type[]
 }
 

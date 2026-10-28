@@ -29,9 +29,9 @@ const sections: NavSection[] = [
     items: [
       { label: "Bookings",            path: "/bookings",    icon: <CalendarDays size={18} />, icon_selected: <CalendarDays size={18} className="text-sky-400" /> },
       { label: "Customers",           path: "/customers",   icon: <User size={18} />, icon_selected: <User size={18} className="text-purple-400" /> },
-      { label: "Therapists & Roster", path: "/therapist",   icon: <Astroid size={18} className="text-white" />, icon_selected: <Astroid size={18} className="text-yellow-200" /> },
+      { label: "Duty Roster", path: "/therapist",   icon: <Astroid size={18} className="text-white" />, icon_selected: <Astroid size={18} className="text-yellow-200" /> },
       { label: "Schedule",            path: "/schedule",    icon: <CalendarCheck2 size={18} className="text-white" />, icon_selected: <CalendarCheck2 size={18} className="text-blue-300" /> },
-      { label: "Packages & Service",            path: "/packages",    icon: <Diamond size={18} />, icon_selected: <Diamond size={18} className="text-pink-400" /> },
+      { label: "Treatment",            path: "/packages",    icon: <Diamond size={18} />, icon_selected: <Diamond size={18} className="text-pink-400" /> },
       { label: "Membership",          path: "/memberships", icon: <Disc size={18} />, icon_selected: <Disc size={18} className="text-amber-400" /> },
     ],
   },

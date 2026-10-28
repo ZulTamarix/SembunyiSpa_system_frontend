@@ -1,3 +1,4 @@
+import type { Log_voucher_type } from "./log_voucher";
 import type { User_type } from "./user";
 
 export interface Voucher_type {
@@ -15,7 +16,11 @@ export interface Voucher_customer_type {
     id: number,
     voucher_id: number,
     date_expired: string,
+    quantity: string,
+    serial_no: string
 
     user: User_type
     voucher: Voucher_type
+
+    log?: Log_voucher_type[]
 }

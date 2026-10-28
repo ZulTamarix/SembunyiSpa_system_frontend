@@ -55,7 +55,8 @@ import Alert from "../../components/ui/Alert";
                     {/* Header */}
                     <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50 border-b border-gray-200">
                         <span className="text-sm text-title">
-                            Select {label.toLowerCase()}
+                            {/* Select {label.toLowerCase()} */}
+                            Select
                         </span>
 
                         <span className="text-xs text-secondary">
@@ -386,13 +387,14 @@ const Packages: React.FC = () => {
 
             // CREATE service
             const handleCreate_package = async () => {
-                // loading
-                setIsLoading(true)
 
                 // console.log('data = ',packages)
                 // console.log('therapist = ',selectedTherapist)
                 // console.log('room = ',selectedRoom)
                 // console.log('service = ',selectedService)
+
+                // loading
+                setIsLoading(true)
 
                 // format data to allow image uploading
                 const formData = new FormData();
@@ -750,6 +752,7 @@ const Packages: React.FC = () => {
 
     //#endregion
 
+
     return (
         <>
 
@@ -1089,8 +1092,8 @@ const Packages: React.FC = () => {
 
                         {/* 6) */}
                         <Field
-                            label="Gender"
-                            placeholder="Select a gender"
+                            label="Type"
+                            // placeholder="Select a gender"
                             value={packages.gender}
                             onChange={(e) =>
                                 setPackages({
@@ -1100,10 +1103,10 @@ const Packages: React.FC = () => {
                             }
                             type="select"
                             options={[
-                                { label: "Man", value: "man" },
-                                { label: "Woman", value: "woman" },
-                                { label: "Unisex", value: "unisex" },
-                                { label: "Couple", value: "couple" },
+                                { label: "Individual", value: "single" },
+                                { label: "Couple", value: "multiple" },
+                                // { label: "Unisex", value: "unisex" },
+                                // { label: "Couple", value: "couple" },
                             ]}
                         />
 
@@ -1169,7 +1172,7 @@ const Packages: React.FC = () => {
                             
                             {/* 10) Service */}
                             <MultiSelect
-                                label="Service"
+                                label="Service (based on order)"
                                 options={databaseService.map((service) => ({
                                     id: service.package?.id || 0,
                                     name: service.package.title,
@@ -1188,7 +1191,7 @@ const Packages: React.FC = () => {
                         <Grid className="md:grid-cols-2">
                             {/* 11) Therapist */}
                             <MultiSelect
-                                label="Therapist"
+                                label="Therapist (based on order)"
                                 options={databaseTherapist.map((therapist) => ({
                                     id: therapist?.id || 0,
                                     name: therapist.name,
@@ -1199,7 +1202,7 @@ const Packages: React.FC = () => {
                             />
                             {/* 12) Room */}
                             <MultiSelect
-                                label="Room"
+                                label="Room (based on order)"
                                 options={databaseRoom.map((room) => ({
                                     id: room.id,
                                     name: room.name,

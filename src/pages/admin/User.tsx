@@ -8,7 +8,6 @@ import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
 import api from "../../api/axios";
 import Label from "../../components/ui/Label";
-import { getCurrentDate } from "../../utils/date";
 import Alert from "../../components/ui/Alert";
 
 const User: React.FC = () => {
@@ -23,7 +22,6 @@ const User: React.FC = () => {
             phoneNo: '',
             status: '',
             password: '',
-            date_joined: getCurrentDate(),
             specialty: '',
             code: ''
         })
@@ -57,7 +55,6 @@ const User: React.FC = () => {
                     phoneNo: '',
                     status: '',
                     password: '',
-                    date_joined: getCurrentDate(),
                     specialty: '',
                     code: ''
                 })
@@ -88,7 +85,6 @@ const User: React.FC = () => {
                     email: user.email,
                     phoneNo: user.phoneNo,
                     password: user.password,
-                    date_joined: user.date_joined,
 
                     ...(user.role === 'therapist' && {
                         specialty: user.specialty,
@@ -122,7 +118,6 @@ const User: React.FC = () => {
                     email: user.email,
                     phoneNo: user.phoneNo,
                     password: user.password,
-                    date_joined: user.date_joined,
 
                     ...(user.role === 'therapist' && {
                         specialty: user.specialty,
@@ -251,7 +246,7 @@ const User: React.FC = () => {
             api.get(`/user`, {
                 params: {
                     role: 'therapist',
-                    extra_1: 'include_admin'
+                    extra: 'include_admin'
                 }
             })
             .then((response) => {
@@ -381,13 +376,6 @@ const User: React.FC = () => {
                         value={user.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
                         type="password"
-                    />
-                    <Field
-                        label="Date joined"
-                        // placeholder="2026-03-12"
-                        value={user.date_joined}
-                        onChange={(e) => setUser({ ...user, date_joined: e.target.value })}
-                        type="date"
                     />
                 </div>
             </Form>

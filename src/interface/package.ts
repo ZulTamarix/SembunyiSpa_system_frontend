@@ -21,6 +21,7 @@ export interface Package_service_type {
     id: number
     package_id: number
     service_id: number
+    order?: number
 }
 
 export interface Package_json {

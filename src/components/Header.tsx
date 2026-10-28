@@ -2,6 +2,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
+import type { User_type } from "../interface/user";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -12,9 +13,9 @@ const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/bookings": "Bookings",
   "/customers": "Customers",
-  "/therapist": "Therapists & Roster",
+  "/therapist": "Duty Roster",
   "/schedule": "Schedule",
-  "/packages": "Packages & Service",
+  "/packages": "Treatment",
   "/memberships": "Membership",
   "/vouchers": "Vouchers",
   "/banners": "Banners",
@@ -30,6 +31,7 @@ const pageTitles: Record<string, string> = {
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const location = useLocation();
   const title = pageTitles[location.pathname] ?? "";
+  const user: User_type = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
     <header className="w-full h-14 bg-white border-b border-border flex items-center gap-4 px-6 shrink-0">
@@ -46,11 +48,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
 
       <div className="ml-auto flex items-center gap-3 whitespace-nowrap">
-          <span className="font-semibold w-32 h-6 bg-tertiary rounded-xl flex items-center justify-center text-sm">
-            Administrator
+          <span className="font-semibold px-3 h-6 bg-tertiary border border-border rounded-xl flex items-center justify-center text-sm capitalize">
+            {user?.name || 'Administrator'}
           </span>
-          <span className="font-bold w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-            A
+          <span className="font-bold w-8 h-8 bg-secondary rounded-full flex items-center justify-center capitalize">
+            {user?.name?.charAt(0) || 'S'}
           </span>
       </div>
     </header>
