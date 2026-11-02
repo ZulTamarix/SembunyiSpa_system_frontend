@@ -248,7 +248,14 @@ const Banners: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_banner}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        banner.poster == null ||
+                                        banner.title == '' ||
+                                        banner.description == ''
+                                    )
+                                }
                             />
                         ) : (
 
@@ -256,7 +263,14 @@ const Banners: React.FC = () => {
                                 label="Update"
                                 className="w-24"
                                 onClick={handleUpdate_banner}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        banner.poster == null ||
+                                        banner.title == '' ||
+                                        banner.description == ''
+                                    )
+                                }
                             />
                         )}
 

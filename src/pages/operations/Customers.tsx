@@ -9,8 +9,8 @@ import type { Voucher_customer_type, Voucher_type } from "../../interface/vouche
 import Form from "../../components/ui/Form";
 import Button from "../../components/ui/Button";
 import Field from "../../components/ui/Field";
-import { Eye, Plus, Timeline } from "lucide-react";
-import { getCurrentDate, getCurrentDate_Add_OneYear } from "../../utils/date";
+import { CheckIcon, Eye, Plus, Timeline } from "lucide-react";
+import { getCurrentDate_Add_OneYear } from "../../utils/date";
 import type { Membership_json } from "../../interface/membership";
 import Alert from "../../components/ui/Alert";
 import type { Log_voucher_type } from "../../interface/log_voucher";
@@ -26,7 +26,8 @@ const Customers: React.FC = () => {
         // selected id
         const [selectedId, setSelected_id] = useState(0);
         // a) detect error -> common
-        const [isAlert, setIs_alert] = useState(false);
+        const [isAlert_user, setIs_alert_user] = useState(false);
+        const [isAlert_quantity, setIs_alert_quantity] = useState(false);
         // form
         const [form_user, setForm_user] = useState(false);
         const [form_voucher, setForm_voucher] = useState(false);
@@ -55,7 +56,8 @@ const Customers: React.FC = () => {
             status: '',
             password: '',
             specialty: '',
-            code: ''
+            code: '',
+            date_birthday: '',
         })
         const [membership, setMembership] = useState<User_type> ({
             id: 0,
@@ -68,7 +70,8 @@ const Customers: React.FC = () => {
             membership_id: 0,
             membership_date_expired: getCurrentDate_Add_OneYear(),
             specialty: '',
-            code: ''
+            code: '',
+            date_birthday: '',
         })
 
     //#endregion
@@ -88,7 +91,8 @@ const Customers: React.FC = () => {
                     status: '',
                     password: '',
                     specialty: '',
-                    code: ''
+                    code: '',
+                    date_birthday: ''
                 })
             }
             if(!form_membership) {
@@ -100,10 +104,11 @@ const Customers: React.FC = () => {
                     phoneNo: '',
                     status: '',
                     password: '',
-                    membership_id: 0,
+                    membership_id: databaseMembership[0]?.membership.id ?? 0,
                     membership_date_expired: getCurrentDate_Add_OneYear(),
                     specialty: '',
-                    code: ''
+                    code: '',
+                    date_birthday: ''
                 })
             }
             // if(!form_voucher) {
@@ -214,7 +219,7 @@ const Customers: React.FC = () => {
 
                     fetchData_user()
                     setForm_user(false)
-                    setIs_alert(false)
+                    setIs_alert_user(false)
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
@@ -227,7 +232,9 @@ const Customers: React.FC = () => {
         //#endregion
        
         // #region b) --> other
-            const handleSelect_customer = (data: any, type: 'voucher' | 'membership' | 'privilege', crud: 'edit' | 'create' | 'view' ) => {
+
+            // set customer's id
+            const handleSelect_customer = (data: any, type: 'voucher' | 'membership' | 'privilege' | 'deduct', crud: 'edit' | 'create' | 'view' ) => {
                 setSelected_customer({
                     id: data.id,
                     name: data.name
@@ -250,8 +257,8 @@ const Customers: React.FC = () => {
                 }
             }
 
-            // UPDATE voucher
-            const handleUpdate_voucher = async () => {
+            // CREATE voucher
+            const handleCreate_voucher = async () => {
 
                 // find index
                 const selectedIndex = databaseVoucher.findIndex(
@@ -266,6 +273,7 @@ const Customers: React.FC = () => {
                         quantity: databaseVoucher[selectedIndex].quantity,
                         date_expired: databaseVoucher[selectedIndex].date_expired,
                         serial_no: 'test',
+                        status: databaseVoucher[selectedIndex].status,
 
                         switch: 'voucher_customer'
                     });
@@ -281,12 +289,35 @@ const Customers: React.FC = () => {
                     setIsLoading(false)
                 }
             }
+            
+            // Update voucher
+            const handleUpdate_voucher = async () => {
+
+                // loading
+                setIsLoading(true)
+
+                try {
+                    await api.put(`/voucher/${selectedId}`, {
+                        switch: 'customer'
+                    });
+
+                    fetchData_user()
+                    setForm_voucherList(false)
+                    setIs_alert_quantity(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response status:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
 
             // UPDATE membership
             const handleUpdate_membership = async() => {
                 // loading
                 setIsLoading(true)
-                
                 try {
                     
                     await api.put(`/user/${selectedCustomer.id}`, {
@@ -345,11 +376,12 @@ const Customers: React.FC = () => {
         const fetchData_voucher = useCallback(() => {
             api.get(`/voucher`, {
                 params :{
+                    switch: 'voucher',
                     extra: 'exclude inactive'
                 }
             })
             .then((response) => {
-                // console.log('data = ',response.data)
+                console.log('data = ',response.data)
                 setDatabase_voucher(response.data)
                 
                 // set data
@@ -430,7 +462,7 @@ const Customers: React.FC = () => {
                                 {row.membership_id ? (
                                     <>
                                         <span className="px-4 py-1 text-sm font-medium">
-                                            {row.membership?.tier}
+                                            {row.code}
                                         </span>
                                         <button onClick={() => handleSelect_customer(row, 'membership', 'edit')} className="px-3 py-1 bg-tertiary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
                                             <Eye size={18} />
@@ -482,7 +514,7 @@ const Customers: React.FC = () => {
                             Edit
                         </button>
                         
-                        <button onClick={() => {setIs_alert(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                        <button onClick={() => {setIs_alert_user(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                             Delete
                         </button>
                     </div>
@@ -511,7 +543,15 @@ const Customers: React.FC = () => {
             {
                 key: "quantity",
                 header: "Quantity",
-                render: (row) => row?.quantity || 0
+                render: (row) => (
+                    <>
+                        {row?.quantity == null ? (
+                            <span>∞</span>
+                        ) : (
+                            <span>{row?.quantity || 0}</span>
+                        )}
+                    </>
+                )
             },
             {
                 key: "validTill",
@@ -523,15 +563,35 @@ const Customers: React.FC = () => {
                 header: "Status",
                 render: (row) => (
                     <>
-                        {Number(row.quantity) == 0 ? (
+                        {row.status == 'redeemed' ? (
                             <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Redeemed</span>
                         ) : 
-                        row.date_expired < getCurrentDate() ?(
+                        row.status == 'expired' ?(
                             <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Expired</span>
-                        ):(
+                        ) :
+                        row.status == 'active' ?(
                             <span className="py-1 px-2 rounded-full bg-green-100 text-green-600">Active</span>
+                        ) : (
+                            <></>
                         )}
 
+                    </>
+
+                )
+            },
+            {
+                key: "redeem",
+                header: "Redeem",
+                align: "center",
+                render: (row) => (
+                    <>
+                        {row.status == 'active' ? (
+                            <button onClick={() => { setIs_alert_quantity(true), setSelected_id(row.id)}} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer rounded-lg">
+                                <CheckIcon size={20}/>
+                            </button>
+                        ) : (
+                            <span>-</span>
+                        )}
                     </>
 
                 )
@@ -590,7 +650,8 @@ const Customers: React.FC = () => {
         ]
 
     //#endregion
-    
+
+
     return (
         <>
             {/* Filter */}
@@ -627,7 +688,16 @@ const Customers: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_user}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        user.role == '' ||
+                                        user.name == '' ||
+                                        user.email == '' ||
+                                        user.phoneNo == '' ||
+                                        user.password == ''
+                                    )
+                                }
                             />
                         ) : (
 
@@ -635,7 +705,16 @@ const Customers: React.FC = () => {
                                 label="Update"
                                 className="w-24"
                                 onClick={handleUpdate_user}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        user.role == '' ||
+                                        user.name == '' ||
+                                        user.email == '' ||
+                                        user.phoneNo == '' ||
+                                        user.password == ''
+                                    )
+                                }
                             />
                         )}
 
@@ -694,14 +773,14 @@ const Customers: React.FC = () => {
                             <Button
                                 label="Save"
                                 className="w-24"
-                                onClick={handleUpdate_voucher}
+                                onClick={handleCreate_voucher}
                                 disabled={isLoading}
                             />
                         ) : (
                             <Button
                                 label="Update"
                                 className="w-24"
-                                onClick={handleUpdate_voucher}
+                                onClick={handleCreate_voucher}
                                 disabled={isLoading}
                             />
                         )}
@@ -817,15 +896,28 @@ const Customers: React.FC = () => {
 
             {/* Delete*/} {/* User */}
             <Alert
-                open={isAlert}
+                open={isAlert_user}
                 title="Delete this user?"
                 description="This action can't be undone."
                 isLoading={isLoading}
                 confirmLabel="Delete"
-                onCancel={() => setIs_alert(false)}
+                onCancel={() => setIs_alert_user(false)}
                 onConfirm={() => {
                     // do your action here
                     handleDelete_user()
+                }}
+            />
+            {/* Decrement*/} {/* Voucher */}
+            <Alert
+                open={isAlert_quantity}
+                title="Redeem this voucher?"
+                description="This action will set quantity to '0'."
+                isLoading={isLoading}
+                confirmLabel="Redeem"
+                onCancel={() => setIs_alert_quantity(false)}
+                onConfirm={() => {
+                    // do your action here
+                    handleUpdate_voucher()
                 }}
             />
         </>

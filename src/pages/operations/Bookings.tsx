@@ -34,6 +34,7 @@ const Bookings: React.FC = () => {
         // form
         const [form_booking, setForm_booking] = useState(false);
         const [form_log, setForm_log] = useState(false);
+        const [form_payment, setForm_payment] = useState(false);
         // fieldname
             // booking
             const [booking, setBooking] = useState<Booking_type>({
@@ -45,8 +46,9 @@ const Bookings: React.FC = () => {
                 time_start: '',
                 time_end: '',
                 booking_type: 'walkin',
-                status: 'pending',
+                status: 'booked',
                 payment: 'pending',
+                payment_type: 'card',
                 price_original: 0,
                 price_discount: 0,
                 price_final: 0,
@@ -122,8 +124,9 @@ const Bookings: React.FC = () => {
                     time_start: '',
                     time_end: '',
                     booking_type: 'prepaid',
-                    status: `${crud=='edit'? 'booked' : 'pending'}`,
+                    status: 'booked',
                     payment: 'pending',
+                    payment_type: 'card',
                     price_original: 0,
                     price_discount: 0,
                     price_final: 0,
@@ -228,6 +231,7 @@ const Bookings: React.FC = () => {
             }
 
         }, [booking.user_id])
+
         // set temporary user (shared)
         useEffect(() => {
             if(booking.user_shared_id) {
@@ -257,20 +261,18 @@ const Bookings: React.FC = () => {
 
                 // 1) calculate 'time_end'
                     const [hours, minutes] = booking.time_start.split(":").map(Number);
-                    // const totalMinutes = hours * 60 + minutes + temp_package.package.duration;
-                    
-                    let totalMinutes = 0
-                    if(temp_duration.extended)
-                        totalMinutes = (hours * 60 + minutes + temp_package.package.duration) + temp_duration.extended;
-                    else
-                        totalMinutes = hours * 60 + minutes + temp_package.package.duration;
+
+                    const duration = Number(temp_package.package.duration) || 0;
+                    const extended = Number(temp_duration.extended) || 0;
+
+                    const totalMinutes = (hours * 60) + minutes + duration + extended;
 
                     const time_end = `${String(Math.floor(totalMinutes / 60) % 24).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
-                    
-                    setBooking((prev)=> ({
+
+                    setBooking((prev) => ({
                         ...prev,
                         time_end: time_end
-                    }))
+                    }));
 
                 // 2) fetch all 'therapist_id' and 'room_id
                 let therapist_list = {};
@@ -479,7 +481,7 @@ const Bookings: React.FC = () => {
                     voucher_customer_price_id: Number(voucher_price_selectedId) || 'blank',
                     voucher_customer_duration_id: Number(voucher_duration_selectedId) || 'blank',
 
-                    role: 'customer'
+                    // role: 'customer'
                 })
 
                 setForm_booking(false)
@@ -550,6 +552,7 @@ const Bookings: React.FC = () => {
                     await api.put(`/booking/${selectedId}`, {
                         // set based on 'type'
                         payment: 'paid',
+                        payment_type: booking.payment_type,
                         switch: 'payment'
                     });
                 }
@@ -576,6 +579,7 @@ const Bookings: React.FC = () => {
 
                 fetchData_booking()
                 setForm_booking(false)
+                setForm_payment(false)
                 setIs_alert(false)
             }
             catch(error) {
@@ -617,7 +621,6 @@ const Bookings: React.FC = () => {
             api.get(`/package`, {
                 params: {
                     switch: 'package',
-                    extra: 'for_booking'
                 }
             })
             .then((response) => {
@@ -641,7 +644,7 @@ const Bookings: React.FC = () => {
             })
             .then((response) => {
                 // 1) normal
-                // console.log('data = ',response.data)
+                console.log('data = ',response.data)
                 setDatabase_service(response.data)
             })
             .catch((error) => {
@@ -659,7 +662,7 @@ const Bookings: React.FC = () => {
                 }
             })
             .then((response) => {
-                // console.log('data = ',response.data)
+                console.log('data = ',response.data)
                 setDatabase_booking(response.data)
             })
             .catch((error) => {
@@ -679,13 +682,6 @@ const Bookings: React.FC = () => {
 
         // tableTitle
         const tableTitle_booking: Column<any>[] = [
-            // {
-            //     key: "id",
-            //     header: "Booking ID",
-            //     render: (row) => (
-            //         <span className="text-sm text-title font-mono">{row.user.id}</span>
-            //     ),
-            // },
             {
                 key: "name",
                 header: "Customer",
@@ -718,7 +714,7 @@ const Bookings: React.FC = () => {
                 render: (row) => (
                 <div>
                     <div className="font-semibold text-black">{row.booking.date_start}</div>
-                    <span className="text-xs">{row.booking.time_start}</span>
+                    <span className="text-xs">{row.booking.time_start} : {row.booking.time_end}</span>
                 </div>
                 ),
             },
@@ -790,7 +786,8 @@ const Bookings: React.FC = () => {
                                         Pending
                                     </span>
 
-                                    <button onClick={() => {setIs_alert(true); setSelected_id(row.booking.id); setUpdated_type('Payment')}} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
+                                    {/* <button onClick={() => {setIs_alert(true); setSelected_id(row.booking.id); setUpdated_type('Payment')}} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer"> */}
+                                    <button onClick={() => {setForm_payment(true); setSelected_id(row.booking.id); setUpdated_type('Payment')}} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
                                         <CheckIcon size={20}/>
                                     </button>
                                 </div>
@@ -810,36 +807,40 @@ const Bookings: React.FC = () => {
                 header: "Treatment Time",
                 render: (row) => (
                     <>
-                        <div className="flex justify-center">
-                            <div className="flex items-center border border-border rounded-md overflow-hidden bg-white">
-                                {row.booking.recorded_time_end ? (
-                                    <>
-                                        <span className="px-4 py-1 text-sm font-medium border-r border-border">
-                                            {row.booking.recorded_time_start}
-                                        </span>
-                                        <span className="px-4 py-1 text-sm font-medium">
-                                            {row.booking.recorded_time_end}
-                                        </span>
-                                    </>
-                                ) : 
-                                row.booking.recorded_time_start ? (
-                                    <>
-                                        <span className="px-4 py-1 text-sm font-medium">
-                                            {row.booking.recorded_time_start}
-                                        </span>
-                                        <button onClick={() => {setIs_alert(true); setSelected_id(row.booking.id); setUpdated_type('End')}} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
-                                            End
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button onClick={() => {setIs_alert(true); setSelected_id(row.booking.id); setUpdated_type('Start')}} className="px-5 py-2 bg-secondary hover:opacity-80 active:scale-95 transition-all text-black text-sm font-semibold rounded-lg shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                                            Start
-                                        </button>
-                                    </>
-                                )}
+                        {row.booking.payment == 'pending' ? (
+                            <span className="py-1 px-2 rounded-full bg-red-100 text-red-600">Pending payment</span>
+                        ) : (
+                            <div className="flex justify-center">
+                                <div className="flex items-center border border-border rounded-md overflow-hidden bg-white">
+                                    {row.booking.recorded_time_end ? (
+                                        <>
+                                            <span className="px-4 py-1 text-sm font-medium border-r border-border">
+                                                {row.booking.recorded_time_start}
+                                            </span>
+                                            <span className="px-4 py-1 text-sm font-medium">
+                                                {row.booking.recorded_time_end}
+                                            </span>
+                                        </>
+                                    ) : 
+                                    row.booking.recorded_time_start ? (
+                                        <>
+                                            <span className="px-4 py-1 text-sm font-medium">
+                                                {row.booking.recorded_time_start}
+                                            </span>
+                                            <button onClick={() => {setIs_alert(true); setSelected_id(row.booking.id); setUpdated_type('End')}} className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
+                                                End
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => {setIs_alert(true); setSelected_id(row.booking.id); setUpdated_type('Start')}} className="px-5 py-2 bg-secondary hover:opacity-80 active:scale-95 transition-all text-black text-sm font-semibold rounded-lg shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                                Start
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </>
                 ),
             },
@@ -939,7 +940,21 @@ const Bookings: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_booking}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        ( !isWalkin && booking.user_id == 0 ) ||
+                                        ( isWalkin  && (userWalkin.name == '' || userWalkin.email == '' || userWalkin.phoneNo == '')) ||
+                                        ( (isShared && !isWalkin_shared) && booking.user_shared_id == 0 ) ||
+                                        ( (isShared && isWalkin_shared)  && (userWalkin_shared.name == '' || userWalkin_shared.email == '' || userWalkin_shared.phoneNo == '')) ||
+                                        ( temp_package.length == 0 ) ||
+                                        ( booking.date_start == '' ) ||
+                                        ( booking.time_start == '' ) ||
+                                        ( booking.time_end == '' ) ||
+                                        ( booking_selected.user_id == 0 ) ||
+                                        ( booking_selected.room_id == 0 )
+                                    )
+                                }
                             />
                         ) : (
 
@@ -947,7 +962,21 @@ const Bookings: React.FC = () => {
                                 label="Update"
                                 className="w-24"
                                 onClick={handleUpdate_booking}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        ( !isWalkin && booking.user_id == 0 ) ||
+                                        ( isWalkin  && (userWalkin.name == '' || userWalkin.email == '' || userWalkin.phoneNo == '')) ||
+                                        ( (isShared && !isWalkin_shared) && booking.user_shared_id == 0 ) ||
+                                        ( (isShared && isWalkin_shared)  && (userWalkin_shared.name == '' || userWalkin_shared.email == '' || userWalkin_shared.phoneNo == '')) ||
+                                        ( temp_package.length == 0 ) ||
+                                        ( booking.date_start == '' ) ||
+                                        ( booking.time_start == '' ) ||
+                                        ( booking.time_end == '' ) ||
+                                        ( booking_selected.user_id == 0 ) ||
+                                        ( booking_selected.room_id == 0 )
+                                    )
+                                }
                             />
                         )}
 
@@ -1456,10 +1485,43 @@ const Bookings: React.FC = () => {
                 <Table fieldName={tableTitle_log} data={log} loading={spinner} />
             </Form>
 
+            {/* Form */} {/*Payment*/}
+            <Form title='Make payment' isOpen={form_payment} onClose={() => setForm_payment(false)} width="max-w-md"
+                footer={
+                        <>
+                            <Button
+                                label="Cancel"
+                                className="w-24"
+                                onClick={() => setForm_booking(false)}
+                                disabled={isLoading}
+                            />
+                            <Button
+                                label="Save"
+                                className="w-24"
+                                onClick={handleUpdate_booking}
+                                disabled={isLoading}
+                            />
+                            
+                        </>
+                    }
+                >
+                    <Field
+                        label="Select Payment "
+                        value={booking.payment_type}
+                        onChange={(e) => setBooking({...booking, payment_type: e.target.value as 'cash' | 'card' | 'online'})}
+                        type="select"
+                        options={[
+                            { value: 'cash', label: 'Cash' },
+                            { value: 'card', label: 'Card' },
+                            { value: 'online', label: 'Online Payment' },
+                        ]}
+                    />
+            </Form>
+
             {/* Delete*/}
             <Alert
                 open={isAlert}
-                title={`${updatedType=='Payment'? 'Make Payment?' : `${updatedType} the Treatment?`} `}
+                title={`${updatedType} the Treatment? `}
                 description="This action can't be undone."
                 isLoading={isLoading}
                 confirmLabel="Confirm"

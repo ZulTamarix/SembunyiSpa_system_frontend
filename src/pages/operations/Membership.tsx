@@ -321,14 +321,30 @@ const Membership: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_membership}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    ( 
+                                        membership.tier == '' ||
+                                        membership.serial_code == '' ||
+                                        membership.duration == 0 ||
+                                        voucher.length == 0
+                                    )
+                                }
                             />
                         ) : (
                             <Button
                                 label="Update"
                                 className="w-24"
                                 onClick={handleCreate_membership}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    ( 
+                                        membership.tier == '' ||
+                                        membership.serial_code == '' ||
+                                        membership.duration == 0 ||
+                                        voucher.length == 0
+                                    )
+                                }
                             />
                         )}
 
@@ -394,16 +410,26 @@ const Membership: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleAdd_voucher}
-                                // onClick={() => setIndex(prev => prev+1)}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        voucher[index]?.code == '' ||
+                                        voucher[index]?.description == ''
+                                    )
+                                }
                             />
                         ) : (
                             <Button
                                 label="Update"
                                 className="w-24"
                                 onClick={handleAdd_voucher}
-                                // disabled={isLoading}
-                                disabled
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        voucher[index]?.code == '' ||
+                                        voucher[index]?.description == ''
+                                    )
+                                }
                             />
                         )}
 

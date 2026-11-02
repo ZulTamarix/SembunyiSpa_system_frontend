@@ -11,7 +11,6 @@ import Label from "../../components/ui/Label";
 import type { User_type } from "../../interface/user";
 import Table, { type Column } from "../../components/ui/Table";
 import Tabs from "../../components/ui/Tab";
-import TextEditor from "../../components/ui/TextEditor";
 import Alert from "../../components/ui/Alert";
 
 // #region 0) a) --> Multi select
@@ -229,8 +228,6 @@ const Packages: React.FC = () => {
         const [crud, setCrud] = useState<'create'|'edit'>('create')
         // loading
         const [isLoading, setIsLoading] = useState(false);
-        // textEditor
-        // const [content, setContent] = useState("");
         // loading state
         const [spinner, setSpinner] = useState(false)
 
@@ -295,20 +292,19 @@ const Packages: React.FC = () => {
                 description: '',
                 duration: 0,
                 price: 0,
-                gender: '',
+                gender: 'single',
                 detail: '',
                 type: active=='package'? 'package' : 'service',
                 package_category_id: 0,
-                is_standalone: false
+                is_standalone: true
             })
             // preview poster
             const [posterPreview, setPosterPreview] = useState<string | null>(null);
             // form
             const [form_package, setForm_package] = useState(false);
             // selected id
-            // const [selectedId, setSelected_id] = useState(0);
-            const [, setSelected_id] = useState(0);
-            const [isAlert, setIs_alert] = useState(false);
+            const [selectedId, setSelected_id] = useState(0);
+            // const [isAlert_package, setIs_alert_package] = useState(false);
 
             const [selectedTherapist, setSelected_therapist] = useState<number[]>([]);
             const [selectedRoom, setSelected_room] = useState<number[]>([]);
@@ -327,11 +323,11 @@ const Packages: React.FC = () => {
                         description: '',
                         duration: 0,
                         price: 0,
-                        gender: '',
+                        gender: 'single',
                         detail: '',
                         type: active=='package'? 'package' : 'service',
                         package_category_id: databaseCategory[0]?.id,
-                        is_standalone: false
+                        is_standalone: true
                     })
                 }
                 setPosterPreview(null)
@@ -354,7 +350,7 @@ const Packages: React.FC = () => {
                 else if(active == 'service') { 
                     setPackages ((prev) => ({
                         ...prev,
-                        is_standalone: false,
+                        is_standalone: true,
                         type: 'service'
                     }))
                 }
@@ -388,11 +384,8 @@ const Packages: React.FC = () => {
             // CREATE service
             const handleCreate_package = async () => {
 
-                // console.log('data = ',packages)
-                // console.log('therapist = ',selectedTherapist)
-                // console.log('room = ',selectedRoom)
-                // console.log('service = ',selectedService)
-
+                console.log('detail = ',packages.detail)
+                console.log('description = ',packages.description)
                 // loading
                 setIsLoading(true)
 
@@ -477,7 +470,7 @@ const Packages: React.FC = () => {
 
                 //     fetchData_package()
                 //     setForm_package(false)
-                //     setIs_alert(false)
+                //     setIs_alert_category(false)
                 // }
                 // catch(error) {
                 //     console.error('Error:', error); // use only to remove warning on vscode
@@ -520,7 +513,7 @@ const Packages: React.FC = () => {
                 })
                 .then((response) => {
                     // 1) normal
-                    console.log('dara = ',response.data)
+                    console.log('data = ',response.data)
                     setDatabase_service(response.data)
                 })
                 .catch((error) => {
@@ -536,6 +529,7 @@ const Packages: React.FC = () => {
     //#region 3 --> setting
 
         // #region a) --> category
+        
             // #region 1) --> useState
                 // form
                 const [form_category, setForm_category] = useState(false);
@@ -544,11 +538,13 @@ const Packages: React.FC = () => {
                     id: 0,
                     name: ''
                 });
+                const [isAlert_category, setIs_alert_category] = useState(false);
             //#endregion
 
             // #region 2) --> method
+
                 // CREATE
-                const handleCreate_category= async() => {
+                const handleCreate_category = async() => {
 
                     // loading
                     setIsLoading(true)
@@ -570,6 +566,63 @@ const Packages: React.FC = () => {
                         setIsLoading(false)
                     }
                 }
+                // EDIT
+                const handleEdit_category = (data: Package_category_type) => {
+                    setCategory(data)
+    
+                    setForm_category(true)
+                    setCrud('edit')
+                }
+                // UPDATE
+                const handleUpdate_category = async() => {
+                    
+                    // loading
+                    setIsLoading(true)
+                    
+                    // UPDATE data
+                    try {
+                        await api.put(`/package/${category.id}`, {
+                            name: category.name,
+
+                            switch: 'category'
+                        });
+
+                        fetchData_category()
+                        setForm_category(false)
+                    }
+                    catch(error) {
+                        console.error('Error:', error); // use only to remove warning on vscode
+                        // console.error('Response status:', error.response?.data);
+                    }
+                    finally {
+                        setIsLoading(false)
+                    }
+                }
+                // DELETE
+                const handleDelete_category = async () => {
+                    
+                    setIsLoading(true)
+
+                    // DELETE data
+                    try {
+                        await  api.delete(`/package/${selectedId}`, {
+                            params: {
+                                switch: 'category'
+                            }
+                        })
+
+                        fetchData_category()
+                        setIs_alert_category(false)
+                    }
+                    catch(error) {
+                        console.error('Error:', error); // use only to remove warning on vscode
+                        // console.error('Response status:', error.response?.data);
+                    }
+                    finally {
+                        setIsLoading(false)
+                    }
+                }
+
             //#endregion
 
             // #region 3) --> database
@@ -604,6 +657,15 @@ const Packages: React.FC = () => {
                         setSpinner(false)
                     })
                 }, []);
+                // remove fieldname everytime form closed
+                useEffect(() => {
+                    if(!form_category) {
+                        setCategory({
+                            id: 0,
+                            name: ''
+                        })
+                    }
+                }, [form_category])
                 
                 // tableTitle_category
                 const tableTitle_category: Column<Package_category_type>[] = [
@@ -615,28 +677,19 @@ const Packages: React.FC = () => {
                     {
                         key: "",
                         header: "Action",
-                        render: () => (
+                        render: (row) => (
                             <div className="flex gap-3">
-                                <button className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                                <button onClick={() => handleEdit_category(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
                                     Edit
                                 </button>
                                 
-                                <button className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                                <button onClick={() => {setIs_alert_category(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                                     Delete
                                 </button>
                             </div>
                         )
                     },
                 ];
-                // remove fieldname everytime form closed
-                useEffect(() => {
-                    if(!form_category) {
-                        setCategory({
-                            id: 0,
-                            name: ''
-                        })
-                    }
-                }, [form_category])
             //#endregion
 
         //#endregion
@@ -647,43 +700,32 @@ const Packages: React.FC = () => {
                 // form
                 const [form_room, setForm_room] = useState(false);
                 // fieldname
-                const [room, setRoom] = useState("");
-                const [description, setDescription] = useState("");
+                // const [room, setRoom] = useState("");
+                // const [description, setDescription] = useState("");
+                const [room, setRoom] = useState<Room_type>({
+                    id: 0,
+                    name: '',
+                    description: ''
+                })
                 // database
                 const [databaseRoom, setDatabase_room] = useState<Room_type[]>([])
                 // for detecting error
                 const [errorRoom, setError_room] = useState<Partial<Record<keyof Room_type, string>>>({});
+                // delete
+                const [isAlert_room, setIs_alert_room] = useState(false);
             //#endregion
 
             // #region 2) --> method
                 // edit
-                const editRoom = (item: Room_type) => {
-                    setRoom(item.name)
-                    setDescription(item.description)
-                    
-                    setCrud('edit')
-                    setForm_room(true)
-                }
                 // CREATE
                 const handleCreate_room = async() => {
-                    // check error
-                    const newError_room: Partial<Record<keyof Room_type, string>> = {};
-                    if (!room.trim()) 
-                        newError_room.name = "Role is required";
-                    if (!description.trim()) 
-                        newError_room.description = "Name is required";
-                    setError_room(newError_room);
-
-                    // Stop here if there are errorRoom
-                    if (Object.keys(newError_room).length > 0) 
-                        return;
 
                     // loading
                     setIsLoading(true)
                     try {
                         await api.post(`/room`, {
-                            name: room,
-                            description: description
+                            name: room.name,
+                            description: room.description
                         });
 
                         fetchData_room()
@@ -692,6 +734,57 @@ const Packages: React.FC = () => {
                     catch(error) {
                         console.error('Error:', error); // use only to remove warning on vscode
                         // console.error('Response status:', error.response?.message);
+                    }
+                    finally {
+                        setIsLoading(false)
+                    }
+                }
+                // EDIT
+                const handleEdit_room = (item: Room_type) => {
+                    setRoom(item)
+                    
+                    setCrud('edit')
+                    setForm_room(true)
+                }
+                // UPDATE
+                const handleUpdate_room = async() => {
+                    
+                    // loading
+                    setIsLoading(true)
+                    
+                    // UPDATE data
+                    try {
+                        await api.put(`/room/${room.id}`, {
+                            name: room.name,
+                            description: room.description
+                        });
+
+                        fetchData_room()
+                        setForm_room(false)
+                    }
+                    catch(error) {
+                        console.error('Error:', error); // use only to remove warning on vscode
+                        // console.error('Response status:', error.response?.data);
+                    }
+                    finally {
+                        setIsLoading(false)
+                    }
+                }
+                // DELETE
+                const handleDelete_room = async () => {
+                    
+                    setIsLoading(true)
+
+                    // DELETE data
+                    try {
+                        await  api.delete(`/room/${selectedId}`)
+
+                        fetchData_room()
+                        setIs_alert_room(false)
+                    }
+                    catch(error) {
+                        console.error('Error:', error); // use only to remove warning on vscode
+                        // console.error('Response status:', error.response?.data);
                     }
                     finally {
                         setIsLoading(false)
@@ -707,13 +800,13 @@ const Packages: React.FC = () => {
                     {
                         key: "",
                         header: "Action",
-                        render: (item) => (
+                        render: (row) => (
                             <div className="flex gap-3">
-                                <button onClick={() => editRoom(item)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                                <button onClick={() => handleEdit_room(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
                                     Edit
                                 </button>
                                 
-                                <button className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
+                                <button onClick={() => {setIs_alert_room(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                                     Delete
                                 </button>
                             </div>
@@ -741,8 +834,11 @@ const Packages: React.FC = () => {
                 // remove fieldname everytime form closed
                 useEffect(() => {
                     if(!form_room) {
-                        setRoom('')
-                        setDescription('')
+                        setRoom({
+                            id: 0,
+                            name: '',
+                            description: ''
+                        })
                         setError_room({})
                     }
                 }, [form_room])
@@ -784,7 +880,7 @@ const Packages: React.FC = () => {
                                 duration={data.package.duration}
                                 category={data.package_category.name}
                                 onEdit={() => handleEdit_package(data)}
-                                onDelete={() => {setIs_alert(true), setSelected_id(data?.package.id|| 0)}}
+                                onDelete={() => {setIs_alert_category(true), setSelected_id(data?.package.id|| 0)}}
                             />
                         ))}
                     </Grid>
@@ -812,7 +908,7 @@ const Packages: React.FC = () => {
                                 duration={data.package.duration}
                                 category={data.package_category.name}
                                 onEdit={() => handleEdit_package(data)}
-                                onDelete={() => {setIs_alert(true), setSelected_id(data?.package.id|| 0)}}
+                                onDelete={() => {setIs_alert_category(true), setSelected_id(data?.package.id|| 0)}}
                             />
                         ))}
                     </Grid>
@@ -820,12 +916,12 @@ const Packages: React.FC = () => {
                     
                     {/* Delete service */}
                     <Alert
-                        open={isAlert}
+                        open={isAlert_category}
                         title="Delete this service?"
                         description="This action can't be undone."
                         isLoading={isLoading}
                         confirmLabel="Delete"
-                        onCancel={() => setIs_alert(false)}
+                        onCancel={() => setIs_alert_category(false)}
                         onConfirm={() => {
                             // do your action here
                             handleDelete_package()
@@ -837,7 +933,6 @@ const Packages: React.FC = () => {
             {/* #region 3 --> setting */}
             {active == 'setting' && (
                 <>
-
                     {/* a) category */}
                     <>
                         {/* Create */}
@@ -868,15 +963,25 @@ const Packages: React.FC = () => {
                                             label="Save"
                                             className="w-24"
                                             onClick={handleCreate_category}
-                                            disabled={isLoading}
+                                            disabled={
+                                                isLoading ||
+                                                (
+                                                    category.name == ''
+                                                )
+                                            }
                                         />
                                     ) : (
 
                                         <Button
                                             label="Update"
                                             className="w-24"
-                                            onClick={handleCreate_category}
-                                            disabled={isLoading}
+                                            onClick={handleUpdate_category}
+                                            disabled={
+                                                isLoading ||
+                                                (
+                                                    category.name == ''
+                                                )
+                                            }
                                         />
                                     )}
 
@@ -892,7 +997,20 @@ const Packages: React.FC = () => {
                                 />
                             </div>
                         </Form>
-                        
+            
+                        {/* Delete category */}
+                        <Alert
+                            open={isAlert_category}
+                            title="Delete this category?"
+                            description="This action can't be undone."
+                            isLoading={isLoading}
+                            confirmLabel="Delete"
+                            onCancel={() => setIs_alert_category(false)}
+                            onConfirm={() => {
+                                // do your action here
+                                handleDelete_category()
+                            }}
+                        />
                     </>
                     {/* b) room */}
                     <>
@@ -924,15 +1042,27 @@ const Packages: React.FC = () => {
                                             label="Save"
                                             className="w-24"
                                             onClick={handleCreate_room}
-                                            disabled={isLoading}
+                                            disabled={
+                                                isLoading ||
+                                                (
+                                                    room.name == '' ||
+                                                    room.description == ''
+                                                )
+                                            }
                                         />
                                     ) : (
 
                                         <Button
                                             label="Update"
                                             className="w-24"
-                                            onClick={handleCreate_room}
-                                            disabled={isLoading}
+                                            onClick={handleUpdate_room}
+                                            disabled={
+                                                isLoading ||
+                                                (
+                                                    room.name == '' ||
+                                                    room.description == ''
+                                                )
+                                            }
                                         />
                                     )}
 
@@ -943,20 +1073,34 @@ const Packages: React.FC = () => {
                                 <Field
                                     label="Room"
                                     placeholder="Enter room name"
-                                    value={room}
+                                    value={room.name}
                                     error={errorRoom.name}
-                                    onChange={(e) => setRoom(e.target.value)}
+                                    onChange={(e) => setRoom({...room, name: e.target.value})}
                                 />
 
                                 <Field
                                     label="Description"
                                     placeholder="Single room / Couple room / ...."
-                                    value={description}
+                                    value={room.description}
                                     error={errorRoom.description}
-                                    onChange={(e) => setDescription(e.target.value)}
+                                    onChange={(e) => setRoom({...room, description: e.target.value})}
                                 />
                             </div>
                         </Form>
+            
+                        {/* Delete room*/}
+                        <Alert
+                            open={isAlert_room}
+                            title="Delete this room?"
+                            description="This action can't be undone."
+                            isLoading={isLoading}
+                            confirmLabel="Delete"
+                            onCancel={() => setIs_alert_room(false)}
+                            onConfirm={() => {
+                                // do your action here
+                                handleDelete_room()
+                            }}
+                        />
                     </>
                 </>
             )}
@@ -978,7 +1122,19 @@ const Packages: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_package}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        packages.poster == null ||
+                                        packages.title == '' ||
+                                        packages.price == 0 ||
+                                        packages.duration == 0 ||
+                                        packages.description == '' ||
+                                        packages.detail == '' ||
+                                        ( active == 'package' && selectedService.length == 0) ||
+                                        ( active == 'service' && (selectedTherapist.length == 0 || selectedRoom.length == 0)) 
+                                    )
+                                }
                             />
                         ) : (
                             <Button
@@ -1123,44 +1279,43 @@ const Packages: React.FC = () => {
                                 ]}
                             />
                         )}
-                        {/* 7) */}
-                        {/* <div className="cols-span-2">
-                            <Field
-                                label="Description"
-                                placeholder="Enter a description"
-                                value={packages.description}
-                                onChange={(e) =>
-                                    setPackages({
-                                        ...packages,
-                                        description: e.target.value,
-                                    })
-                                }
-                                type="textarea"
-                            />
-                        </div> */}
                         
+                        {/* 8) Description */}
                         <div className="col-span-2">
-                            <span className="text-sm text-title font-medium block mb-1.5">Enter a description</span>
-                            <TextEditor
+                            {/* <span className="text-sm text-title font-medium block mb-1.5">Enter a description</span> */}
+                            {/* <TextEditor
                                 value={packages.description}
                                 onChange={(value) => setPackages({
                                     ...packages,
                                     description: value
                                 })}
+                            /> */}
+                            <Field
+                                label="Enter a description"
+                                placeholder="Click ENTER for 'bullet point' style"
+                                // value={packages.description}
+                                value={`${crud=='create'? packages.description : Array.isArray(packages.description) ? packages.description.join('\n') : packages.description}`}
+                                onChange={(e) => setPackages({ ...packages, description: e.target.value })}
+                                type="textarea"
                             />
                         </div>
 
-                        
-
                         {/* 9) Details / What to expect */}
                         <div className="col-span-2">
-                            <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
+                            {/* <span className="text-sm text-title font-medium block mb-1.5">What To Expect</span>
                             <TextEditor
                                 value={packages.detail}
                                 onChange={(value) => setPackages({
                                     ...packages,
                                     detail: value
                                 })}
+                            /> */}
+                            <Field
+                                label="What To Expect"
+                                placeholder="Click ENTER for 'bullet point' style"
+                                value={`${crud=='create'? packages.detail : Array.isArray(packages.detail) ? packages.detail.join('\n') : packages.detail}`}
+                                onChange={(e) => setPackages({ ...packages, detail: e.target.value })}
+                                type="textarea"
                             />
                         </div>
 

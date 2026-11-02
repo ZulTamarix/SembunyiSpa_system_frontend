@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { EyeIcon, Plus } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Grid from "../../components/ui/Grid";
 import { useCallback, useEffect, useState } from "react";
@@ -27,7 +27,8 @@ const Notifications: React.FC = () => {
         // loading
         const [isLoading, setIsLoading] = useState(false);
         // selected id
-        const [selectedId, setSelected_id] = useState(0);
+        // const [selectedId, setSelected_id] = useState(0);
+        const [selectedId, ] = useState(0);
         // a) detect error -> common
         const [isAlert, setIs_alert] = useState(false);
         // form
@@ -98,30 +99,30 @@ const Notifications: React.FC = () => {
         }
 
         // UPDATE notification
-        const handleUpdate_notification = async () => {
+        // const handleUpdate_notification = async () => {
 
-            // loading
-            setIsLoading(true)
+        //     // loading
+        //     setIsLoading(true)
 
-            // UPDATE data
-            try {
-                await api.put(`/notification/${notification.id}`, {
-                    role: notification.role,
-                    title: notification.title,
-                    description: notification.description
-                });
+        //     // UPDATE data
+        //     try {
+        //         await api.put(`/notification/${notification.id}`, {
+        //             role: notification.role,
+        //             title: notification.title,
+        //             description: notification.description
+        //         });
 
-                fetchData_notification()
-                setForm_notification(false)
-            }
-            catch(error) {
-                console.error('Error:', error); // use only to remove warning on vscode
-                // console.error('Response status:', error.response?.data);
-            }
-            finally {
-                setIsLoading(false)
-            }
-        }
+        //         fetchData_notification()
+        //         setForm_notification(false)
+        //     }
+        //     catch(error) {
+        //         console.error('Error:', error); // use only to remove warning on vscode
+        //         // console.error('Response status:', error.response?.data);
+        //     }
+        //     finally {
+        //         setIsLoading(false)
+        //     }
+        // }
 
         // DELETE notification
         const handleDelete_notification = async () => {
@@ -148,14 +149,61 @@ const Notifications: React.FC = () => {
     //#endregion
 
     
-    // #region 4) --> database
+    //#region 4) --> database
+
+        // notification
+        const [databaseNotification, setDatabase_notification] = useState<Notification_type[]>([])
+        const fetchData_notification = useCallback(() => {
+
+            // loading
+            setSpinner(true)
+
+            api.get(`/notification`)
+            .then((response) => {
+                console.log('data = ',response.data)
+                setDatabase_notification(response.data)
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            })
+            .finally(()=> {
+                setSpinner(false)
+            })
+        }, [])
+
+        useEffect(() => {
+            fetchData_notification()
+        }, [])
+
+        
         // tableTitle
         const tableTitle: Column<Notification_type>[] = [
+            {
+                key: "date",
+                header: "Date",
+                render: (row) => (
+                    <span className="text-sm text-title font-mono">
+                        {new Date(row?.created_at ?? 0).toLocaleDateString('en-CA')}
+                    </span>
+                ),
+            },
             {
                 key: "role",
                 header: "Role",
                 render: (row) => (
-                    <span>{row.role}</span>
+                    // <span>{row.user?.role}</span>
+                    
+                    <>
+                        {row.user?.role == 'customer' ? (
+                            <span className="py-1 px-2 rounded-full bg-cyan-100 text-cyan-500">Customer</span>
+                        ) : 
+                        row.user?.role == 'therapist' ? (
+                            <span className="py-1 px-2 rounded-full bg-purple-100 text-purple-600">Therapist</span>
+                        ) : 
+                        (
+                            <span>-</span>
+                        )} 
+                    </>
                 ),
             },
             {
@@ -171,40 +219,19 @@ const Notifications: React.FC = () => {
                 render: (row) => (
                     <div className="flex gap-3">
                         <button onClick={() => handleEdit_notification(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
-                            Edit
+                           <EyeIcon size={18}/>
                         </button>
                         
+                        {/* <button onClick={() => handleEdit_notification(row)} className="border border-border p-1 px-2 text-black text-sm rounded-md cursor-pointer">
+                            Edit
+                        </button>
                         <button onClick={() => {setIs_alert(true), setSelected_id(row?.id|| 0)}} className="border border-danger p-1 px-2 text-danger text-sm rounded-md cursor-pointer">
                             Delete
-                        </button>
+                        </button> */}
                     </div>
                 )
             },
         ];
-
-        // b) notification
-        const [databaseNotification, setDatabase_notification] = useState<Notification_type[]>([])
-        const fetchData_notification = useCallback(() => {
-
-            // loading
-            setSpinner(true)
-
-            api.get(`/notification`)
-            .then((response) => {
-                // console.log('data = ',response.data)
-                setDatabase_notification(response.data)
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            })
-            .finally(()=> {
-                setSpinner(false)
-            })
-        }, [])
-
-        useEffect(() => {
-            fetchData_notification()
-        }, [])
     //#endregion
     
 
@@ -249,31 +276,40 @@ const Notifications: React.FC = () => {
             </Grid>
 
             {/* Form */}
-            <Form title={crud=='create'? 'Add Notification':'Edit Notification'} isOpen={form_notification} onClose={() => setForm_notification(false)} width="max-w-2xl"
-                
+            <Form title={crud=='create'? 'Add Notification':'View Notification'} isOpen={form_notification} onClose={() => setForm_notification(false)} width="max-w-2xl"
                 footer={
                     <>
-                        <Button
-                            label="Cancel"
-                            className="w-24"
-                            onClick={() => setForm_notification(false)}
-                            disabled={isLoading}
-                        />
 
                         {crud == 'create' ? (
-                            <Button
-                                label="Save"
-                                className="w-24"
-                                onClick={handleCreate_notification}
-                                disabled={isLoading}
-                            />
+                            <>
+                                <Button
+                                    label="Cancel"
+                                    className="w-24"
+                                    onClick={() => setForm_notification(false)}
+                                    disabled={isLoading}
+                                />
+                                <Button
+                                    label="Save"
+                                    className="w-24"
+                                    onClick={handleCreate_notification}
+                                    disabled={
+                                        isLoading ||
+                                        (
+                                            notification.title == '' ||
+                                            notification.description == ''
+                                        )
+                                    }
+                                />
+                            </>
                         ) : (
-                            <Button
-                                label="Update"
-                                className="w-24"
-                                onClick={handleUpdate_notification}
-                                disabled={isLoading}
-                            />
+                            // <Button
+                            //     label="Update"
+                            //     className="w-24"
+                            //     onClick={handleUpdate_notification}
+                            //     disabled={isLoading}
+                            // />
+                            <>
+                            </>
                         )}
 
                     </>
@@ -284,7 +320,7 @@ const Notifications: React.FC = () => {
 
                         {/* 1) */}
                         <Field
-                            label="Choose group"
+                            label={`${crud == 'create' ? 'Choose group' : 'Group'}`}
                             value={notification.role}
                             onChange={(e) => setNotification({...notification, role: e.target.value as 'therapist' | 'customer'})}
                             type="select"
@@ -292,8 +328,7 @@ const Notifications: React.FC = () => {
                                 { label: 'Customer', value: 'customer' },
                                 { label: 'Therapist', value: 'therapist' },
                             ]}
-                            disabled={crud == 'edit'}
-                            
+                            disabled={crud=='edit'}
                         />
                         {/* 2) */}
                         <Field
@@ -301,6 +336,7 @@ const Notifications: React.FC = () => {
                             placeholder="Enter title for the description"
                             value={notification.title}
                             onChange={(e) => setNotification({...notification, title: e.target.value})}
+                            disabled={crud=='edit'}
                         />
                         {/* 3) */}
                         <div className="col-span-2">
@@ -310,6 +346,7 @@ const Notifications: React.FC = () => {
                                 value={notification.description}
                                 onChange={(e) => setNotification({...notification, description: e.target.value})}
                                 type="textarea"
+                                disabled={crud=='edit'}
                             />
                         </div>
                     </Grid>

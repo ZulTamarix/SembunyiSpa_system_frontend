@@ -76,7 +76,7 @@ export default function LoginPage() {
                     />
 
                     <div className="mt-5">
-                        <Button disabled={isLoading} label="Sign in"></Button>
+                        <Button disabled={isLoading || (user.email=='' || user.password=='')} label="Sign in"></Button>
                     </div>
                 </form>
             </div>

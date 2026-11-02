@@ -299,7 +299,17 @@ const User: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_user}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        user.role == '' ||
+                                        user.name == '' ||
+                                        user.email == '' ||
+                                        user.phoneNo == '' ||
+                                        user.password == '' ||
+                                        user.role == 'therapist' && (user.specialty == '' || user.code == '')
+                                    )
+                                }
                             />
                         ) : (
 
@@ -307,7 +317,17 @@ const User: React.FC = () => {
                                 label="Update"
                                 className="w-24"
                                 onClick={handleUpdate_user}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        user.role == '' ||
+                                        user.name == '' ||
+                                        user.email == '' ||
+                                        user.phoneNo == '' ||
+                                        user.password == '' ||
+                                        user.role == 'therapist' && (user.specialty == '' || user.code == '')
+                                    )
+                                }
                             />
                         )}
 

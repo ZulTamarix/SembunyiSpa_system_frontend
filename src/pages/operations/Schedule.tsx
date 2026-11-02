@@ -7,10 +7,10 @@ import type { Schedule_therapist_json } from "../../interface/user";
 import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
 
 // #region 0) a) --> logic (chatGPT)
-    const HOUR_WIDTH = 84; // px per hour
+    // const HOUR_WIDTH = 84; // px per hour
     // const LANE_HEIGHT = 64; // px per overlapping lane
-    const LANE_HEIGHT = 80; // px per overlapping lane
-    const COL_WIDTH = 160; // px
+    // const LANE_HEIGHT = 80; // px per overlapping lane
+    // const COL_WIDTH = 160; // px
 
     const pad = (n:any) => String(n).padStart(2, "0");
 
@@ -99,7 +99,7 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                             style={{ top: i * HOUR_HEIGHT }}
                         />
                         <div
-                            className="absolute left-0 right-0 border-t border-dashed border-slate-200"
+                            className="absolute left-0 right-0 border-t border-dashed border-amber-200"
                             style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2 }}
                         />
                     </div>
@@ -284,7 +284,7 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                             const data = type === "therapist" ? row.therapist : row.room;
                                             const laneCount = Math.max(row.laneCount, 1);
                                             const colMinWidth = Math.max(MIN_COL_WIDTH, row.laneCount * LANE_MIN_WIDTH);
-    
+
                                             return (
                                                 <div
                                                     key={data.user?.id ?? data.id}
@@ -292,23 +292,26 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                                     style={{ flex: `1 0 ${colMinWidth}px`, minWidth: colMinWidth }}
                                                 >
                                                     <GridLines hours={hours} />
-    
+
                                                     {/* bookings */}
                                                     {row.placed.map((booking: any) => {
                                                         const s = Math.max(toHours(booking.booking.time_start), startHour);
                                                         const e = Math.min(toHours(booking.booking.time_end), endHour);
-    
+
                                                         if (e <= s) return null;
-    
+
                                                         return (
                                                             <button
                                                                 key={booking.id}
                                                                 title={`${fmtTime(booking.time_start)} - ${fmtTime(booking.time_end)}`}
-                                                                className={`${colorMap[booking.package?.title] ?? DEFAULT_COLOR} absolute flex cursor-pointer flex-col items-start justify-start gap-1 overflow-hidden rounded-md px-2 py-1.5 text-left text-xs leading-tight shadow-md ring-1 ring-black/10 transition hover:-translate-y-px hover:shadow-lg`}
+                                                                className={`${colorMap[
+                                                                    booking.booking?.package_id == null
+                                                                        ? booking.package?.title
+                                                                        : booking.booking?.package?.title
+                                                                ] ?? DEFAULT_COLOR} absolute flex cursor-pointer flex-col items-start justify-start gap-1 overflow-hidden rounded-md px-2 py-1.5 text-left text-xs leading-tight shadow-md ring-1 ring-black/10 transition hover:-translate-y-px hover:shadow-lg`}
                                                                 style={{
                                                                     top: (s - startHour) * HOUR_HEIGHT + 1,
                                                                     height: (e - s) * HOUR_HEIGHT - 2,
-                                                                    // lanes sit side by side, sharing the column width
                                                                     left: `calc(${(booking.lane / laneCount) * 100}% + 2px)`,
                                                                     width: `calc(${100 / laneCount}% - 4px)`,
                                                                 }}
@@ -316,11 +319,15 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                                                 <span className="rounded bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
                                                                     {fmtTime(booking.time_start)} - {fmtTime(booking.time_end)}
                                                                 </span>
-    
+
                                                                 <span className="text-[13px] font-bold">
-                                                                    - {booking.package?.title}
+                                                                    - {
+                                                                        booking.booking?.package_id == null
+                                                                            ? booking.package?.title
+                                                                            : booking.booking?.package?.title
+                                                                    }
                                                                 </span>
-    
+
                                                                 <span className="text-[12px] font-semibold">
                                                                     - {booking.booking?.user?.name}
                                                                 </span>
@@ -400,7 +407,7 @@ const Schedule: React.FC = () => {
                     }
                 })
                 .then((response) => {
-                    // console.log('data = ',response.data)
+                    console.log('data = ',response.data)
                     setDatabase_therapist(response.data)
                 })
                 .catch((error) => {
@@ -410,11 +417,8 @@ const Schedule: React.FC = () => {
                     setSpinner(false)
                 })
             }, [date]);
-            useEffect(() => {
-                fetchData_therapist();
-            }, [fetchData_therapist]);
 
-        // b) fetch 'troom'
+        // b) fetch 'room'
             const [databaseRoom, setDatabase_room] = useState<any []>([])
             const fetchData_room = useCallback(() => {
             
@@ -440,8 +444,13 @@ const Schedule: React.FC = () => {
             }, [date]);
 
             useEffect(() => {
-                fetchData_room()
-            }, [fetchData_room])
+                
+                if(active == 'therapist')
+                    fetchData_therapist()
+                else if(active == 'room')
+                    fetchData_room()
+
+            }, [fetchData_room,fetchData_therapist, active])
 
     //#endregion
 
@@ -460,7 +469,7 @@ const Schedule: React.FC = () => {
                 []
             );
 
-            const timelineWidth = hours.length * HOUR_WIDTH;
+            // const timelineWidth = hours.length * HOUR_WIDTH;
 
             const goTo = (iso:any) => {
                 if (!iso) return;
@@ -490,11 +499,6 @@ const Schedule: React.FC = () => {
                 isToday && nowHour >= startHour && nowHour <= endHour;
 
             const { weekday, full } = prettyDate(date);
-            // const todayISO = toISO(now);
-
-            // const handleClick = (a:any) => {
-            //     console.log('a = ',a)        
-            // };
         //#endregion
 
 
@@ -507,6 +511,10 @@ const Schedule: React.FC = () => {
                         .map((item) => ({
                             ...item,
                             ...item.booking,
+
+                            // Use booking_selected first, booking as fallback
+                            package_id: item.package_id ?? item.booking?.package_id,
+                            package: (item as any).package ?? (item.booking as any)?.package,
                         }));
 
                     const { placed, laneCount } = assignLanes(dayItems);
@@ -528,7 +536,11 @@ const Schedule: React.FC = () => {
                 () =>
                     buildColorMap(
                         therapistRows.flatMap((row) =>
-                            row.placed.map((booking) => booking.package?.title)
+                            row.placed.map((booking) =>
+                                booking.booking?.package_id == null
+                                    ? booking.package?.title
+                                    : booking.booking?.package?.title
+                            )
                         )
                     ),
                 [therapistRows]
@@ -541,10 +553,14 @@ const Schedule: React.FC = () => {
             const roomRows = useMemo(() => {
                 return databaseRoom.map((room) => {
                     const dayItems = room.booking_selected
-                        .filter((item:any) => item.booking?.date_start === date)
-                        .map((item:any) => ({
+                        .filter((item: any) => item.booking?.date_start === date)
+                        .map((item: any) => ({
                             ...item,
                             ...item.booking,
+
+                            // Use booking_selected first, booking as fallback
+                            package_id: item.package_id ?? item.booking?.package_id,
+                            package: item.package ?? item.booking?.package,
                         }));
 
                     const { placed, laneCount } = assignLanes(dayItems);
@@ -566,7 +582,11 @@ const Schedule: React.FC = () => {
                 () =>
                     buildColorMap(
                         roomRows.flatMap((row) =>
-                            row.placed.map((booking) => booking.package?.title)
+                            row.placed.map((booking) =>
+                                booking.booking?.package_id == null
+                                    ? booking.package?.title
+                                    : booking.booking?.package?.title
+                            )
                         )
                     ),
                 [roomRows]
@@ -593,7 +613,7 @@ const Schedule: React.FC = () => {
                     fullDate={full}
                     dayName={weekday}
                     date={date}
-                    timelineWidth={timelineWidth}
+                    // timelineWidth={timelineWidth}
                     hours={hours}
                     startHour={startHour}
                     endHour={endHour}
@@ -614,7 +634,7 @@ const Schedule: React.FC = () => {
                     fullDate={full}
                     dayName={weekday}
                     date={date}
-                    timelineWidth={timelineWidth}
+                    // timelineWidth={timelineWidth}
                     hours={hours}
                     startHour={startHour}
                     endHour={endHour}

@@ -8,7 +8,6 @@ import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
 import { getCurrentDate } from "../../utils/date";
 import api from "../../api/axios";
-import type { User_type } from "../../interface/user";
 import type { Voucher_type } from "../../interface/vouchers";
 import Alert from "../../components/ui/Alert";
 
@@ -49,7 +48,7 @@ const Membership: React.FC = () => {
     
     //#region 2) --> method
 
-        // edit user
+        // edit voucher
         const handleEdit_voucher = (data: Voucher_type) => {
             setVoucher(data)
 
@@ -214,14 +213,18 @@ const Membership: React.FC = () => {
     
     //#region 4) --> database
         const [databaseVoucher, setDatabase_voucher] = useState<Voucher_type[]>([])
-        const [databaseUser, setDatabase_user] = useState<User_type[]>([])
         const fetchData_voucher = useCallback(() => {
 
             // loading
             setSpinner(true)
 
-            api.get(`/voucher`)
+            api.get(`/voucher`, {
+                params :{
+                    switch: 'voucher',
+                }
+            })
             .then((response) => {
+                console.log('data = ',response.data)
                 setDatabase_voucher(response.data)
             })
             .catch((error) => {
@@ -231,23 +234,8 @@ const Membership: React.FC = () => {
                 setSpinner(false)
             })
         }, [])
-        const fetchData_user = useCallback(() => {
-
-            api.get(`/user`, {
-                params: {
-                    role: 'customer',
-                }
-            })
-            .then((response) => {
-                setDatabase_user(response.data)
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            });
-        }, [])
         useEffect(() => {
             fetchData_voucher()
-            fetchData_user()
         }, [])
 
         // tableTitle
@@ -342,14 +330,28 @@ const Membership: React.FC = () => {
                                 label="Save"
                                 className="w-24"
                                 onClick={handleCreate_voucher}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        voucher.code == '' ||
+                                        voucher.description == '' ||
+                                        (voucher.discount_value == 0 && voucher.discount_type != 'complimentary')
+                                    )
+                                }
                             />
                         ) : (
                             <Button
                                 label="Update"
                                 className="w-24"
                                 onClick={handleUpdate_voucher}
-                                disabled={isLoading}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        voucher.code == '' ||
+                                        voucher.description == '' ||
+                                        (voucher.discount_value == 0 && voucher.discount_type != 'complimentary')
+                                    )
+                                }
                             />
                         )}
 
@@ -388,12 +390,8 @@ const Membership: React.FC = () => {
                             onChange={(e) => setSelected_customer(e.target.value)}
                             type="select"
                             options={[
-                                // { label:'-- All customer --', value: 'all'},
-                                // { label:'-- Blank voucher --', value: 'blank'},
-                                ...databaseUser.map((user) => ({
-                                    label: user.name,
-                                    value: user.id
-                                }))
+                                { label:'-- All customer --', value: 'all'},
+                                { label:'-- Blank voucher --', value: 'blank'}
                             ]}
                             disabled={crud == 'edit'}
                         />

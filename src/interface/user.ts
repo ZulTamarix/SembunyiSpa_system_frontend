@@ -9,6 +9,7 @@ export interface User_type {
   email: string;
   phoneNo: string;
   status: string;
+  date_birthday?: string;
   
   password: string;
 

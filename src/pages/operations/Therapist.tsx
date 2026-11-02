@@ -207,7 +207,7 @@ const Therapist: React.FC = () => {
                     }
                 })
                 .then((response) => {
-                    // console.log('roster = ',response.data)
+                    console.log('roster = ',response.data)
                     setDatabase_roster(response.data)
                 })
                 .catch((error) => {
@@ -217,7 +217,6 @@ const Therapist: React.FC = () => {
                     setSpinner(false)
                 })
             }, [])
-
             
             const tableTitle_adjustment: Column<Roster_adjustment_type>[] = [
                 {
@@ -291,8 +290,6 @@ const Therapist: React.FC = () => {
                 // API month is 1-based
                 fetchData_roster(newYear, newMonthIndex + 1);
             };
-
-
             // Next month
             const goToNextMonth = () => {
                 let newMonthIndex = monthIndex;
@@ -337,6 +334,7 @@ const Therapist: React.FC = () => {
                         isWeekend: dow === 0 || dow === 6,
                     });
                 }
+
                 return list;
             }, [year, monthIndex, totalDays]);
             const therapistsByRole = useMemo(() => {
@@ -869,27 +867,46 @@ const Therapist: React.FC = () => {
                                                         {/* data */}
                                                         {rows.map((row) => {
                                                             const cell = getCell(row.iso, t.id);
-            
+                                                            
+                                                            // check if there are any adjustment time
+                                                            const currentRoster: any = databaseRoster.find(
+                                                                (item) =>
+                                                                    item.roster.user_id === t.id &&
+                                                                    item.roster.date === row.iso
+                                                            );
+
                                                             return (
-                                                                <div key={row.iso} className="px-0.5 py-1 flex justify-center border-l border-border">
-                                                                    {cell ? (
-                                                                        <button
-                                                                            onClick={() => handleOpen_roster(row, t, 'edit')}
-                                                                            className={`w-full min-h-8 text-center text-xs font-bold px-1 py-1 rounded-md cursor-pointer hover:opacity-50 transition ${
-                                                                                cell.isOff
-                                                                                    ? "bg-blue-200/70 text-blue-900"
-                                                                                    : "bg-[#F7DE8B] text-[#5b3f10]"
-                                                                            }`}
-                                                                        >
-                                                                            {cell.label}
-                                                                        </button>
-                                                                    ) : (
-                                                                        // <span className="text-xs text-title">—</span>
-                                                                        <button  onClick={() => handleOpen_roster(row, t, 'create')} className={`w-full min-h-8 text-center text-sm font-bold px-1 py-1 rounded-md cursor-pointer bg-[#e7e0d2] text-[#6b6355]" hover:opacity-50 transition`}>
-                                                                            -
-                                                                        </button>
-                                                                    )}
-                                                                </div>
+                                                                <>
+                                                                    <div key={row.iso} className="px-0.5 py-1 flex justify-center border-l border-border">
+                                                                        {cell ? (
+                                                                            <>
+                                                                                {/* if data has adjustment time */}
+                                                                                {currentRoster?.roster_adjustment?.length != 0 ? (
+                                                                                    <button onClick={() => handleOpen_roster(row, t, 'edit')} className={`w-full min-h-8 text-center text-xs font-bold px-1 py-1 rounded-md cursor-pointer hover:opacity-50 transition text-[#5b3f10] bg-[linear-gradient(70deg,#F7DE8B_70%,#C4B5FD_70%)]`}>
+                                                                                        {cell?.label}
+                                                                                    </button>
+                                                                                ) : (
+                                                                                    <button
+                                                                                        onClick={() => handleOpen_roster(row, t, 'edit')}
+                                                                                        className={`w-full min-h-8 text-center text-xs font-bold px-1 py-1 rounded-md cursor-pointer hover:opacity-50 transition ${
+                                                                                            cell.isOff
+                                                                                                ? "bg-blue-200/70 text-blue-900"
+                                                                                                : "bg-[#F7DE8B] text-[#5b3f10]"
+                                                                                        }`}
+                                                                                    >
+                                                                                        {cell.label}
+                                                                                    </button>
+                                                                                )}
+                                                                            </>
+                                                                        ) : (
+                                                                            // <span className="text-xs text-title">—</span>
+                                                                            <button  onClick={() => handleOpen_roster(row, t, 'create')} className={`w-full min-h-8 text-center text-sm font-bold px-1 py-1 rounded-md cursor-pointer bg-[#e7e0d2] text-[#6b6355]" hover:opacity-50 transition`}>
+                                                                                -
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </>
+
                                                             );
                                                         })}
                                                     </div>
@@ -1084,7 +1101,14 @@ const Therapist: React.FC = () => {
                                     label="Save"
                                     className="w-24"
                                     onClick={handleAdd_adjustment}
-                                    disabled={isLoading}
+                                    disabled={
+                                        isLoading ||
+                                        ( 
+                                            adjustment[index]?.reason == '' ||
+                                            adjustment[index]?.time_start == '' ||
+                                            adjustment[index]?.time_end == '' 
+                                        )
+                                    }
                                 />
 
                             </>
@@ -1280,7 +1304,13 @@ const Therapist: React.FC = () => {
                                             label="Save"
                                             className="w-24"
                                             onClick={handleCreate_leave}
-                                            disabled={isLoading}
+                                            disabled={
+                                                isLoading ||
+                                                (
+                                                    leave.icon == '' ||
+                                                    leave.description == ''
+                                                )
+                                            }
                                         />
                                     ) : (
 
@@ -1288,7 +1318,13 @@ const Therapist: React.FC = () => {
                                             label="Update"
                                             className="w-24"
                                             onClick={handleUpdate_leave}
-                                            disabled={isLoading}
+                                            disabled={
+                                                isLoading ||
+                                                (
+                                                    leave.icon == '' ||
+                                                    leave.description == ''
+                                                )
+                                            }
                                         />
                                     )}
 

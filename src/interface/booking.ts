@@ -13,6 +13,7 @@ export interface Booking_type {
     booking_type: 'prepaid' | 'walkin';
     status: 'pending' | 'booked' | 'in_treatment' | 'completed' | 'cancelled';
     payment: 'pending' | 'paid' | 'cancel';
+    payment_type: 'cash' | 'card' | 'online';
     remark: string;
 
     price_original: number | "";

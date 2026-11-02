@@ -17,7 +17,8 @@ export interface Voucher_customer_type {
     voucher_id: number,
     date_expired: string,
     quantity: string,
-    serial_no: string
+    serial_no: string,
+    status: string
 
     user: User_type
     voucher: Voucher_type

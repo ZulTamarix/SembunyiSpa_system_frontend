@@ -5,6 +5,9 @@ export interface Notification_type {
     role: 'customer' | 'therapist'
     title: string
     description: string
+
+    created_at?: string,
+    user?: User_type
 }
 
 export interface Notification_json {
