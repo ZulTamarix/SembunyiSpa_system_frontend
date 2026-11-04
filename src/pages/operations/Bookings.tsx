@@ -52,7 +52,10 @@ const Bookings: React.FC = () => {
                 price_original: 0,
                 price_discount: 0,
                 price_final: 0,
-                remark: ''
+                remark: '',
+
+                user_couple_id: null,
+                room_couple_id: null
             })
             const [booking_selected, setBooking_selected] = useState<Booking_selected_type>({
                 id: 0,
@@ -130,7 +133,10 @@ const Bookings: React.FC = () => {
                     price_original: 0,
                     price_discount: 0,
                     price_final: 0,
-                    remark: ''
+                    remark: '',
+
+                    user_couple_id: null,
+                    room_couple_id: null
                 })
                 setBooking_selected ({
                     id: 0,
@@ -231,7 +237,6 @@ const Bookings: React.FC = () => {
             }
 
         }, [booking.user_id])
-
         // set temporary user (shared)
         useEffect(() => {
             if(booking.user_shared_id) {
@@ -242,7 +247,7 @@ const Bookings: React.FC = () => {
 
         }, [booking.user_shared_id])
 
-        // check availability
+        // check 'availability'
         useEffect(() => {
 
             if (booking.date_start && booking.time_start) {
@@ -302,7 +307,7 @@ const Bookings: React.FC = () => {
                         (item: any) => item.user_id
                     );
                     room_list = temp_package.package_room.map(
-                        (item: any) => item.id
+                        (item: any) => item.room_id
                     );
                 }
 
@@ -343,7 +348,6 @@ const Bookings: React.FC = () => {
    
         // calculate payment + duration
         useEffect(() => {
-
             // a) initial
             if(!voucher_price_selectedId && !voucher_duration_selectedId) {
                 // time
@@ -470,7 +474,9 @@ const Bookings: React.FC = () => {
                     booking: {
                         ...booking,
                         user_id: userId,
-                        user_shared_id: userSharedId
+                        user_shared_id: userSharedId,
+                        user_couple_id: booking.user_couple_id == 0 ? null : booking.user_couple_id,
+                        room_couple_id: booking.room_couple_id == 0 ? null : booking.room_couple_id,
                     },
                     booking_selected: booking_selected_new,
 
@@ -480,8 +486,6 @@ const Bookings: React.FC = () => {
 
                     voucher_customer_price_id: Number(voucher_price_selectedId) || 'blank',
                     voucher_customer_duration_id: Number(voucher_duration_selectedId) || 'blank',
-
-                    // role: 'customer'
                 })
 
                 setForm_booking(false)
@@ -644,7 +648,7 @@ const Bookings: React.FC = () => {
             })
             .then((response) => {
                 // 1) normal
-                console.log('data = ',response.data)
+                // console.log('data = ',response.data)
                 setDatabase_service(response.data)
             })
             .catch((error) => {
@@ -662,7 +666,7 @@ const Bookings: React.FC = () => {
                 }
             })
             .then((response) => {
-                console.log('data = ',response.data)
+                // console.log('data = ',response.data)
                 setDatabase_booking(response.data)
             })
             .catch((error) => {
@@ -722,14 +726,38 @@ const Bookings: React.FC = () => {
                 key: "therapist",
                 header: "Therapist",
                 render: (row) => (
-                    <span>{row.booking_selected[0]?.user?.name || '-'}</span>
+                    <>
+                        {row.user_couple ? (
+                            <>
+                                <span>- {row.booking_selected[0]?.user?.name || '-'}</span>
+                                <br />
+                                <span>- {row.user_couple.name}</span>
+                            </>
+                        ): (
+                            <>
+                                <span>{row.booking_selected[0]?.user?.name || '-'}</span>
+                            </>
+                        )}
+                    </>
                 ),
             },
             {
                 key: "room",
                 header: "Room",
                 render: (row) => (
-                    <span>{row.booking_selected[0]?.room?.name}</span>
+                    <>
+                        {row.room_couple ? (
+                            <>
+                                <span>- {row.booking_selected[0]?.room?.name}</span>
+                                <br />
+                                <span>- {row.room_couple.name}</span>
+                            </>
+                        ): (
+                            <>
+                                <span>{row.booking_selected[0]?.room?.name}</span>
+                            </>
+                        )}
+                    </>
                 ),
             },
             {
@@ -1384,6 +1412,7 @@ const Bookings: React.FC = () => {
                                 <label className="block mb-2 text-md font-medium text-title"> Select Date, Time & Therapist </label>
                                 
                                 <div className="grid cols-1 md:grid-cols-4 gap-5">
+                                    {/* a) date */}
                                     <div className="col-span-2">
                                         <Field
                                             label="Date"
@@ -1397,6 +1426,7 @@ const Bookings: React.FC = () => {
                                             type="date"
                                         />
                                     </div>
+                                    {/* b) time start */}
                                     <div className="col-span-1">
                                         <Field
                                             label="Time (start)"
@@ -1410,6 +1440,7 @@ const Bookings: React.FC = () => {
                                             type="time"
                                         />
                                     </div>
+                                    {/* c) time end */}
                                     <div className="col-span-1">
                                         <Field
                                             label="Time (end)"
@@ -1422,51 +1453,100 @@ const Bookings: React.FC = () => {
                                     {(booking.time_start && booking.date_start) && (
                                         <>
                                             {spinner ? (
-                                                <div className="col-span-2 flex items-center justify-center gap-2 py-6 bg-tertiary border-2 border-border rounded-2xl">
+                                                <div className="col-span-4 flex items-center justify-center gap-2 py-6 bg-tertiary border-2 border-border rounded-2xl">
                                                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                                                     <span className="text-title">Checking availability...</span>
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <div className="col-span-2">
-                                                        <Field
-                                                            label={`Available therapist ${new_therapist?.length == 0 ? '(no therapist available ❌)' : ''}`}
-                                                            value={booking_selected.user_id}
-                                                            onChange={(e) =>
-                                                                setBooking_selected({
-                                                                    ...booking_selected,
-                                                                    user_id: Number(e.target.value),
-                                                                })
-                                                            }
-                                                            type="select"
-                                                            options={
-                                                                new_therapist?.map((item: any) => ({
-                                                                    label: `${item.name} --> ${item.specialty}`,
-                                                                    value: item.id
-                                                                }))
-                                                            }
-                                                        />
-                                                    </div>
+                                                    {/* normal */}
+                                                    <>
+                                                        <div className="col-span-2">
+                                                            <Field
+                                                                label={`${new_therapist?.length == 0 ? 'No therapist available ❌' : 'Available therapist'}`}
+                                                                value={booking_selected.user_id}
+                                                                onChange={(e) =>
+                                                                    setBooking_selected({
+                                                                        ...booking_selected,
+                                                                        user_id: Number(e.target.value),
+                                                                    })
+                                                                }
+                                                                type="select"
+                                                                options={
+                                                                    new_therapist?.map((item: any) => ({
+                                                                        label: `${item.name} --> ${item.specialty}`,
+                                                                        value: item.id
+                                                                    }))
+                                                                }
+                                                            />
+                                                        </div>
 
-                                                    <div className="col-span-2">
-                                                        <Field
-                                                            label={`Available room ${new_room?.length == 0 ? '(no room available ❌)' : ''}`}
-                                                            value={booking_selected.room_id}
-                                                            onChange={(e) =>
-                                                                setBooking_selected({
-                                                                    ...booking_selected,
-                                                                    room_id: Number(e.target.value),
-                                                                })
-                                                            }
-                                                            type="select"
-                                                            options={
-                                                                new_room?.map((item: any) => ({
-                                                                    label: `${item.name} --> ${item.description}`,
-                                                                    value: item.id
-                                                                }))
-                                                            }
-                                                        />
-                                                    </div>
+                                                        <div className="col-span-2">
+                                                            <Field
+                                                                label={`${new_room?.length == 0 ? 'No room available ❌' : 'Available room'}`}
+                                                                value={booking_selected.room_id}
+                                                                onChange={(e) =>
+                                                                    setBooking_selected({
+                                                                        ...booking_selected,
+                                                                        room_id: Number(e.target.value),
+                                                                    })
+                                                                }
+                                                                type="select"
+                                                                options={
+                                                                    new_room?.map((item: any) => ({
+                                                                        label: `${item.name} --> ${item.description}`,
+                                                                        value: item.id
+                                                                    }))
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </>
+                                                    {/* couple */}
+                                                    {temp_package?.package?.gender == 'couple' && (
+                                                        <>
+                                                            <div className="col-span-2">
+                                                                <Field
+                                                                    label={`${new_therapist?.length == 0 ? 'No therapist available ❌' : 'Available therapist (2nd)(optional)'}`}
+                                                                    value={booking?.user_couple_id || ''}
+                                                                    onChange={(e) =>
+                                                                        setBooking({
+                                                                            ...booking,
+                                                                            user_couple_id: Number(e.target.value),
+                                                                        })
+                                                                    }
+                                                                    type="select"
+                                                                    options={[
+                                                                        { label: "No need for 2nd therapist", value: 0 },
+                                                                        ...(new_therapist?.map((item: any) => ({
+                                                                            label: `${item.name} --> ${item.specialty}`,
+                                                                            value: item.id
+                                                                        })) || [])
+                                                                    ]}
+                                                                />
+                                                            </div>
+
+                                                            <div className="col-span-2">
+                                                                <Field
+                                                                    label={`${new_room?.length == 0 ? 'No room available ❌' : 'Available room (2nd)(optional)'}`}
+                                                                    value={booking?.room_couple_id || ''}
+                                                                    onChange={(e) =>
+                                                                        setBooking({
+                                                                            ...booking,
+                                                                            room_couple_id: Number(e.target.value),
+                                                                        })
+                                                                    }
+                                                                    type="select"
+                                                                    options={[
+                                                                        { label: "No need for 2nd room", value:  0 },
+                                                                        ...(new_room?.map((item: any) => ({
+                                                                            label: `${item.name} --> ${item.description}`,
+                                                                            value: item.id
+                                                                        })) || [])
+                                                                    ]}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </>
                                             )}
                                         </>

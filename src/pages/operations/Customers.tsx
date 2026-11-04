@@ -9,7 +9,7 @@ import type { Voucher_customer_type, Voucher_type } from "../../interface/vouche
 import Form from "../../components/ui/Form";
 import Button from "../../components/ui/Button";
 import Field from "../../components/ui/Field";
-import { CheckIcon, Eye, Plus, Timeline } from "lucide-react";
+import { CheckIcon, Eye, Plus, SquarePenIcon, Timeline } from "lucide-react";
 import { getCurrentDate_Add_OneYear } from "../../utils/date";
 import type { Membership_json } from "../../interface/membership";
 import Alert from "../../components/ui/Alert";
@@ -44,7 +44,8 @@ const Customers: React.FC = () => {
         })
         const [selectedVoucher, setSelected_voucher] = useState ({
             id: 0,
-            quantity: 0
+            quantity: 0,
+            serial_no: ''
         })
         const [voucher, setVoucher] = useState<Voucher_customer_type[]>([])
         const [user, setUser] = useState<User_type>({
@@ -111,12 +112,13 @@ const Customers: React.FC = () => {
                     date_birthday: ''
                 })
             }
-            // if(!form_voucher) {
-            //     setSelected_voucher ({
-            //         id: 0,
-            //         quantity: 0
-            //     })
-            // }
+            if(!form_voucher) {
+                setSelected_voucher ({
+                    id: 0,
+                    quantity: 0,
+                    serial_no: ''
+                })
+            }
         }, [form_user, form_membership])
 
         // change 'code' and 'expiry date'
@@ -152,7 +154,7 @@ const Customers: React.FC = () => {
 
             // CREATE user
             const handleCreate_user = async () => {
-
+                
                 // loading
                 setIsLoading(true)
 
@@ -164,6 +166,7 @@ const Customers: React.FC = () => {
                         email: user.email,
                         phoneNo: user.phoneNo,
                         password: user.password,
+                        date_birthday: user.date_birthday,
                     });
 
                     fetchData_user()
@@ -291,19 +294,38 @@ const Customers: React.FC = () => {
             }
             
             // Update voucher
-            const handleUpdate_voucher = async () => {
+            const handleUpdate_voucher = async (type: 'quantity' | 'serial_no') => {
 
                 // loading
                 setIsLoading(true)
 
                 try {
-                    await api.put(`/voucher/${selectedId}`, {
-                        switch: 'customer'
-                    });
+                    if(type == 'quantity') {
+                        await api.put(`/voucher/${selectedId}`, {
+                            switch: 'customer',
+                            extra: 'quantity'
+                        });
+
+                        setForm_voucherList(false)
+                        setIs_alert_quantity(false)
+                    }
+                    else if(type == 'serial_no') {
+                        await api.put(`/voucher/${selectedVoucher.id}`, {
+                            serial_no: selectedVoucher.serial_no,
+
+                            switch: 'customer',
+                            extra: 'serial_no',
+                        });
+                    }
 
                     fetchData_user()
                     setForm_voucherList(false)
                     setIs_alert_quantity(false)
+                    setSelected_voucher ({
+                        id: 0,
+                        quantity: 0,
+                        serial_no: ''
+                    })
                 }
                 catch(error) {
                     console.error('Error:', error); // use only to remove warning on vscode
@@ -387,7 +409,8 @@ const Customers: React.FC = () => {
                 // set data
                 setSelected_voucher(({
                     id: response.data[0].id,
-                    quantity: response.data[0].quantity
+                    quantity: response.data[0].quantity,
+                    serial_no: '',
                 }))
             })
             .catch((error) => {
@@ -523,12 +546,41 @@ const Customers: React.FC = () => {
         ];
         const tableTitle_voucher: Column<Voucher_customer_type>[] = [
             {
-                key: "serial_np",
+                key: "serial_no",
                 header: "Serial no",
+                align: "center",
                 render: (row) => (
                     <>
                         {row.serial_no ? (
-                            <span>{row.serial_no}</span>
+                            <div className="flex justify-center">
+                                <div className="flex items-center border border-border rounded-md overflow-hidden bg-white">
+                                    {row.id == selectedVoucher?.id ? (
+                                        <>
+                                            <span className="px-4 py-1 text-sm font-medium">
+                                                <input value={selectedVoucher?.serial_no} onChange={(e) => setSelected_voucher({...selectedVoucher, serial_no: e.target.value})}/>
+                                            </span>
+                                            <button onClick={() => handleUpdate_voucher('serial_no')} className={`px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`} disabled={isLoading}>
+                                                <CheckIcon size={20} />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="px-4 py-1 text-sm font-medium">
+                                                {row.serial_no}
+                                            </span>
+                                            <button 
+                                                onClick={() => setSelected_voucher( {
+                                                                                        id: row.id,
+                                                                                        quantity: Number(row.quantity),
+                                                                                        serial_no: row.serial_no,
+                                                                                    })} 
+                                                className="px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer">
+                                                <SquarePenIcon size={20} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                         ) : (
                             <span>-</span>
                         )}
@@ -695,7 +747,8 @@ const Customers: React.FC = () => {
                                         user.name == '' ||
                                         user.email == '' ||
                                         user.phoneNo == '' ||
-                                        user.password == ''
+                                        user.password == '' ||
+                                        user.date_birthday == ''
                                     )
                                 }
                             />
@@ -712,7 +765,8 @@ const Customers: React.FC = () => {
                                         user.name == '' ||
                                         user.email == '' ||
                                         user.phoneNo == '' ||
-                                        user.password == ''
+                                        user.password == '' ||
+                                        user.date_birthday == ''
                                     )
                                 }
                             />
@@ -741,12 +795,13 @@ const Customers: React.FC = () => {
                         value={user.phoneNo}
                         onChange={(e) => setUser({ ...user, phoneNo: e.target.value })}
                     />
-                    {/* <Field
-                        label="Username"
-                        placeholder="Enter username"
-                        value={user.username}
-                        onChange={(e) => setUser({ ...user, username: e.target.value })}
-                    /> */}
+                  
+                    <Field
+                        label="Birthday date"
+                        value={user.date_birthday}
+                        onChange={(e) => setUser({ ...user, date_birthday: e.target.value })}
+                        type="date"
+                    />
                     <Field
                         label="Password"
                         placeholder="Enter password"
@@ -907,6 +962,7 @@ const Customers: React.FC = () => {
                     handleDelete_user()
                 }}
             />
+
             {/* Decrement*/} {/* Voucher */}
             <Alert
                 open={isAlert_quantity}
@@ -917,7 +973,7 @@ const Customers: React.FC = () => {
                 onCancel={() => setIs_alert_quantity(false)}
                 onConfirm={() => {
                     // do your action here
-                    handleUpdate_voucher()
+                    handleUpdate_voucher('quantity')
                 }}
             />
         </>

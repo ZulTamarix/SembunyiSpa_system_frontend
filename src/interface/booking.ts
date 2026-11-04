@@ -20,6 +20,9 @@ export interface Booking_type {
     price_discount: number | "";
     price_final: number | "";
 
+    user_couple_id?: number | null;
+    room_couple_id?: number | null;
+
     recorded_time_start?: string;
     recorded_time_end?: string;
 

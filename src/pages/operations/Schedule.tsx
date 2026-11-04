@@ -27,9 +27,8 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
         const [y, m, d] = s.split("-").map(Number);
         return new Date(y, m - 1, d);
     };
-    const toISO = (date:any) =>
-        `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-        const addDays = (iso:any, n:any) => {
+    const toISO = (date:any) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const addDays = (iso:any, n:any) => {
         const d = parseDate(iso);
         d.setDate(d.getDate() + n);
         return toISO(d);
@@ -316,10 +315,12 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                                                     width: `calc(${100 / laneCount}% - 4px)`,
                                                                 }}
                                                             >
+                                                                {/* time */}
                                                                 <span className="rounded bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
                                                                     {fmtTime(booking.time_start)} - {fmtTime(booking.time_end)}
                                                                 </span>
 
+                                                                {/* Treatment's name */}
                                                                 <span className="text-[13px] font-bold">
                                                                     - {
                                                                         booking.booking?.package_id == null
@@ -328,8 +329,9 @@ import { buildColorMap, DEFAULT_COLOR } from "../../utils/color";
                                                                     }
                                                                 </span>
 
+                                                                {/* Customer's name */}
                                                                 <span className="text-[12px] font-semibold">
-                                                                    - {booking.booking?.user?.name}
+                                                                    - Customer: {booking.booking?.user?.name}
                                                                 </span>
                                                             </button>
                                                         );

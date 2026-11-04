@@ -84,15 +84,29 @@ const Banners: React.FC = () => {
 
         // UPDATE banner
         const handleUpdate_banner = async () => {
-
+            // console.log('banner = ', banner.poster)
+            if (banner.poster instanceof File) {
+                // New uploaded image
+                console.log("New image uploaded");
+            } else {
+                // Existing image path from database
+                console.log("Existing image");
+            }
             // loading
             setIsLoading(true)
 
             // format data to allow image uploading
             const formData = new FormData();
 
+            if (banner.poster instanceof File) {
+                formData.append('poster', banner.poster);
+            } else {
+                // Existing image path from database
+                console.log("Existing image");
+            }
+
             // if(banner.poster)
-                // formData.append('poster', banner.poster);
+            //     formData.append('poster', banner.poster);
 
             formData.append('title', banner.title);
             formData.append('description', banner.description);
@@ -280,13 +294,13 @@ const Banners: React.FC = () => {
                 <div className="space-y-4">
                 
                     {/* 1) Poster */}
-                    {crud == 'create' && ( 
+                    {/* {crud == 'create' && (  */}
                         <Grid className="md:grid-cols-2">
 
                             {/* 1) Poster */}
                             <div className="col-span-2">
                                 <Field
-                                    label="Poster"
+                                    label={`${crud == 'create' ? 'Poster' : 'Poster (new)'}`}
                                     placeholder="Set a poster"
                                     type="file"
                                     accept="image/*"
@@ -316,7 +330,7 @@ const Banners: React.FC = () => {
                             </div>
 
                         </Grid>
-                    )}
+                    {/* )} */}
 
                     <Grid className="md:grid-cols-2">
                         {/* 2) Title */}

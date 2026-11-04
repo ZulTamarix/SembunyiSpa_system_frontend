@@ -442,14 +442,16 @@ const Packages: React.FC = () => {
             
             // EDIT service
             const handleEdit_package = (data: any) => {
+                console.log('service= ',data.package_service)
+
                 // get selected
                 if(active == 'package') {
-                    const serviceIds = data.package_service.map((item:any) => item.id);
+                    const serviceIds = data.package_service.map((item:any) => item.service_id);
                     setSelected_service(serviceIds)
                 }
                 else if(active == 'service') {
-                    const roomIds = data.package_room.map((item:any) => item.id);
-                    const therapistIds = data.package_therapist.map((item:any) => item.id);
+                    const roomIds = data.package_room.map((item:any) => item.room_id);
+                    const therapistIds = data.package_therapist.map((item:any) => item.user_id);
 
                     setSelected_room(roomIds)
                     setSelected_therapist(therapistIds)
@@ -459,6 +461,72 @@ const Packages: React.FC = () => {
                 setForm_package(true)
                 setCrud('edit')
             }
+
+            // CREATE service
+            const handleUpdate_package = async () => {
+
+                console.log('package = ',packages)
+                console.log('therapist = ',selectedTherapist)
+                console.log('room = ',selectedRoom)
+                console.log('service = ',selectedService)
+                // loading
+                setIsLoading(true)
+
+                // format data to allow image uploading
+                const formData = new FormData();
+                if (packages.poster instanceof File) {
+                    formData.append('poster', packages.poster);
+                } else {
+                    // Existing image path from database
+                    console.log("Existing image");
+                }
+
+                formData.append('title', packages.title);
+                formData.append('description', packages.description);
+                formData.append('duration', packages.duration.toString());
+                formData.append('price', packages.price.toString());
+                formData.append('gender', packages.gender);
+                formData.append('type', packages.type);
+                formData.append('detail', packages.detail);
+                formData.append('package_category_id', packages.package_category_id?.toString() || '');
+
+                // optional
+                if(active == 'package') {
+                    formData.append('service_list', JSON.stringify([...selectedService].reverse())); //reverse order
+                    formData.append('switch', 'package');
+                }
+                else if(active == 'service') {
+                    formData.append('therapist_list', JSON.stringify([...selectedTherapist].reverse())); //reverse order
+                    formData.append('room_list', JSON.stringify([...selectedRoom].reverse())); //reverse order
+                    formData.append('switch', 'service');
+                    formData.append('is_standalone', packages.is_standalone ? '1' : '0');
+                }
+
+                // for (const [key, value] of formData.entries()) {
+                //     console.log(key, value);
+                // }
+
+                // UPDATE data
+                try {
+                    // await api.put(`/package`, formData);
+                    await api.put(`/package/${packages.id}`, formData);
+
+                    if(active == 'package') 
+                        fetchData_package()
+                    else if(active == 'service') 
+                        fetchData_service()
+
+                    setForm_package(false)
+                }
+                catch(error) {
+                    console.error('Error:', error); // use only to remove warning on vscode
+                    // console.error('Response:', error.response?.data);
+                }
+                finally {
+                    setIsLoading(false)
+                }
+            }
+
             // DELETE service
             const handleDelete_package = async() => {
             
@@ -502,7 +570,6 @@ const Packages: React.FC = () => {
                 });
             }, [])
 
-            
             // service
             const [databaseService, setDatabase_service] = useState<Package_json[]>([])
             const fetchData_service = useCallback(() => {
@@ -1140,9 +1207,20 @@ const Packages: React.FC = () => {
                             <Button
                                 label="Update"
                                 className="w-24"
-                                onClick={handleCreate_package}
-                                // disabled={isLoading}
-                                disabled
+                                onClick={handleUpdate_package}
+                                disabled={
+                                    isLoading ||
+                                    (
+                                        packages.poster == null ||
+                                        packages.title == '' ||
+                                        packages.price == 0 ||
+                                        packages.duration == 0 ||
+                                        packages.description == '' ||
+                                        packages.detail == '' ||
+                                        ( active == 'package' && selectedService.length == 0) ||
+                                        ( active == 'service' && (selectedTherapist.length == 0 || selectedRoom.length == 0)) 
+                                    )
+                                }
                             />
                         )}
 
@@ -1260,7 +1338,7 @@ const Packages: React.FC = () => {
                             type="select"
                             options={[
                                 { label: "Individual", value: "single" },
-                                { label: "Couple", value: "multiple" },
+                                { label: "Couple", value: "couple" },
                                 // { label: "Unisex", value: "unisex" },
                                 // { label: "Couple", value: "couple" },
                             ]}
@@ -1327,7 +1405,7 @@ const Packages: React.FC = () => {
                             
                             {/* 10) Service */}
                             <MultiSelect
-                                label="Service (based on order)"
+                                label="Service"
                                 options={databaseService.map((service) => ({
                                     id: service.package?.id || 0,
                                     name: service.package.title,
@@ -1346,7 +1424,7 @@ const Packages: React.FC = () => {
                         <Grid className="md:grid-cols-2">
                             {/* 11) Therapist */}
                             <MultiSelect
-                                label="Therapist (based on order)"
+                                label="Therapist"
                                 options={databaseTherapist.map((therapist) => ({
                                     id: therapist?.id || 0,
                                     name: therapist.name,
