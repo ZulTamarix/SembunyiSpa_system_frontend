@@ -207,32 +207,35 @@ const Dashboard: React.FC = () => {
     return (
         <>
             {/* Info */}
-            <Grid className="md:grid-cols-4">
+            <Grid className="md:grid-cols-8">
                 {[
                     { title: "Daily Revenue", value: `RM${Number(databaseVenue.daily_predict || 0).toLocaleString('en-MY', { minimumFractionDigits: 2 })}`, info: "↑ Predicted amount" },
                     { title: "Weekly Revenue", value: `RM${Number(databaseVenue.weekly_predict || 0).toLocaleString('en-MY', { minimumFractionDigits: 2 })}`, info: "↑ Predicted amount" },
                     { title: "Monthly Revenue", value: `RM${Number(databaseVenue.monthly_actual || 0).toLocaleString('en-MY', { minimumFractionDigits: 2 })}`, info: "↑ Actual amount" },
-                    { title: "Total upcoming customer", value: databaseSchedule.length, info: null },
+                    { title: "Upcoming customer", value: databaseSchedule.length, info: null },
+                    { title: "Upcoming booking", value: databaseSchedule.length, info: null },
                 ].map((item, i) => (
-                    <Card key={i}>
-                        <div className="flex flex-col">
-                            <span className={titleStyle}>{item.title}</span>
+                    <div className={`${item.info? 'col-span-2' : 'col-span-1'}`}>
+                        <Card key={i}>
+                            <div className={`flex flex-col ${item.info? '' : 'text-center'}`}>
+                                <span className={titleStyle}>{item.title}</span>
 
-                            {/* {spinner ? (
-                                <div className="my-1 h-7 w-28 animate-pulse rounded-md bg-gray-200" />
-                            ) : (
-                                <span className={dataStyle}>{item.value}</span>
-                            )} */}
-                                <span className={dataStyle}>{item.value || 'loading...'}</span>
+                                {/* {spinner ? (
+                                    <div className="my-1 h-7 w-28 animate-pulse rounded-md bg-gray-200" />
+                                ) : (
+                                    <span className={dataStyle}>{item.value}</span>
+                                )} */}
+                                    <span className={dataStyle}>{item.value || '0'}</span>
 
 
-                            {item.info && (
-                                <span className={`${infoStyle} text-green-700`}>
-                                    {item.info}
-                                </span>
-                            )}
-                        </div>
-                    </Card>
+                                {item.info && (
+                                    <span className={`${infoStyle} text-green-700`}>
+                                        {item.info}
+                                    </span>
+                                )}
+                            </div>
+                        </Card>
+                    </div>
                 ))}
             </Grid>
 

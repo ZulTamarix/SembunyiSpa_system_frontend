@@ -3,8 +3,11 @@ import Button from "../components/ui/Button";
 import Field from "../components/ui/Field";
 import api from "../api/axios";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+
+    const navigate = useNavigate();
 
     // #region 1) --> useState
         const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +38,8 @@ export default function LoginPage() {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
 
-                window.location.href = '/dashboard';
+                // window.location.href = 'sembunyiSpa/dashboard';
+                navigate('/dashboard');
             }
             catch(error) {
                 console.error('Error:', error); // use only to remove warning on vscode

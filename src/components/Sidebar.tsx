@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
 
-        window.location.href = '/login';
+        window.location.href = 'sembunyiSpa/login';
     }
 };
 
