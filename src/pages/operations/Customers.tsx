@@ -275,7 +275,7 @@ const Customers: React.FC = () => {
                         voucher_id: selectedVoucher.id,
                         quantity: databaseVoucher[selectedIndex].quantity,
                         date_expired: databaseVoucher[selectedIndex].date_expired,
-                        serial_no: 'test',
+                        serial_no: '-',
                         status: databaseVoucher[selectedIndex].status,
 
                         switch: 'voucher_customer'
@@ -551,13 +551,13 @@ const Customers: React.FC = () => {
                 align: "center",
                 render: (row) => (
                     <>
-                        {row.serial_no ? (
+                        {/* {row.serial_no ? ( */}
                             <div className="flex justify-center">
                                 <div className="flex items-center border border-border rounded-md overflow-hidden bg-white">
-                                    {row.id == selectedVoucher?.id ? (
+                                    {(row.id == selectedVoucher?.id) ? (
                                         <>
                                             <span className="px-4 py-1 text-sm font-medium">
-                                                <input value={selectedVoucher?.serial_no} onChange={(e) => setSelected_voucher({...selectedVoucher, serial_no: e.target.value})}/>
+                                                <input value={selectedVoucher?.serial_no || '-'} onChange={(e) => setSelected_voucher({...selectedVoucher, serial_no: e.target.value})}/>
                                             </span>
                                             <button onClick={() => handleUpdate_voucher('serial_no')} className={`px-3 py-1 bg-secondary hover:opacity-70 transition-opacity text-black font-semibold cursor-pointer ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`} disabled={isLoading}>
                                                 <CheckIcon size={20} />
@@ -566,7 +566,7 @@ const Customers: React.FC = () => {
                                     ) : (
                                         <>
                                             <span className="px-4 py-1 text-sm font-medium">
-                                                {row.serial_no}
+                                                {row?.serial_no ?? '-'}
                                             </span>
                                             <button 
                                                 onClick={() => setSelected_voucher( {
@@ -581,9 +581,9 @@ const Customers: React.FC = () => {
                                     )}
                                 </div>
                             </div>
-                        ) : (
+                        {/* ) : (
                             <span>-</span>
-                        )}
+                        )} */}
                     </>
                 )
             },
