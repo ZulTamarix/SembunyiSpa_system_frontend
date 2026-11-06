@@ -22,4 +22,8 @@ export interface Report_therapist_type {
     name: string,
     specialty: string,
     total: number,
+}export interface Report_revenue_type {
+    id: number,
+    date: string,
+    price: number,
 }

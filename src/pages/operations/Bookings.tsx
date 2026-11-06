@@ -927,8 +927,7 @@ const Bookings: React.FC = () => {
 
     return (
         <>
-
-            {/* filter */}
+            {/* Filter */}
             <Grid className="md:grid-cols-5 items-center">
                 <div className="md:col-span-5 bg-white p-3 rounded-xl grid md:grid-cols-5 items-center gap-4 border border-border overflow-hidden">
                     <Searchbar placeholder="Search by name,phone or booking ID..." className="md:col-span-3 bg-tertiary "/>

@@ -6,7 +6,9 @@ export interface Column<T> {
   header: string;
   align?: "left" | "center" | "right";
   render?: (row: T) => React.ReactNode;
+  mergeRows?: boolean;
 }
+
 
 interface TableProps<T> {
   fieldName: Column<T>[];
@@ -133,19 +135,17 @@ export function Table<T>({ fieldName, data, loading = false, skeletonRows = 6,  
               </tr>
             ) : (
               data.map((row, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-border last:border-0 hover:bg-hover transition-colors"
-                >
-                  {fieldName.map((col) => (
-                    <td
-                      key={col.key}
-                      className={`px-6 py-3 align-middle text-title text-sm whitespace-nowrap ${alignClass[col.align ?? "left"]}`}
-                    >
-                      {col.render ? col.render(row) : (row as any)[col.key] ?? "—"}
-                    </td>
-                  ))}
-                </tr>
+                  <tr key={i} className="border-b border-border last:border-0 hover:bg-hover transition-colors">
+                      {fieldName.map((col) => {
+                          if (col.mergeRows && i !== 0) return null;
+
+                          return (
+                            <td key={col.key} rowSpan={col.mergeRows ? data.length : undefined} className={`px-6 py-3 align-middle text-title text-sm whitespace-nowrap ${alignClass[col.align ?? "left"]} ${col.mergeRows ? "border-r border-border" : ""}`}>
+                                {col.render ? col.render(row) : (row as any)[col.key] ?? "—"}
+                            </td>
+                          );
+                      })}
+                  </tr>
               ))
             )}
           </tbody>
