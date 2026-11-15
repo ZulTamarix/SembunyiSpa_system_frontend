@@ -9,7 +9,9 @@ import { useLocation } from "react-router-dom";
 const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
+  const isLoginPage =
+    location.pathname === "/login" ||
+    location.pathname === "/deleteUser";
 
   return (
     <div className="flex min-h-screen w-screen">

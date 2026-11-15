@@ -1,8 +1,7 @@
 import type { Booking_selected_type, Booking_type } from "../../interface/booking";
 import Grid from "../../components/ui/Grid";
 import Button from "../../components/ui/Button";
-import { CheckIcon, Plus, Timeline } from "lucide-react";
-import Searchbar from "../../components/ui/Searchbar";
+import { ArrowRight, CheckIcon, Plus, Timeline } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Form from "../../components/ui/Form";
 import Field from "../../components/ui/Field";
@@ -13,6 +12,7 @@ import { getCurrentTime } from "../../utils/date";
 import Table, { type Column } from "../../components/ui/Table";
 import Alert from "../../components/ui/Alert";
 import type { Log_booking_type } from "../../interface/log_booking";
+import Searchbar from "../../components/ui/Searchbar";
 
 const Bookings: React.FC = () => {
 
@@ -31,6 +31,8 @@ const Bookings: React.FC = () => {
         const [spinner, setSpinner] = useState(false)
         // alert
         const [updatedType, setUpdated_type] = useState<'Start' | 'End' | 'Payment' | 'Booking'>('Start');
+        // searchbar
+        const [searchBooking, setSearchBooking] = useState('')
         // form
         const [form_booking, setForm_booking] = useState(false);
         const [form_log, setForm_log] = useState(false);
@@ -64,6 +66,14 @@ const Bookings: React.FC = () => {
                 room_id: 0,
                 user_id: 0,
             })
+            // date
+            // const [date, setDate] = useState(getCurrentDate())
+            const [date, setDate] = useState({
+                // start: new Date(new Date().setDate(new Date().getDate() - 7)).toLocaleDateString('en-CA'), // today
+                // end: new Date().toLocaleDateString('en-CA') // 7 day before
+                start: '2026-11-15', // today
+                end: '2026-11-16' // 7 day before
+            });
             // log
             const [log, setLog] = useState<Log_booking_type[]> ([])
             // user(normal)
@@ -345,7 +355,11 @@ const Bookings: React.FC = () => {
 
         // }, [])
         }, [booking.date_start, booking.time_start, temp_duration])
-   
+        // check 'date'
+        useEffect(() => {
+            fetchData_booking(date.start, date.end)
+        }, [date])
+
         // calculate payment + duration
         useEffect(() => {
             // a) initial
@@ -489,7 +503,7 @@ const Bookings: React.FC = () => {
                 })
 
                 setForm_booking(false)
-                fetchData_booking()
+                fetchData_booking(date.start, date.end)
                 fetchData_user()
             }
             catch (error) {
@@ -502,7 +516,6 @@ const Bookings: React.FC = () => {
         }
         // UPDATE
         const handleEdit_booking = (data: any) => {
-
             // a) package
             if(data.package) {
                 const packages = databasePackage.find(item => item.package.id === data.booking.package_id);
@@ -572,16 +585,42 @@ const Bookings: React.FC = () => {
                         }
                     });
 
-                    // Update booking
+                    // a. if shared booking
+                    let updatedBooking = { ...booking };
+                    let customer_shared_name = null
+                    if(isShared) {
+
+                        // i. Create shread walkin user first(if needed)
+                        let userSharedId = booking?.user_shared_id || null
+                        if (isWalkin_shared) {
+                            // Create user first
+                            const response = await api.post(`/user`, {
+                                role: userWalkin_shared.role,
+                                name: userWalkin_shared.name,
+                                email: userWalkin_shared.email,
+                                phoneNo: userWalkin_shared.phoneNo,
+                            })
+                            customer_shared_name = userWalkin_shared.name
+                            updatedBooking.user_shared_id = response.data.id;
+                        }
+                        else {
+                            const user = databaseUser.find(user => user.user.id == userSharedId);
+                            customer_shared_name = user?.user.name
+                        }
+
+                    }
+                    // c. Update booking
                     await api.put(`/booking/${booking.id}`, {
-                        booking: booking,
+                        booking: updatedBooking,
                         booking_selected: booking_selected,
+
+                        customer_shared_name: customer_shared_name,
 
                         switch: 'booking'
                     })
                 }
 
-                fetchData_booking()
+                fetchData_booking(date.start, date.end)
                 setForm_booking(false)
                 setForm_payment(false)
                 setIs_alert(false)
@@ -658,10 +697,14 @@ const Bookings: React.FC = () => {
 
         // d) booking
         const [databaseBooking, setDatabase_booking] = useState<any[]>([])
-        const fetchData_booking = useCallback(() => {
+        const fetchData_booking = useCallback((start: string, end: string) => {
+
             setSpinner(true)
             api.get(`/booking`, {
                 params: {
+                    // date: date,
+                    firstDate: start,
+                    lastDate: end,
                     switch: 'booking',
                 }
             })
@@ -681,7 +724,7 @@ const Bookings: React.FC = () => {
             fetchData_user()
             fetchData_package()
             fetchData_service()
-            fetchData_booking()
+            fetchData_booking(date.start, date.end)
         }, [])
 
         // tableTitle
@@ -698,8 +741,8 @@ const Bookings: React.FC = () => {
                             </>
                         ): (
                             <>
-                                <div className="font-semibold text-black">{row.user.name}</div>
-                                <span className="text-xs">{row.user.phoneNo}</span>
+                                <div className="font-semibold text-black">{row.user?.name || 'DELETED USER'}</div>
+                                <span className="text-xs">{row.user?.phoneNo || 'DELETED USER'}</span>
                             </>
                         )}
                     </div>
@@ -717,7 +760,7 @@ const Bookings: React.FC = () => {
                 header: "Date & Time",
                 render: (row) => (
                 <div>
-                    <div className="font-semibold text-black">{row.booking.date_start}</div>
+                    <div className="font-semibold text-black">{row.booking.date_start.split('-').reverse().join('-')}</div>
                     <span className="text-xs">{row.booking.time_start} : {row.booking.time_end}</span>
                 </div>
                 ),
@@ -923,6 +966,21 @@ const Bookings: React.FC = () => {
             },
         ]
     //#endregion
+    
+
+    // #region 5) --> searchbar
+        const filteredBooking = databaseBooking.filter((booking) => {
+            const search = searchBooking.toLowerCase().trim()
+
+            return (
+                booking.user?.name?.toLowerCase().includes(search) ||
+                booking.user?.phoneNo?.toLowerCase().includes(search) ||
+                booking.package?.title.toLowerCase().includes(search) ||
+                booking.booking_selected[0]?.package.title.toLowerCase().includes(search)
+                // row.package? row.package.title :  row.booking_selected[0].package.title
+            )
+        })
+    //#endregion
 
 
     return (
@@ -930,24 +988,24 @@ const Bookings: React.FC = () => {
             {/* Filter */}
             <Grid className="md:grid-cols-5 items-center">
                 <div className="md:col-span-5 bg-white p-3 rounded-xl grid md:grid-cols-5 items-center gap-4 border border-border overflow-hidden">
-                    <Searchbar placeholder="Search by name,phone or booking ID..." className="md:col-span-3 bg-tertiary "/>
-                    {/* <select className="bg-tertiary px-3 h-10 rounded-xl border border-border focus:outline-none focus:ring-0 focus:border-border">
-                        <option selected>All</option>
-                        <option value=''>Confirmed</option>
-                        <option value=''>Arrived</option>
-                        <option value=''>Room Assigned</option>
-                        <option value=''>In Treatment</option>
-                        <option value=''>Completed</option>
-                        <option value=''>Cancelled</option>
-                    </select> */}
-                    <Button onClick={() => { setForm_booking(true); setCrud('create')}} icon={Plus} label='Create Booking' className="md:col-start-5"/>
-                    {/* <Button onClick={() => navigate("/packages/create")} icon={Plus} label='Create Booking' className="md:col-start-5"/> */}
+                    
+                    {/* a) Left filter */}
+                        <Searchbar value={searchBooking} onChange={(e: any) => setSearchBooking(e.target.value)} placeholder="Search by name, phone number, or treatment" className="md:col-span-2 bg-tertiary "/>
+                    
+                    {/* b) Right filters */}
+                        <div className="flex flex-wrap items-center gap-2 md:col-start-3 col-span-2">
+                            <input type="date" value={date.start} onChange={(e) => setDate({...date, start:(e.target.value)})} className="bg-tertiary px-3 h-10 rounded-xl border border-border focus:outline-none focus:ring-0 focus:border-border"/>
+                            <span><ArrowRight size={20}/></span>
+                            <input type="date" value={date.end} onChange={(e) => setDate({...date, end:(e.target.value)})} className="bg-tertiary px-3 h-10 rounded-xl border border-border focus:outline-none focus:ring-0 focus:border-border"/>
+                        </div>
+                        <Button onClick={() => { setForm_booking(true); setCrud('create')}} icon={Plus} label='Create Booking' className="md:col-start-5"/>
                 </div>
             </Grid>
             
             {/* Table */}
             <Grid>
-                <Table fieldName={tableTitle_booking} data={databaseBooking} loading={spinner} />
+                {/* <Table fieldName={tableTitle_booking} data={databaseBooking} loading={spinner} /> */}
+                <Table fieldName={tableTitle_booking} data={filteredBooking} loading={spinner} />
             </Grid>
             
             {/* Create */} {/*Booking*/}
@@ -997,7 +1055,7 @@ const Bookings: React.FC = () => {
                                         ( (isShared && !isWalkin_shared) && booking.user_shared_id == 0 ) ||
                                         ( (isShared && isWalkin_shared)  && (userWalkin_shared.name == '' || userWalkin_shared.email == '' || userWalkin_shared.phoneNo == '')) ||
                                         ( temp_package.length == 0 ) ||
-                                        ( booking.date_start == '' ) ||
+                                        ( booking.date_start == '' ) || 
                                         ( booking.time_start == '' ) ||
                                         ( booking.time_end == '' ) ||
                                         ( booking_selected.user_id == 0 ) ||
@@ -1089,6 +1147,7 @@ const Bookings: React.FC = () => {
                                     value={booking.remark}
                                     onChange={(e) => setBooking({...booking, remark: e.target.value})}
                                     type="textarea"
+                                    disabled={crud == "edit"}
                                 />
                             </div>
                             {/* switch to 'shared booking' */}
@@ -1098,7 +1157,8 @@ const Bookings: React.FC = () => {
                                     value={isShared}
                                     onChange={(e) => setIs_shared((e.target as HTMLInputElement).checked)}
                                     type="switch"
-                                    disabled={crud == 'edit'}/>
+                                    // disabled={crud == 'edit'}
+                                />
                             </div>
                         </div>
                     </Card>
@@ -1131,7 +1191,7 @@ const Bookings: React.FC = () => {
                                                     ],
                                                 }))
                                             ]}
-                                            disabled={isWalkin_shared || crud == 'edit'}
+                                            disabled={isWalkin_shared}
                                         />
                                     </div>
                                     {/* switch */}
@@ -1141,7 +1201,6 @@ const Bookings: React.FC = () => {
                                             value={isWalkin_shared}
                                             onChange={(e) => setIs_walkin_shared((e.target as HTMLInputElement).checked)}
                                             type="switch"
-                                            disabled={crud == 'edit'}
                                         />
                                     </div>
                                     {/* walkin only */}
@@ -1153,21 +1212,18 @@ const Bookings: React.FC = () => {
                                                     placeholder="Enter name"
                                                     value={userWalkin_shared.name}
                                                     onChange={(e) => setUser_walkin_shared({ ...userWalkin_shared, name: e.target.value })}
-                                                    disabled={crud == 'edit'}
                                                 />
                                                 <Field
                                                     label="Email"
                                                     placeholder="Enter email"
                                                     value={userWalkin_shared.email}
                                                     onChange={(e) => setUser_walkin_shared({ ...userWalkin_shared, email: e.target.value })}
-                                                    disabled={crud == 'edit'}
                                                 />
                                                 <Field
                                                     label="Phone"
                                                     placeholder="Enter phone number"
                                                     value={userWalkin_shared.phoneNo}
                                                     onChange={(e) => setUser_walkin_shared({ ...userWalkin_shared, phoneNo: e.target.value })}
-                                                    disabled={crud == 'edit'}
                                                 />
                                             </div>
                                         </div>
@@ -1221,9 +1277,9 @@ const Bookings: React.FC = () => {
                                                     setBooking({ ...booking, package_id: pkg.package.id })
                                                     setTemp_package(pkg);
                                                 }}
-                                                className={`flex items-center gap-4 p-4 border rounded-2xl cursor-pointer
+                                                className={`flex items-center gap-4 p-4 border rounded-2xl
                                                     ${isSelected ? 'bg-tertiary border-primary' : 'bg-white border-border'}
-                                                    ${crud == 'create'? ' hover:bg-tertiary transition-colors' : ''}
+                                                    ${crud == 'create'? 'cursor-pointer hover:bg-tertiary transition-colors' : 'cursor-not-allowed pointer-events-none'}
                                                 `}>
                                                 {/* poster */}
                                                 <img

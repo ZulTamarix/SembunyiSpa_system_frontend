@@ -21,6 +21,7 @@ import Settings from "./pages/admin/Settings";
 
 import LoginPage from "./pages/login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DeleteUserPage from "./pages/deleteUser";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -28,6 +29,7 @@ const AppRoutes: React.FC = () => {
 
             {/* Public */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/deleteUser" element={<DeleteUserPage />} />
 
             {/* Protected */}
             <Route element={<ProtectedRoute />}>
